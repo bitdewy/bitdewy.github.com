@@ -43,6 +43,7 @@ while b < 10:
 
 最后来一张八爪萌猫大图：
 
+<!-- more -->
 ![](http://octodex.github.com/images/snowoctocat.jpg)
 
 全文完整代 markdown 代码如下：
@@ -83,5 +84,6 @@ while b < 10:
 	```
 
     最后来一张八爪萌猫大图：
-    
+
+    <!-- more -->
 	![](http://octodex.github.com/images/snowoctocat.jpg)
