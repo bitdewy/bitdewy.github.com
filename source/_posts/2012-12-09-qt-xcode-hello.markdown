@@ -48,7 +48,7 @@ localhost:qt_xcode_hello bitdewy$ qmake
 ```
 
 
-##为毛不直接生成能用 Xcode 工程
+##为毛不直接生成能用的 Xcode 工程
 
 更明白的人可能要说脏话了，你妹的搞这么麻烦，生成 xcodeproj 之前补上一句 `touch qt_xcode_hello.cpp` 不就不用配置 XCode 工程了么？ bitdewy 也不是二货，为毛要配置 Xcode 工程？ 因为 Qt 的 Meta Object Compile，用到 signal 和 slot 的时候，都需要 qmake 生成 moc 文件，所以先配置一下没什么坏处这样。
 
