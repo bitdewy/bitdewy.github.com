@@ -1,0 +1,167 @@
+---
+layout: post
+title: "[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)"
+date: 2012-07-02 02:38
+comments: true
+categories: [C++, GotW]
+---
+
+原文在这里 [GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)](http://herbsutter.com/gotw/_101/)
+
+
+##Guru问题
+
+[GotW #100][GotW100] 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：
+
+``` cpp
+// in header file
+class widget {
+public:
+    widget();
+    ~widget();
+private:
+    class impl;
+    unique_ptr<impl> pimpl;
+};
+ 
+// in implementation file
+class widget::impl {
+    // :::
+};
+ 
+widget::widget() : pimpl{ new impl{ /*...*/ } } { }
+widget::~widget() { } // or =default
+```
+
+有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。
+
+  [GotW100]: http://bitdewy.github.com/blog/2012/06/30/gotw100/
+
+
+<!-- more -->
+##解决方案
+
+是的，我们有一些办法。可能最简单的办法之一是使用一个类似 unique_ptr 的 helper 类，但是我还是会把它叫做 pimpl 而不是 pimpl_ptr 因为他还要负责分配和释放 impl 对象。
+
+让我们朝着我们的目标前进，即简化 widget 的代码。由于 Pimpl 惯用法同时影响可见类的定义的头文件和隐藏私有部分的实现的头文件，我们把 Pimpl 也放到两个文件中。
+
+首先，我们引入一个 pimpl_h.h 然后添加 `pimpl<myclass::impl>` 类型的数据成员。然后在我们的实现文件中引入 pimpl_impl.h 然后定义我们的 impl 类。
+
+``` cpp
+// in header file
+#include "pimpl_h.h"
+class widget {
+    class impl;
+    pimpl<impl> m;
+    // ...
+};
+ 
+// in implementation file
+#include "pimpl_impl.h"
+class widget::impl {
+    // ...
+};
+```
+
+为什么这比手工实现的 Pimpl 惯用法更好？
+
+- 首先，代码变得简单了，因为我们头文件中减少了代码：在手工实现的版本中，你还需要声明构造函数，然后在实现文件中显式的分配 impl 对象。你应该还记得需要声明析构函数，然后在实现文件中显式的实现，[GotW #100][GotW100] 中已经解释过这个晦涩的问题。
+- 第二，代码更健壮了：在手工实现的版本中，如果你忘了实现非内联的析构函数，Pimpl 类将能够独立的编译，但是如果调用者试图销毁这个对象时，将会的到一个有用的编译错误“无法生成析构函数，由于 impl 呃，你知道的，不是完整类型”，这可能会使代码调用者挠着头离开，然后找你检查一下这到底是什么问题。
+
+pimpl<T> 模板会完成这些工作，不过，我们还要再加点料：它在可见类和实现类之间而不知道任何一个的定义，并且它把所有东西都连接到一起，完成了那些可见类和实现类可能去要做的事。幸运的是，没有什么是 pimpl<T> 不能控制的。
+
+现在，我们来看看 pimpl_h.h 和 pimpl_impl.h 把我们的思绪连接起来。
+
+
+####pimpl_h.h : 可见类需要的东西
+
+pimpl_h.h 提供不透明的 impl 和它的指针（在这里，我们使用 m 代替 pimpl）。它同时也声明两个构造函数和一个析构函数，这些将在 pimpl_impl.h 中以非内联的方式实现，并掌管 impl 对象的生命周期。
+
+``` cpp
+// pimpl_h.h
+#ifndef PIMPL_H_H
+#define PIMPL_H_H
+ 
+#include <memory>
+ 
+template<typename T>
+class pimpl {
+private:
+    std::unique_ptr<T> m;
+public:
+    pimpl();
+    template<typename ...Args> pimpl( Args&& ... );
+    ~pimpl();
+    T* operator->();
+    T& operator*();
+};
+ 
+#endif
+```
+
+第二个构造函数提供了一种给 impl 对象传递初始化参数的方式。由于 pimpl 对 impl 一无所知，这时候完美转发立功了！这是一个有意思的惯用法，它会逐渐的被人所熟知：所有的参数用使用 (&&) 右值引用，然后传递参数时使用 std::forward，这些会在 pimpl_impl.h 中实现。
+
+
+####pimpl_impl.h:提供内部实现
+
+pimpl_impl.h 提供创建和销毁 impl 对象的其他内部实现，就像上面说的，下面我们将看到完美转发的实现部分。
+
+首先，如果你知道非内联的完美转发模板声明语法，给你发一朵小红花。注意构造函数需要的模板不是一个，而是两个，一个是 pimpl 模板参数，另一个是构造函数的参数的模板参数。
+
+``` cpp
+// file pimpl_impl.h
+#ifndef PIMPL_IMPL_H
+#define PIMPL_IMPL_H
+ 
+#include <utility>
+ 
+template<typename T>
+pimpl<T>::pimpl() : m{ new T{} } { }
+ 
+template<typename T>
+template<typename ...Args>
+pimpl<T>::pimpl( Args&& ...args )
+    : m{ new T{ std::forward<Args>(args)... } } { }
+ 
+template<typename T>
+pimpl<T>::~pimpl() { }
+ 
+template<typename T>
+T* pimpl<T>::operator->() { return m.get(); }
+ 
+template<typename T>
+T& pimpl<T>::operator*() { return *m.get(); }
+ 
+#endif
+```
+
+每个构造函数都可以在不知道 impl 类型细节的时候创建出一个新的 impl 对象。类型只要调用者在其他地方定义就可以了。
+
+转发构造函数可以简单的转发参数，`pimpl<widget>::impl` 类型可以幸福的提供带着任何参数的构造函数，可见类 widget 的构造函数可以接受这些参数然后安全的正确的转发给 impl，而不需要 pimpl<>。所有需要的“智慧”的东西都由标准中的&&右值引用和 `std::forward` 提供——这是避免左值需要了解太多右值业务的漂亮的标准实现，而且它能很好地工作。
+
+
+##注解
+
+变长模板参数使得转发构造函数写起来比固定模板参数更容易。如果你使用的编译器支持右值语法但是还不支持变长模板参数，有仍然可以实现相同的效果，只是需要一些重复——决定你准备支持的参数个数，然后写一组模板构造函数的重载，来代替单个变长模板构造函数。前三个看起来可能是这个样子：
+
+``` cpp
+template<typename T>
+template<typename Arg1>
+pimpl<T>::pimpl( Arg1&& arg1 )
+    : m( new T( std::forward<Arg1>(arg1) ) ) { }
+ 
+template<typename T>
+template<typename Arg1, typename Arg2>
+pimpl<T>::pimpl( Arg1&& arg1, Arg2&& arg2 )
+    : m( new T( std::forward<Arg1>(arg1), std::forward<Arg2>(arg2) ) ) { }
+ 
+template<typename T>
+template<typename Arg1, typename Arg2, typename Arg3>
+pimpl<T>::pimpl( Arg1&& arg1, Arg2&& arg2, Arg3&& arg3 )
+    : m( new T( std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3) ) ) { }
+```
+
+##更改记录
+2011-12-06: 把 pimpl<> 从一个基类更改为成员——我真的讨厌不必要的继承，你也应该是的。
+
+2011-12-13: 增加解释，为什么这比手工实现的 Pimpl 惯用法更好。

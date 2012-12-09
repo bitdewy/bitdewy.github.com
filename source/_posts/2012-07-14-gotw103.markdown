@@ -1,0 +1,71 @@
+---
+layout: post
+title: "[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)"
+date: 2012-07-14 19:14
+comments: true
+categories: [C++, GotW]
+---
+
+原文在这里 [GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)](http://herbsutter.com/gotw/_102/)
+
+
+##JG 问题
+
+1\. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。
+
+
+##Guru 问题
+
+2\. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。
+
+3\. 如何处理 auto_ptr ？
+
+
+<!-- more -->
+##解决方案
+
+**1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。**
+
+当不确定时，优先考虑使用 unique_ptr，你可以在之后有需要的时候转换成 shared_ptr。如果你一开始就可以确定需要共享所有权，那么你可以直接使用 make_shared（看下面的 #2）来构造 shared_ptr 对象。
+
+“当不确定时，优先考虑使用 unique_ptr” 的主要原因包括一下几点：
+
+**语义**：选择正确的智能指针，尽可能的直接表达你的意图，和（当前）你所需要的。如果你正在创建一个对象并且不需要共享所有权（当时看来），使用表达唯一所有权的 unique_ptr，你仍然可以把它放到容器中，（例如：`vector<unique_ptr<widget> >`），同时也可以做大部分原始指针能做的事情，而且更安全。如果之后你又需要共享所有全，那么你通常都可以直接把 unique_ptr 转换为 shared_ptr。
+
+**效率**：unique_ptr 比 shared_ptr 有更好的性能，因为它不需要维护一个引用计数和控制块；unique_ptr 的转移几乎和原始指针一样廉价。如果你没有比你需要的要求更多，那么就不会招致额外的开销。
+
+**适应性**：如果你一开始就使用 unique_ptr，你通常稍后可以把它转换成 shared_ptr，或者甚至一个原始指针。（通过 get 或者 release）。
+
+**2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。**
+
+shared_ptr 的实现需要维护被 shared_ptrs 和 weak_ptrs 引用的对象的内部信息控制块。特别的，内部信息包含的不是一个引用计数，而是两个：
+
+- 一个“强引用”计数，用来记录当前有多少个存活的 shared_ptrs 正持有该对象。共享的对象会在最后一个强引用离开的时候销毁（也可能是释放）。
+- 一个“弱引用”计数，用来记录当前有多少个正在观察该对象的 weak_ptrs。当最后一个弱引用离开的时候，共享的内部信息控制块会被销毁和释放（共享的对象也会被释放，如果还没有释放的话）。
+
+如果你通过使用原始的 new 表达式分配对象，然后传递给 shared_ptr，shared_ptr 的实现没有办法选择，而只能单独的分配控制块，看下面的 Example 2(a) 和 Fugure 2(a)。
+
+``` cpp
+// Example 2(a): Separate allocation
+auto p = new widget(); 
+shared_ptr sp1{ p }, sp2{ sp1 };
+```
+
+![](http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png)
+
+我们应该在此避免两次单独的分配，如果你使用 make_shared 来分配对象，那么shared_ptr 的构造就仅需要一步，他的实现可以把两次分配合并成一次分配，看下面的 Example 2(b) 和 Figure 2(b)。
+
+``` cpp
+// Example 2(b): Single allocation
+auto sp1 = make_shared(), sp2{ sp1 };
+```
+
+![](http://y6yska.bay.livefilestore.com/y1p-Y0XAkcMZMrSdxkTa85nShcDkVKvqhMTFVGSDc0jURLybPXTGHPdWv9CZGgcGmvZwQQvd6Y1Qdg/sharedptr2.png)
+
+通常情况下，一个单独的函数调用可以表达的比你想要的东西更多，你给了系统一个更好的机会去以更好的效率完成这项工作。这是毫无疑问的，使用单独的函数调用 make_shared 代替 new widget() 和 shared_ptr(widget *)，就好像当你插入 100 个元素到 vector 中时，使用单独的一个指定插入区间的函数调用 v.insert(first, last) 来代替调用 100 次 v.insert(value) 一样。
+
+**3. 如何处理 auto_ptr ？**
+
+auto_ptr 是最……的特性，它在 C++ 还没有转移语义的时候，勇敢的尝试创建一个 unique_ptr。
+
+现在 auto_ptr 是被反对的，并且不应该在新的代码中使用它。如果你有机会，应该试着在你的代码中全局替换，把 auto_ptr 都替换成 unique_ptr；大部分使用的地方会像之前一样工作，而且它可能暴露出问题（比如编译期错误）或者修复（悄悄地）一个或两个你自己都不知道的 bug。
