@@ -36,10 +36,10 @@ ABI涵盖了各种细节，例如：
 <!-- more -->
 ##什么是引用计数？
 
-引用计数是一种资源管理的方式，经常和垃圾回收在一起讨论，引用计数策略和[垃圾回收][GC]策略都属于资源的自动化管理 ，在引用计数中，每一个对象负责维护对象所有引用的计数值。当一个新的引用指向对象时，引用计数器就递增，当去掉一个引用时，引用计数就递减。当引用计数到零时，该对象就将释放占有的资源。COM 是使用引用计数的典型例子之一。详细内容请看 [Reference counting][RC#COM]
+引用计数是一种资源管理的方式，经常和垃圾回收在一起讨论，引用计数策略和[垃圾回收][wikiGC]策略都属于资源的自动化管理 ，在引用计数中，每一个对象负责维护对象所有引用的计数值。当一个新的引用指向对象时，引用计数器就递增，当去掉一个引用时，引用计数就递减。当引用计数到零时，该对象就将释放占有的资源。COM 是使用引用计数的典型例子之一。详细内容请看 [Reference counting][wikiRC#COM]
 
-  [GC]: http://en.wikipedia.org/wiki/Garbage_collection_(computer_science)
-  [RC#COM]: http://en.wikipedia.org/wiki/Reference_counting#COM
+  [wikiGC]: http://en.wikipedia.org/wiki/Garbage_collection_(computer_science)
+  [wikiRC#COM]: http://en.wikipedia.org/wiki/Reference_counting#COM
 
 
 ##为毛 COM 中的接口都没有虚析构函数？
@@ -49,7 +49,7 @@ ABI涵盖了各种细节，例如：
 1. 《Effective C++》 第三版，item 7：为多态基类声明 virtual 析构函数
 2. 《C++ Coding Standards -- 101 Rules, Guidelines, and Best Practices》第 50 条，将基类析构函数设为公用且虚拟的，或者保护且非虚拟的
 
-学过 C++ 的人应该都知道，基类需要声明为 virtual 或者禁止直接调用基类的析构函数，否则使用派生类初始化基类指针，当调用 delete 释放时，由于基类的析构函数不是虚函数，那么派生类的析构函数将不会被调用，造成对象的切割，派生类特有的部分将不会得到释放，造成内存或资源的泄漏。
+学过 C++ 的人应该都知道，基类的析构函数需要声明为 virtual 或者禁止直接调用基类的析构函数，否则使用派生类初始化基类指针，当调用 delete 释放时，由于基类的析构函数不是虚函数，那么派生类的析构函数将不会被调用，造成对象的切割，派生类特有的部分将不会得到释放，造成内存或资源的泄漏。
 
 COM 的核心在于：接口，它解决了二进制级复用的两个主要问题：
 
@@ -79,12 +79,13 @@ COM 使用引用计数的最主要动机是在不同的语言和运行时系统�
 
 但 COM 的引用计数代价不小，使用 COM 时最容易出现的 bug 就是引用计数不正确。而引用计数的不正确有可能是在某个不透明的第三方组件中。因此， 保证引用计数的正确性不是个容易的问题。
 
-在 .Net 中，微软抛弃了[引用计数][RC]，而引入了[垃圾回收][GC]。
+在 .Net 中，微软抛弃了[引用计数][wikiRC]，而引入了[垃圾回收][GC]。
 
-  [RC]: http://en.wikipedia.org/wiki/Reference_counting
+  [wikiRC]: http://en.wikipedia.org/wiki/Reference_counting
 
 ####参考
 
 - 陈硕：[C++ 工程实践(4)：二进制兼容性](http://www.cnblogs.com/Solstice/archive/2011/03/09/1978024.html)
 - wikipedia: [Component Object Model][wikiCOM]
 - wikipedia: [Application binary interface][wikiABI]
+- wikipedia: [Reference counting][wikiRC]
