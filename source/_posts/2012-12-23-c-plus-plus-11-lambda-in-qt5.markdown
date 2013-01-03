@@ -122,3 +122,8 @@ void Doc::saveDocument() {
 ```
 
 虽然 C++ 不推崇函数式，但 lambda 的引入绝对是一大进步，据说 Java 8 也会引入 lambda，不过 Java 8 什么时候发布都还没谱呢……
+
+###参考
+
+- wiki: [C++11][http://en.wikipedia.org/wiki/C%2B%2B11]
+- [New Signal Slot Syntax Coming in Qt 5][http://qt-project.org/wiki/New_Signal_Slot_Syntax]
