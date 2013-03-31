@@ -1,0 +1,63 @@
+---
+layout: post
+title: "QtScript 与信号槽"
+date: 2013-03-21 14:53
+comments: true
+categories: [C++, Qt, webkit]
+---
+
+Qt从4.3开始, 提供了 [ECMAScript][] 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）
+
+  [ECMAScript]: http://zh.wikipedia.org/wiki/ECMAScript
+
+
+##在 QtScript 中使用信号槽
+
+Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做
+
+1. C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.
+2. Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）
+3. 纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 `QLineEdit::returnPressed()` 信号, 然后连接信号与 script 函数.
+
+<!-- more -->
+使用 `qScriptConnect()` 函数连接 C++ 信号到 script 函数上. 下面的例子中, handler 用来处理 `QLineEdit::textChanged()` 信号:
+
+```cpp
+QScriptEngine eng;
+QLineEdit *edit = new QLineEdit();
+QScriptValue handler = eng.evaluate(
+"(function(text) { print('text was changed to', text); })");
+qScriptConnect(edit, SIGNAL(textChanged(const QString &)), QScriptValue(), handler);
+```
+
+`qScriptConnect()` 的前两个参数与 `QObject::connect()` 的完全一致. 第三个参数是 script 对象, 当 signal handler 被调用时, 它充当 `this` 的角色. 在上面的代码中, 我们传入了一个不可用的值, 此时 `this` 是全局对象. 第四个参数是 script 函数, 相当于槽函数.
+下面的代码展示如何使用 `this` 参数:
+
+```cpp
+QLineEdit *edit1 = new QLineEdit();
+QLineEdit *edit2 = new QLineEdit();
+ 
+QScriptValue handler = eng.evaluate("(function() { print('I am', this.name); })");
+QScriptValue obj1 = eng.newObject();
+obj1.setProperty("name", "the walrus");
+QScriptValue obj2 = eng.newObject();
+obj2.setProperty("name", "Sam");
+ 
+qScriptConnect(edit1, SIGNAL(returnPressed()), obj1, handler);
+qScriptConnect(edit2, SIGNAL(returnPressed()), obj2, handler);
+```
+
+我们创建了两个 `QLineEdit` 对象, 然后定义了信号响应函数. 信号槽链接使用了相同的响应函数, 但是使用不同的 `this` 对象, 具体使用哪个, 取决于哪个对象发出信号, 因此 `print()` 语句输出的内容将会有所不同.
+
+
+在某个项目中,设计之初曾经考虑过以下的交互方式: javascript 传入 json 对象, 其中某个 value 是匿名 function, 来实现异步调用. 这种方式看起来很美, 也与第一种方式类似, 但是存在问题. C++ 无法获得当前 webkit 的 javascript 运行环境. QtScript 曾考虑过提供 API 来访问 webkit 的 javascript 运行环境, 详细信息可以参考：[https://bugreports.qt-project.org/browse/QTWEBKIT-2](https://bugreports.qt-project.org/browse/QTWEBKIT-2), 但由于种种原因最终放弃了, 不得不说这是个遗憾.
+
+
+##参考
+
+- [http://qt-project.org/doc/qt-4.8/qtscript.html](http://qt-project.org/doc/qt-4.8/qtscript.html)
+- [http://qt-project.org/doc/qt-4.8/scripting.html](http://qt-project.org/doc/qt-4.8/scripting.html)
+- [http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html](http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html)
+
+
+ 
