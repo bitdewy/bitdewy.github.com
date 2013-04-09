@@ -125,5 +125,5 @@ void Doc::saveDocument() {
 
 ###参考
 
-- wiki: [C++11][http://en.wikipedia.org/wiki/C%2B%2B11]
-- [New Signal Slot Syntax Coming in Qt 5][http://qt-project.org/wiki/New_Signal_Slot_Syntax]
+- wikipedia: [C++11](http://en.wikipedia.org/wiki/C%2B%2B11)
+- [New Signal Slot Syntax Coming in Qt 5](http://qt-project.org/wiki/New_Signal_Slot_Syntax)
