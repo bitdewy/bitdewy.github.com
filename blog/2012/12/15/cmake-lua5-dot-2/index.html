@@ -1,0 +1,212 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>CMake lua 5.2 - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 CMake 来生成 vcproj，这样维护起来更方便。 什么是 CMake？ &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">CMake Lua 5.2</h2>
+	<div class="entry-content"><p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
+
+<h2>什么是 CMake？</h2>
+
+<p><a href="http://www.cmake.org/">CMake</a> 是个开源的跨平台自动化建构系统，它用组态档控制建构过程（build process）的方式和 Unix 的 Make 相似，只是 <a href="http://www.cmake.org/">CMake</a> 的组态档取名为 CMakeLists.txt。<a href="http://www.cmake.org/">CMake</a> 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 <a href="http://www.cmake.org/">CMake</a> 和 SCons 等其他类似系统的区别之处。</p>
+
+<p>有了 <a href="http://www.cmake.org/">CMake</a> 就不用在 vcproj 的各个版本之前来回的切换了，每次用 <a href="http://www.cmake.org/">CMake</a> 生成相应的工程文件就一切 OK 了。</p>
+
+<h2>Windows 下用 CMake 安装 lua 5.2.1</h2>
+
+<h3>安装 CMake</h3>
+
+<p>从<a href="http://cmake.org/cmake/resources/software.html">官方下载</a>相应的安装包，安装完成后，别忘了把 <a href="http://www.cmake.org/">CMake</a> 加入 <code>PATH</code> 中。</p>
+
+<h3>使用 CMake 生成 vcproj</h3>
+
+<p>lua官方不提供带 CMake 的源码，会的朋友可以手工写几个 CMakeList.txt 就 OK，不会的直接下载 bitdewy 写好的 <a href="http://sdrv.ms/TTp5Y6">cmake-lua-5.2.1.tar.gz</a> 吧。解压后用 visual studio 的命令行进入 <code>lua-5.2.1/build</code> 目录，然后输入：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bat'><span class='line'>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="s2">&quot;C:\lua52&quot;</span> ..
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完成之后就可以打开 build 目录下的 lua.sln 文件直接编译了，编译 INSTALL 工程，会在上面设置的 <code>C:\lua52</code> 目录中安装 lua，luac，静态链接库，动态链接库，头文件、源代码以及文档，如果不想安装，不编译 INSTALL 工程就好。如果不设置安装目录，那么 windows 下默认的安装目录就是 <code>%ProgramFiles%</code> 。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-15T18:09:00+08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cmake/'>cmake</a>, <a class='category' href='/blog/categories/lua/'>lua</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2012/12/15/cmake-lua5-dot-2/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

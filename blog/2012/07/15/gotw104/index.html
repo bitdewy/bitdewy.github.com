@@ -1,0 +1,322 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[译] GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10) - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="原文在这里 GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10) 当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明： widget* load_widget( widget::id desired ); JG 问题 1. &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[译] GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</h2>
+	<div class="entry-content"><p>原文在这里 <a href="http://herbsutter.com/gotw/_104/">GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</a></p>
+
+<p>当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明：</p>
+
+<p><code>widget* load_widget( widget::id desired );</code></p>
+
+<h2>JG 问题</h2>
+
+<p>1. 返回值的类型有什么问题？</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 返回值的推荐类型是是什么？ 解释你的答案，包括任何的权衡。</p>
+
+<p>3. 你希望更改返回值的类型为问题 #2 中推荐的类型，但是你担心破坏了原有代码的函数调用的兼容性；重新编译现有的函数调用是可行的，但修改所有的函数调用就……。然后你灵光一闪，意识到这是一个相当新的项目，所有的代码都使用现代 C++ 惯用法，然后你继续修改返回值类型，而没有一点担心，知道重构仅仅需要一点点或者更不不需要更改调用函数的代码。是什么让你如此自信？</p>
+
+<!-- more -->
+
+
+<h2>解决方案</h2>
+
+<p><strong>1. 返回值的类型有什么问题？</strong></p>
+
+<p>第一，我们能够从两行的问题描述中知道些什么？</p>
+
+<ul>
+<li>我们说过，load_widget 是一个工厂方法。它通过“loading” 生产出一个对象，然后把它返回给调用者。由于返回值类型是指针类型，所以结果可能是 null。</li>
+<li>调用者会适当的使用该对象，可能是调用它的成员函数，或者把它传给其他的函数，等等。这是不安全的，除非调用者确保该对象存活——调用者管理对象的生命周期；或者共享所有权，如果工厂方法负责维护内部的强引用和弱引用的话。</li>
+<li>因为调用者持有或共享所有权，它必须在对象不再需要时做一些工作。如果是直接持有，掌管生命周期的话，它应该销毁该对象，通常是一个 delete 或者也可能是类似于 unload_widget 的一个函数调用。不然的话，如果是共享所有权，它应该减少共享的引用计数。</li>
+</ul>
+
+
+<p>不幸的是，返回一个 widget* 有两个主要的问题。第一，默认情况下它是不安全的，因为默认的操作模式（比如不保存返回值）会造成 widget 泄露：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1: Leak by default. Really, this is just so 20th-century...</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span><span class="o">*</span> <span class="n">load_widget</span><span class="p">(</span> <span class="n">widget</span><span class="o">::</span><span class="n">id</span> <span class="n">desired</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">:::</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">load_widget</span><span class="p">(</span> <span class="n">some_id</span> <span class="p">);</span> <span class="c1">// oops</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Example 1 的代码可以干净的编译，运行，（不）开心的泄露 widget。</p>
+
+<p>第二，函数签名传达出来的信息太少了，“一个 widget ？是的，开始吧！享受它。”文档中会指出调用者应该持有该对象，掌管对象的生命周期（或者其它），但是函数声明没有给出这些信息——它掌管对象的生命周期，还是共享所有权，到底是哪个？阅读文档然后记下它吧，因为函数声明没办法告诉我们到底是哪种情况。</p>
+
+<p><strong>2. 返回值的推荐类型是是什么？ 解释你的答案，包括任何的权衡。</strong></p>
+
+<p>推荐的返回值类型是 unique_ptr 或者也可能是 shared_ptr。注意现在 C++ 中返回值类型是很平常的了，但是还有一点不太合适，它改变了语义，因为返回指针类型允许返回 null （无对象），而返回一个值得话不能轻易地处理这个语义，除非加个类似于 optional&lt;> 的东西。</p>
+
+<p><em>准则：工厂方法应该默认返回 unique_ptr 类型，或当需要共享所有权时使用 shared_ptr 类型。</em></p>
+
+<p>这同时解决了上面两个问题：安全，自描述。</p>
+
+<p>第一，考虑如何立即解决 Example 1 中的安全问题：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2: Clean up by default. Much better...</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">load_widget</span><span class="p">(</span> <span class="n">widget</span><span class="o">::</span><span class="n">id</span> <span class="n">desired</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">:::</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">load_widget</span><span class="p">(</span> <span class="n">some_id</span> <span class="p">);</span> <span class="c1">// cleans up</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Example 2 的代码可以干净的编译，运行，开心的清理 widget。但它不仅仅在这种情况下正确——构造也是正确的，因为现在没有办法去制造出一个导致泄露的错误。</p>
+
+<p>画外音：可能会有人说，“难道不会有人一直写 load_widget(some_id).release()？”如果这些人发神经的话，当然可以；正确的答案是，“不要这么做。” 记住我们关心的是什么——bug 和错误，而不是精心设计的犯罪——显然病态的滥用属于后一类。这与在 C# 的 using 块中显式的调用 Dispose，或在 Java 的 try-with-resources 块中调用 close，没什么区别，不会比它们存在更多的类型安全问题。</p>
+
+<p>如果清理工作不是一个单独的 delete 语句，那么该怎么做？简单：使用自定义的 deleter。锦上添花的是例子中的工厂方法知道使用哪个 deleter，并且能够在构造返回值的时候确定；调用者不需要关心这些，尤其是，当调用者使用 auto 关键字作为返回值类型的时候。</p>
+
+<p>第二，这是自描述的：一个返回值类型是 unique_ptr 的函数，清楚的说明这是一个纯“source” 函数，如果一个函数的返回值是 shared_ptr，那么清楚的说明它返回的是一个共享的所有权和/或一个观察者。</p>
+
+<p>最后，为什么默认情况下，如果你不需要表达共享所有权的语义时，优先考虑使用unique_ptr？因为不管对于性能还是正确性来说，这都是对的事情，并且也给调用者留下了一些余地：</p>
+
+<ul>
+<li>返回值类型为 unique_ptr 表示返回唯一所有权，这是纯“source” 工厂方法的标准形式。</li>
+<li>unique_ptr 的性能不会被打败——转移一个 unique_ptr 和转移/复制一个原始指针一样的廉价。</li>
+<li>如果调用者想要通过 shared_ptr 来管理对象的声明周期，可以通过隐式的转移操作来转换为 shared_ptr 类型——不需要显式的 std::move 因为编译器知道返回值是一个临时对象。</li>
+<li>如果调用者想要用其他的办法来维护对象的生命周期，可以通过调用 .release() 来得到原始指针。这是有用的，但是 shared_ptr 没有。</li>
+</ul>
+
+
+<p>看下面的实现：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2, continued</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">up</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>                              <span class="c1">// unique_ptr (by default)</span>
+</span><span class='line'><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">sp</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>                <span class="c1">// shared_ptr (if desired)</span>
+</span><span class='line'><span class="n">my</span><span class="o">::</span><span class="n">smart_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">msp</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">3</span><span class="p">).</span><span class="n">release</span><span class="p">();</span>  <span class="c1">// your own smart pointer (if desired)</span>
+</span><span class='line'><span class="n">widget</span><span class="o">*</span> <span class="n">p</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">4</span><span class="p">).</span><span class="n">release</span><span class="p">();</span>                  <span class="c1">// or even old-school manual management (not recommended)</span>
+</span><span class='line'><span class="k">delete</span> <span class="n">p</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然，如果工厂方法持有一些共享所有权的对象，不论是通过内部的 shared_ptr 还是 weak_ptr，返回 shared_ptr。这时调用者只能被迫使用 shared_ptr，但在这种情形下，这样是合适的。</p>
+
+<p><strong>3. 你希望更改返回值的类型为问题 #2 中推荐的类型，但是你担心破坏了原有代码的函数调用的兼容性；重新编译现有的函数调用是可行的，但修改所有的函数调用就……。然后你灵光一闪，意识到这是一个相当新的项目，所有的代码都使用现代 C++ 惯用法，然后你继续修改返回值类型，而没有一点担心，知道重构仅仅需要一点点或者更不不需要更改调用函数的代码。是什么让你如此自信？</strong></p>
+
+<p>现代可移植的 C++ 代码使用 unique_ptr，shared_ptr，和 auto。返回 unique_ptr 类型可以和这三个协同工作，返回 shared_ptr 只能与后两个协同工作。</p>
+
+<p>如果调用者接受返回值时使用了 auto，例如 <code>auto w = load_widget(whatever)</code>；那么类型自然会是正确的，正常的解引用也可以工作，只有在调用者试图把它存储到一个其他类型的非局部变量中时代码才会出问题。</p>
+
+<p><em>准则：优先考虑使用 auto 声明变量，除非需要显式的类型转换。它更短，而且可以避免类型轻微更改时引起的不必要的波澜。</em></p>
+
+<p>否则：如果调用者没有使用 auto ，那么它应该已经使用返回结果初始化了 unique_ptr 或 shared_ptr， 因为现代 C++ 代码不使用非参数的原始指针变量（下次详细讨论）。每种情况下，返回一个 unique_ptr 可以工作：一个 unique_ptr 可以无缝的转换成这些类型，如果语义上需要返回共享的所有权，那么调用者应该已经使用了 shared_ptr，这样的话，再次工作还会是正常的。（可能比之前的更好，因为为了让原本的返回原始指针的版本正常工作，返回类型大概会被 enable_shared_from_this 所胁迫，但如果我们显示的返回一个 shared_ptr 的话，这些就是不需要的了。）</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-15T16:28:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2012/07/15/gotw104/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2012/07/15/gotw104/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2012/07/15/gotw104/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

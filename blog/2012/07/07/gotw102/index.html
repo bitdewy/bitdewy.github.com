@@ -1,0 +1,520 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10) - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="[这是 GotW #56 的 C++11 更新版] 原文在这里 GotW #102: Exception-Safe Function Calls (Difficulty: 7/10) JG问题 1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？ &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</h2>
+	<div class="entry-content"><p>[这是 <a href="http://www.gotw.ca/gotw/056.htm">GotW #56</a> 的 C++11 更新版]</p>
+
+<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a></p>
+
+<h2>JG问题</h2>
+
+<p>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Example 1(b)</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">g</span><span class="p">(</span> <span class="n">expr1</span> <span class="p">),</span> <span class="n">h</span><span class="p">(</span> <span class="n">expr2</span> <span class="p">)</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Guru问题</h2>
+
+<p>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这段代码包含潜在的异常安全问题吗？请解释。</p>
+
+<p>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</p>
+
+<p>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h2>解决方案</h2>
+
+<p><strong>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</strong></p>
+
+<p>答案遵循下面的基本规则：</p>
+
+<ul>
+<li>函数调用之前，所有的参数必须都已经求值。这也包括任何有副作用的作为函数参数的表达式。</li>
+<li>当函数开始执行的时候，在调用该函数的代码中不会有任何表达式开始或继续求值，直到函数调用结束。函数调用永远都不会交叉执行。</li>
+<li>用作函数参数的表达式可能以任意的顺序求值，包括交叉执行，除非另有其他规则限制。</li>
+</ul>
+
+
+<p>在标准 C++11 中，这些线程内的顺序约束由“sequenced before” 关系决定，它约束了编译器和硬件在单线程执行中的行为。取代了旧的 C/C++ “sequence point”（序列点） ，但它们的目的是相同的。</p>
+
+<p>给出了这些规则，让给我看看在我们的例子中发生了什么：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在例子 1(b) 中，函数和表达式可能以任何的顺序来计算，考虑下面的规则：</p>
+
+<ul>
+<li>epxr1 必须在 g 调用之前计算。</li>
+<li>expr2 必须在 h 调用之前计算。</li>
+<li>g 和 h 必须在 f 调用之前完成。</li>
+</ul>
+
+
+<p>表达式 expr1 和 expr2 的求值有可能交错，但不可能与函数调用交错。举个例子，无论是表达式 expr2 的一部分，还是函数 h 的执行，都不可能发生在 g 的执行过程中；但是，h 的调用有可能发生在 g 调用之前，也可能是 g 调用之后。</p>
+
+<h2>一些函数调用的异常安全问题</h2>
+
+<p><strong>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>这段代码包含潜在的异常安全问题吗？请解释。</strong></p>
+
+<p>是的，这有一些潜在的异常安全问题。</p>
+
+<p>简要归纳：像 new T1 这样的调用，很简单，一个 new 表达式。回忆一下 new 表达式所做的事情（简单起见，忽略定位new 和数组形式的 new，因为这个我们讨论的没有太大关系。）</p>
+
+<ul>
+<li>分配内存</li>
+<li>在分配的内存中构造一个新的对象；然后</li>
+<li>如果由于异常而构造失败，分配的内存将被释放</li>
+</ul>
+
+
+<p>所以每个 new 表达式本质上是两个函数调用：一个是 operator new（可能是全局的，或者这个类型所提供的），另一个是构造函数。</p>
+
+<p>在 Example 2 中，考虑如果编译器生成的代码将按照下面的步骤执行时，将会发生什么：</p>
+
+<ol>
+<li>给 T1 分配内存</li>
+<li>构造 T1</li>
+<li>给 T2 分配内存</li>
+<li>构造 T2</li>
+<li>调用函数 f</li>
+</ol>
+
+
+<p>它存在的问题是：如果第 3 步或第 4 步由于异常而失败了，C++ 标准没有要求 T1 对象必须销毁和释放内存，这是典型的内存泄漏，很明显这不是件好事。</p>
+
+<p>另一个可能的执行顺序：</p>
+
+<ol>
+<li>给 T1 分配内存</li>
+<li>给 T2 分配内存</li>
+<li>构造 T1</li>
+<li>构造 T2</li>
+<li>调用函数 f</li>
+</ol>
+
+
+<p>这个执行顺序不仅仅含有一个，而是两个异常安全的问题并且他们会产生不同的结果：</p>
+
+<ul>
+<li>如果第 3 步由于异常而失败，那么给 T1 分配的内存将自动释放（第 1 步会回滚），但是标准没有要求释放给 T2 分配的内存，内存泄漏了。</li>
+<li>如果第 4 步由于异常而失败，T1 的内存已分配且构造完成，但是标准没有要求销毁和释放它的内存，T1 泄漏了。</li>
+</ul>
+
+
+<p>“呃”，你可能想知道，“为什么这个异常安全漏洞会存在？为什么标准不要求清理时编译器做正确的事来防止这个问题？”</p>
+
+<p>C++ 拥有 C 语言的灵魂——效率，因此 C++ 标准允许编译器某些情形下自行决定表达式的求值顺序，因为这可以允许编译器进行可能的性能优化。为了保证这一点，一些表达式求值规则不是异常安全的，所以如果你想要写异常安全的代码，那么你就需要知道它，并且避免它。</p>
+
+<p>幸运的是，你可以做一些简单的工作来避免这个问题。也许像 unique_ptr 这样的智能指针会有帮助？</p>
+
+<p><strong>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</strong></p>
+
+<p>这个代码试图把问题直接丢给 unique_ptr。很多人相信智能指针是异常安全的万能药，是试金石和护身符，只要有它的出席，就能解决编译器的消化不良。</p>
+
+<p>不是的。没有任何改变。Example 3 仍然不是异常安全的，和之前的原因一模一样。</p>
+
+<p>特别的，只有当资源真的由 unique_ptr 接管时，这些资源才是安全的，但是当还没有到达 unique_ptr 的构造函数时，同样的问题还会存在。因为上面提到的两种执行顺序还是有可能的，只是在调用函数 f 之前需要调用 unique_ptr 的构造函数而已。一个例子：</p>
+
+<ol>
+<li>给 T1 分配内存</li>
+<li>构造 T1</li>
+<li>给 T2 分配内存</li>
+<li>构造 T2</li>
+<li>构造 unique_ptr<T1></li>
+<li>构造 unique_ptr<T2></li>
+<li>调用函数 f</li>
+</ol>
+
+
+<p>在上面的情况下，如果第 3 步或第 4 步异常了，相同的问题仍会存在，下面的也是一样：</p>
+
+<ol>
+<li>给 T1 分配内存</li>
+<li>给 T2 分配内存</li>
+<li>构造 T1</li>
+<li>构造 T2</li>
+<li>构造 unique_ptr<T1></li>
+<li>构造 unique_ptr<T2></li>
+<li>调用函数 f</li>
+</ol>
+
+
+<p>还是一样，如果第 3 步或第 4 步抛出异常，还是会存在异常安全问题。</p>
+
+<p>幸运的是，这不是 unique_ptr 的问题，只是 unique_ptr 的误用而已。让我们看看如果更好的使用它。</p>
+
+<h2>make_unique</h2>
+
+<p><strong>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>基本思路：</p>
+
+<ul>
+<li>我们需要同一个线程中的函数调用不要产生交错，所以我们使用函数来完成分配、构造和构造 unique_ptr 对象的的工作。</li>
+<li>因为我们需要函数可以配合任何类型工作，所以我们需要使用函数模板。</li>
+<li>由于需要通过 make_unique 传递构造参数给需要构造的对象，我们要使用 C++11 的完美转发，把参数传递给 make_unique 函数中的 new 表达式。</li>
+<li>shared_ptr 已经有一个类似的设施 std::make_shared，为了一致性我们把这个函数叫做 make_unique。（C++ 11 中没有 make_unique 是某种程度上的疏忽，几乎可以确定，不就的将来它会被添加到标准中，在这段时间内，我们使用下面的实现。）</li>
+</ul>
+
+
+<p>把上面的要素组装到一起，我们可以得到：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">make_unique</span><span class="p">(</span> <span class="n">Args</span><span class="o">&amp;&amp;</span> <span class="p">...</span><span class="n">args</span> <span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span> <span class="k">new</span> <span class="n">T</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...</span> <span class="p">)</span> <span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这解决了异常安全问题，任何的执行顺序都不会造成资源泄露，因为现在我们只有两个函数，并且我们知道他们必须一个一个的执行。考虑下面的求值顺序：</p>
+
+<ol>
+<li>调用函数 make_unique<T1></li>
+<li>调用函数 make_unique<T2></li>
+<li>调用函数 f</li>
+</ol>
+
+
+<p>如果第 1 步异常了，不会产生泄露因为 make_unique 是异常安全的。</p>
+
+<p>如果第 2 步异常了，那么第一步构造出来的 unique_ptr<T1> 临时对象会被清理掉吗？</p>
+
+<p>是的，它会被清理。可能有人会认为：这难道和 Example 2 是不一样的吗？而 Example 2 是不能正确清理的。不，这和 Example 2 是不同的。因为在这里，unique_ptr<T1> 事实上是一个临时对象，而临时对象的销毁在标准中是明确说明的。在标准 12.2/3 节中（从 C++98 之后没有更改过）：<em>在表达式求值完成之后临时对象将被销毁，包括他们的创建点。即使表达式求值以异常而终止时，也是一样。</em></p>
+
+<p><strong>准则：</strong></p>
+
+<ul>
+<li>优先考虑使用 make_shared 来构造 shared_ptr 对象来管理内存，用 make_unique 来构造 unique_ptr 对象。</li>
+<li>虽然现在标准 C++ 中还没有 make_unique，这是一个疏忽，几乎可以确定它最终会加入到标准中。在这期间，使用上面的版本，你的代码会向前兼容 C++ 标准的。</li>
+<li>避免直接使用 new 或其他的原始的分配内存的方法。取而代之的是，使用类似于 make_unique 的工厂方法，它会包装原始的内存分配然后直接传给需要接管资源的对象，通常是智能指针，它会自动清理资源，或者其他析构函数负责安全的删除资源的对象。</li>
+</ul>
+
+
+<h2>感谢</h2>
+
+<p>这个问题是在 comp.lang.c++.moderated 的讨论中提出的。解决方案中的观点是由 James Kanze, Steve Clamage, 和 Dave Abrahams 在该讨论以及其他讨论和私人邮件中提出的。同时也感谢 Clark Nelson，他起草了 C++11 中的“sequenced before” 的概念，并阐明了其中的疑问。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-07T00:06:00+08:00" pubdate data-updated="true">Jul 7<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2012/07/07/gotw102/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2012/07/07/gotw102/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2012/07/07/gotw102/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

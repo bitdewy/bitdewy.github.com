@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: github | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/github/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hello All]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/11/25/hello-world/"/>
+    <updated>2012-11-25T22:18:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/11/25/hello-world</id>
+    <content type="html"><![CDATA[<p>Hello world, new github blog;</p>
+
+<h1>一级标题</h1>
+
+<h2>二级标题</h2>
+
+<h3>三级标题</h3>
+
+<h4>四级标题</h4>
+
+<h5>五级标题</h5>
+
+<h6>六级标题</h6>
+
+<blockquote><p>这是一个引用</p>
+
+<blockquote><p>引用中的引用</p></blockquote></blockquote>
+
+<p><a href="http://bitdewy.github.com">这是一个超链接</a></p>
+
+<p>下面是一个list：</p>
+
+<ul>
+<li>第一条</li>
+<li>第二条</li>
+<li>第三条</li>
+</ul>
+
+
+<p><em>斜体</em>、<em>还是斜体</em>、<strong><em>粗+斜</em></strong>、<strong>粗体</strong></p>
+
+<p>后面是代码-> <code>something.excute();</code> &lt;&ndash; 前面是代码</p>
+
+<p>下面是一段代码：</p>
+
+<p>``` python</p>
+
+<h1>Fibonacci series:</h1>
+
+<h1>the sum of two elements defines the next</h1>
+
+<p>a, b = 0, 1
+while b &lt; 10:</p>
+
+<pre><code>print b
+a, b = b, a+b
+</code></pre>
+
+<p>```</p>
+
+<p>最后来一张八爪萌猫大图：</p>
+
+<!-- more -->
+
+
+<p><img src="http://octodex.github.com/images/snowoctocat.jpg" alt="" /></p>
+
+<p>全文完整代 markdown 代码如下：</p>
+
+<pre><code>Hello world, new github blog;
+
+#一级标题
+##二级标题
+###三级标题
+####四级标题
+#####五级标题
+######六级标题
+
+&gt; 这是一个引用
+&gt;&gt; 引用中的引用
+
+[这是一个超链接](http://bitdewy.github.com)
+
+下面是一个list：
+
+- 第一条
+- 第二条
+- 第三条
+
+_斜体_、*还是斜体*、***粗+斜***、**粗体**
+
+后面是代码-&gt; `something.excute();` &lt;- 前面是代码
+
+下面是一段代码：
+
+``` python
+# Fibonacci series:
+# the sum of two elements defines the next
+a, b = 0, 1
+while b &lt; 10:
+    print b
+    a, b = b, a+b
+```
+
+最后来一张八爪萌猫大图：
+
+&lt;!-- more --&gt;
+![](http://octodex.github.com/images/snowoctocat.jpg)
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

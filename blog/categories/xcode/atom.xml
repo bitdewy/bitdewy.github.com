@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Xcode | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/xcode/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello/"/>
+    <updated>2012-12-09T13:10:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello</id>
+    <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
+
+<p>其次，准备好 Xcode 先。正文开始：</p>
+
+<h2>安装Qt library</h2>
+
+<p>Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点<a href="http://qt-project.org/downloads">这里</a>，MAC 版的 release 和 debug 库是分开的，可以自由选择。一路安装，下一步就 OK。</p>
+
+<!-- more -->
+
+
+<h2>生成 xcodeproj</h2>
+
+<p>生成 xcodeproj 文件(夹)，(它是文件还是文件夹？)，先创建目录，然后进入，使用 <code>qmake -project</code> 生成 pro 文件，如果找不到 <code>qmake</code>，那就需要手工找，或者重新安装 Qt library 了，生成 pro 文件之后，就可以用 <code>qmake -spec macx-xcode</code> 生成 xcodeproj 了，然后，就没有然后了，直接用 Xcode 打开就 OK。</p>
+
+<p><code>sh
+localhost:~ bitdewy$ mkdir Projects/qt_xcode_hello  #建个文件夹先
+localhost:~ bitdewy$ cd Projects/qt_xcode_hello/    #进入新建的文件夹
+localhost:qt_xcode_hello bitdewy$ qmake -project    #生成pro文件
+localhost:qt_xcode_hello bitdewy$ ls                #看看生成了啥玩意儿
+qt_xcode_hello.pro
+localhost:qt_xcode_hello bitdewy$ qmake -spec macx-xcode  #生成xcodeproj
+localhost:qt_xcode_hello bitdewy$ ls                      #再看看
+qt_xcode_hello.pro      qt_xcode_hello.xcodeproj
+localhost:qt_xcode_hello bitdewy$ open qt_xcode_hello.xcodeproj/  #用 Xcode 打开
+</code></p>
+
+<h2>配置 Xcode 工程</h2>
+
+<p>打开个空工程，自然是毛也没有，首先工程中新建个文件，然后新建 target 选 other &ndash;> External Build System ，Product Name 就叫 qmake，Build Tool 指定到 qmake 的路径，Finish 之后，删除 Arguments 中的 <code>$(ACTION)</code>。Command + D，Duplicate 出来个 qmake copy，改名 <code>qmake -project</code>，Arguments 填上 <code>-project</code>，先run <code>qmake -project</code>，再run <code>qmake</code>，xcode 工程就和谐了，现在可以写代码跑了。</p>
+
+<p>明白人一看就知道上面是在干什么了，新建文件，然后 <code>qmake -project</code> 更新pro文件，再 <code>qmake</code> 生成 makefile。整个过程实际上就三行 shell 搞定。</p>
+
+<p><code>sh
+localhost:qt_xcode_hello bitdewy$ touch qt_xcode_hello.cpp
+localhost:qt_xcode_hello bitdewy$ qmake -project
+localhost:qt_xcode_hello bitdewy$ qmake
+</code></p>
+
+<h2>为毛不直接生成能用的 Xcode 工程</h2>
+
+<p>更明白的人可能要说脏话了，你妹的搞这么麻烦，生成 xcodeproj 之前补上一句 <code>touch qt_xcode_hello.cpp</code> 不就不用配置 XCode 工程了么？ bitdewy 也不是二货，为毛要配置 Xcode 工程？ 因为 Qt 的 Meta Object Compile，用到 signal 和 slot 的时候，都需要 qmake 生成 moc 文件，所以先配置一下没什么坏处这样。</p>
+
+<h4>参考</h4>
+
+<ol>
+<li><a href="http://qtnode.net/wiki/Qt4_with_Xcode">Qt4 with Xcode</a></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>

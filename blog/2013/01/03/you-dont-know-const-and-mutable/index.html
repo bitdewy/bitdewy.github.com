@@ -1,0 +1,491 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>你确定你懂 const 和 mutable ? - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="const 和 mutable 是 C++ 中两个关键字，你确定你懂 const 和 mutable 吗？ 下面是一段完整的 C++11 代码; 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+#include &lt;utility&gt;
+#include &lt;future& &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">你确定你懂 Const 和 Mutable ?</h2>
+	<div class="entry-content"><p>const 和 mutable 是 C++ 中两个关键字，你确定你懂 const 和 mutable 吗？</p>
+
+<p>下面是一段完整的 C++11 代码;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;utility&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">z</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="n">v</span><span class="p">};</span> <span class="p">});</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">z</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="n">v</span><span class="p">};</span> <span class="p">});</span>
+</span><span class='line'>  <span class="n">x</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="n">y</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的程序能正确同步么? 有线程安全的问题吗?</p>
+
+<p>嗯, vector 是标准库的内置容器, 如果换成我们自己写的类呢? 比如下面的代码;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;utility&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span><span class="cm">/*...*/</span><span class="p">}</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="n">widget</span><span class="p">,</span> <span class="n">widget</span><span class="o">&gt;</span> <span class="n">z</span><span class="p">{</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span> <span class="p">};</span> <span class="p">});</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="n">widget</span><span class="p">,</span> <span class="n">widget</span><span class="o">&gt;</span> <span class="n">z</span><span class="p">{</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span> <span class="p">};</span> <span class="p">});</span>
+</span><span class='line'>  <span class="n">x</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="n">y</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>widget</code> 的线程安全性如何?</p>
+
+<!-- more -->
+
+
+<p>上面的问题先放一放, 我们来看一个基础的问题.</p>
+
+<p>在 C++98 中, <code>const</code> 表示什么含义?</p>
+
+<p>嗯, <code>const</code> 表示不可更改, 不过它是 logically const, 而不是 physically 或者 bitwise 的 const.</p>
+
+<p>如果你对 const 的认识仅限于此, 那么可以说你不懂 const, 在 C++11 中, 你需要重新认识 const.</p>
+
+<p><strong>C++11 中增加了一直空白的对于多线程的描述.</strong></p>
+
+<p>看一下 C++11 标准中是怎么说的吧, C++11 标准文档, 语言核心部分 1.10 第4条和第21条:</p>
+
+<p><em>两个表达式, 如果其中一个正在<strong>修改</strong>内存, 而另一个去访问或<strong>修改</strong>相同的内存, 那么两个表达式会发生<strong>冲突</strong>.</em></p>
+
+<p><em>如果一个程序在不同的线程中包含了两个会<strong>冲突</strong>的动作, 至少其中一个不是原子操作, 且不会在另一个动作发生之前发生, 那么程序运行时会产生<strong>数据竞争</strong>. 任何的数据竞争都会导致未定义的行为.</em></p>
+
+<p>再来看看关于标准库部分 17.6.5.9 的第1条和第3条:</p>
+
+<p><em>这一节的指定要求是防止<strong>数据竞争</strong>.</em></p>
+
+<p><em>C++ 标准库函数除在当前线程外, 不能直接或间接的修改对象, 除非这个对象是通过函数的非 const 参数直接或间接的访问的, 包括 <code>this</code> 指针.</em></p>
+
+<p>这样一来, const 的含义就变为了 只读 或 线程安全.</p>
+
+<p>下面来看一下标准中 20.2 的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">namespace</span> <span class="n">std</span> <span class="p">{</span>
+</span><span class='line'><span class="k">namespace</span> <span class="n">rel_ops</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">[...]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">y</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">[...]</span> <span class="nl">Returns:</span> <span class="o">!</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返回值 <code>!(x == y)</code> 意味着什么?</p>
+
+<p>这意味着, 使用 std::rel_ops 的任何类型都需要提供线程安全的 <code>operator==</code> 和 <code>operator&lt;</code>. 比如, 在不同的线程中, 比较同一个对象时, 不需要串行化访问.</p>
+
+<p>再来看看 20.3.2 的 <code>std::pair</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">namespace</span> <span class="n">std</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">T2</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="n">pair</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">pair</span><span class="p">(</span><span class="k">const</span> <span class="n">T1</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="k">const</span> <span class="n">T2</span><span class="o">&amp;</span> <span class="n">y</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>构造函数的参数 <code>const T1&amp; x, const T2&amp; y</code> 这意味着什么?</p>
+
+<p>这意味着, 任何支持拷贝, 会作为 <code>std::pair</code> 类型参数的类型 T, 都需要支持线程安全的拷贝. 比如, 多个线程同时拷贝同一个对象时, 不需要显式的串行化访问.</p>
+
+<p>上面说的这些是什么意思?</p>
+
+<p>线程安全:</p>
+
+<ul>
+<li>bitwise const, 或者</li>
+<li>类似 leaf-level locking(像 std::atomics) 的内部串行化 (非 leaf level 的 locking 可能会导致死锁)</li>
+</ul>
+
+
+<p>标准库保证了 const == 线程安全:</p>
+
+<ul>
+<li>所有的标准库中的类, 以及</li>
+<li>所有能作用到用户自定义类型的操作符</li>
+</ul>
+
+
+<p>所以就照着标准库的方式来做吧.</p>
+
+<p>任何一个标准库中定义的类, 如果声明一个该类型的 const 对象, 那么它就是线程安全的. (完全不可更改, 或者有内部的串行化访问)</p>
+
+<p>在 C++98 中, const 意味着逻辑上不可更改. 而在 C++11 中, const 意味着线程安全(内存完全不可改, 或者内部实现了串行化访问).</p>
+
+<p>明白了 const, 接下来看看下面的代码有什么问题:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">mutex</span> <span class="n">m_</span><span class="p">;</span>  <span class="c1">// protects internal data</span>
+</span><span class='line'>  <span class="c1">//...     // more data</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">info</span> <span class="n">get_info</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">hold</span><span class="p">(</span><span class="n">m_</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="cm">/* use &#39;more data&#39;*/</span><span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>是的, 上面的代码编译不过. <code>lock_guard</code> 需要的是 <code>mutex&amp;</code> 类型, 而现在的类型是 <code>const mutex&amp;</code>.</p>
+
+<p>那么该如何修改呢? 像下面这样么?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">mutex</span> <span class="n">m_</span><span class="p">;</span>  <span class="c1">// protects internal data</span>
+</span><span class='line'>  <span class="c1">//...     // more data</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">info</span> <span class="n">get_info</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">hold</span><span class="p">(</span><span class="k">const_cast</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">m_</span><span class="p">));</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="cm">/* use &#39;more data&#39;*/</span><span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这么改, 没有任何问题, 程序可以正确的运行, 但是, 我们需要在使用了 m_ 的地方都用一下 <code>const_cast</code>. 包括以后新增的代码也需要, 这显然不是个好办法.</p>
+
+<p>改成下面这样呢?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">mutable</span> <span class="n">mutex</span> <span class="n">m_</span><span class="p">;</span>  <span class="c1">// protects internal data</span>
+</span><span class='line'>  <span class="c1">//...             // more data</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">info</span> <span class="n">get_info</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">hold</span><span class="p">(</span><span class="n">m_</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="cm">/* use &#39;more data&#39;*/</span><span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回顾一下, <code>mutable</code> 在 C++98 中的含义: “mutable 表示不会被观察到的非 const.”</p>
+
+<p>如果你对 mutable 的认识仅限于此, 那么可以说你不懂 mutable, 在 C++11 中, 你需要重新认识 mutable.</p>
+
+<p><strong>一个类内部的 mutex 对象想要成为 mutable 类型. 为什么?</strong></p>
+
+<p><strong>因为 mutex 自己已经是串行化访问的了</strong>.</p>
+
+<p>在 C++98 中, mutable 意味着不会被观察到的非 const, 而在 C++11 中, mutable 意味着线程安全.</p>
+
+<p>现在再看上面的代码, mutable表达了什么?</p>
+
+<p>没错，线程安全, 而且是自然而且完美的表达, 因为 mutable 通常就是意味着 “as good as const/ logically const”.</p>
+
+<p>再来看一个例子:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">counter_</span><span class="p">;</span>            <span class="c1">// protects internal data</span>
+</span><span class='line'>  <span class="c1">//...                            // more data</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">info</span> <span class="n">get_info</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="o">++</span><span class="n">counter_</span><span class="p">;</span>                    <span class="c1">// oops, const</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span><span class="cm">/* use &#39;more data&#39;*/</span><span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>与最开始 mutex 的例子一样, 这段代码编译不过. 我们要做的就是把 <code>counter_</code> 声明为 <code>mutable</code>. 因为counter_ 本身就是线程安全的.</p>
+
+<p>C++11 中增加了关于多线程的内容，<code>const</code> 与 <code>mutable</code> 关键字有了新的语义.</p>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3242.pdf">C++ 标准草案 n3242</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2669.htm">Thread-Safety in the Standard Library (Rev 2)</a></li>
+<li><a href="http://channel9.msdn.com/posts/C-and-Beyond-2012-Herb-Sutter-You-dont-know-blank-and-blank">C++ and Beyond 2012: Herb Sutter &ndash; You don&rsquo;t know [blank] and [blank]</a></li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-03T14:38:00+08:00" pubdate data-updated="true">Jan 3<span>rd</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/01/03/you-dont-know-const-and-mutable/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2013/01/03/you-dont-know-const-and-mutable/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2013/01/03/you-dont-know-const-and-mutable/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

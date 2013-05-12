@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: idiom | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/idiom/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[空基类优化]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/"/>
+    <updated>2013-02-25T07:50:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>优化空类数据成员的存储空间</p>
+
+<h2>别名</h2>
+
+<p>EBCO: Empty Base Class Optimization
+Empty Member Optimization</p>
+
+<h2>动机</h2>
+
+<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
+
+<p><code>cpp
+class EmptyClass {};
+EmptyClass arr[10]; // Size of this array can’t be zero.
+</code></p>
+
+<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
+
+<!-- more -->
+
+
+<h2>解决方案&amp;示例代码</h2>
+
+<p>在 C++ 中, 如果一个空类作为基类被继承时, 情况会和上面的有些区别. 编译器允许继承层次结构扁平化, 被继承的空基类不占用空间. 例如下面的代码中 <code>sizeof(AnInt)</code> 在 32 位架构中是 4 字节, <code>sizeof(AnotherEmpty)</code> 是 1 字节, 虽然这两个类都继承自 <code>EmptyClass</code></p>
+
+<p><code>cpp
+class AnInt : public EmptyClass
+{
+   int data;
+};   // size = sizeof(int)
+class AnotherEmpty : public EmptyClass {};  // size =  1
+</code></p>
+
+<p>EBCO 有效的利用了这个特性. 这并不是说简单, 天真的将数据成员的空类变成基类是可取的, 因为这可能会暴露原本需要对用户隐藏的接口. 例如下面的 EBCO 实现方式, 可能会有副作用: 类 <code>Foo</code> 的用户现在可以看到一些方法 (如果在 E1, E2 中存在的话), 虽然他们是私有继承而来的, 不可访问.</p>
+
+<p><code>cpp
+class E1 {};
+class E2 {};
+// **** before EBCO ****
+class Foo {
+  E1 e1;
+  E2 e2;
+  int data;
+}; // sizeof(Foo) = 8
+// **** after EBCO ****
+class Foo : private E1, private E2 {
+  int data;
+}; // sizeof(Foo) = 4
+</code></p>
+
+<p>一种实现 EBCO 的实用方法是: 将空的类成员组合到单一的存储结构扁平的成员中. 下面的模板 <code>BaseOptimization</code> 的前两个模板参数是用来实现 EBCO的. 使用 <code>BaseOptimization</code> 改写类 <code>Foo</code> 如下:</p>
+
+<p>```cpp
+template <class Base1, class Base2, class Member>
+struct BaseOptimization : Base1, Base2
+{
+   Member member;
+   BaseOptimization() {}
+   BaseOptimization(Base1 const&amp; b1, Base2 const &amp; b2, Member const&amp; mem)</p>
+
+<pre><code>   : Base1(b1), Base2(b2), member(mem) { }
+</code></pre>
+
+<p>   Base1 * first()  { return this; }
+   Base2 * second() { return this; }
+};</p>
+
+<p>class Foo {
+  BaseOptimization&lt;E1, E2, int> data;
+}; // sizeof(Foo) = 4
+```</p>
+
+<p>使用 EBCO 并没有改变类 Foo 的继承体系. 保证基类不会互相冲突, 这是至关重要的. 也就是说 Base1 与 Base2 是独立的集成体系中的一部分.</p>
+
+<p><strong>注意</strong>: 对象身份标识的问题, 不同的编译器处理起来是不相同的. 空对象的地址可能是相同的, 也可能是不同的. 例如: BaseOptimization 的成员函数 first 和 second 返回的指针, 在有些编译器上可能是相同的, 而有些编译器上可能是不同的. 更多的讨论请看这里：<a href="http://stackoverflow.com/questions/7694158/boost-compressed-pair-and-addresses-of-empty-objects">stackoverflow</a></p>
+
+<h2>已知的用途</h2>
+
+<p><a href="http://www.boost.org/doc/libs/1_53_0/libs/utility/compressed_pair.htm">boost::compressed_pair</a> 使用了该惯用法, 来优化 pair 的存储空间
+C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.html">unique­_ptr</a> 也使用了该惯用法</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.informit.com/articles/article.aspx?p=31473&amp;seqNum=2">The Empty Base Class Optimization (EBCO)</a></li>
+<li><a href="http://www.cantrip.org/emptyopt.html">The &ldquo;Empty Member&rdquo; C++ Optimization</a></li>
+<li><a href="http://www.ibm.com/developerworks/aix/library/au-boostutilities/index.html">Internals of boost::compressed_pair</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

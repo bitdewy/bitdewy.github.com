@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: unix | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/unix/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Unix 的隐藏文件是个 Bug]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug/"/>
+    <updated>2012-09-14T01:05:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug</id>
+    <content type="html"><![CDATA[<p>玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以<code>.</code>开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。</p>
+
+<p>8月份的时候，<a href="http://en.wikipedia.org/wiki/Rob_Pike">Rob Pike</a> 在 Google+ 上发了一篇名为 &ldquo;<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a>&rdquo; 的短文，介绍了 Unix 文件系统中隐藏文件这个设计上的 bug (feature)。</p>
+
+<p>在 Unix 文件系统设计的早期，为了导航更方便而引入了 <code>.</code> 和 <code>..</code>。当用户输入 <code>ls</code> 时会列出文件清单，所以 <a href="http://en.wikipedia.org/wiki/Ken_Thompson">Ken</a> 或 <a href="http://en.wikipedia.org/wiki/Dennis_Ritchie">Dennis</a> 添加了一些简单的代码。当时用的是汇编，不过代码看起来应该是像这样的：</p>
+
+<p>``` c
+if (name[0] == &lsquo;.&rsquo;)</p>
+
+<pre><code>continue;
+</code></pre>
+
+<p>```</p>
+
+<p>这比它应有的样子稍微短了一点点：</p>
+
+<p>``` c
+if (strcmp(name, &ldquo;.&rdquo;) || strcmp(name, &ldquo;..&rdquo;) == 0)</p>
+
+<pre><code>continue;
+</code></pre>
+
+<p>```</p>
+
+<p>嘿，这很简单。</p>
+
+<!-- more -->
+
+
+<p>但产生了两个后果。</p>
+
+<p>首先，这不是一个好的先例。一些其他懒惰的程序员用相同的简化方式引人了 bug。本应该被计算的以 <code>.</code> 开始的文件就这样被忽略掉了。</p>
+
+<p>其次，更糟糕的是，隐藏文件的概念随之而来了。更懒惰的程序员开始往 home 目录中仍各种文件(夹)。在我写这片短文的机器上，我没有安装多少东西，但是 home 文件夹下有数以百计的隐藏文件，我甚至不知道大部分是干什么的，也不知道它们是否还有用。每次需要扫瞄 home 目录的操作都会因为这些长时间积累下来的垃圾而变慢。</p>
+
+<p>我非常确定，隐藏文件的概念是一个无意中产生的结果。这完全就是一个错误。</p>
+
+<p>原文地址：<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a></p>
+
+<p>PS： 上面一共出现了三个人，这三位都是神级的人物，网络上有一篇流传了很多年的文章叫做 “我心目中的编程高手” 里面介绍了 9 位神级人物，这三位大神都榜上有名。</p>
+]]></content>
+  </entry>
+  
+</feed>

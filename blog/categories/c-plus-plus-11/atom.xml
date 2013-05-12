@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: C++11 | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/c-plus-plus-11/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 std::unordered_map]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/08/21/unordered-map/"/>
+    <updated>2012-08-21T17:54:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/08/21/unordered-map</id>
+    <content type="html"><![CDATA[<h2>历史</h2>
+
+<p>在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
+由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。</p>
+
+<p>例如，GCC 的 lisbstdc++ , 以及微软的 MSVC 标准库。在这些公用的名字后面，有不同的实现，呃，不同的实现。它们在接口、能力、内在数据结构和支持操作的相关效率方面不同。写出使用哈希表的可移植代码是可能的，但不可能像使用标准库中的容器一样容易。（知道标准的重要性了吧。）好在 <code>hash_*</code> 这一组类加入了 C++ TR1 , 可惜由于名字被非标准的各家实现占用，只能退而求其次，改名为 <code>unordered_*</code>。</p>
+
+<p>C++11 中，不排序的关联容器已经正式进入标准库。现在再选择的话，可以毫不犹豫的放弃非标准的 <code>hash_*</code> 而选择标准库中的 <code>unordered_*</code> 系类了。boost &lt;<a href="http://www.boost.org/doc/libs/1_53_0/boost/unordered_map.hpp">boost/unordered_map.hpp</a>> 中同样有实现。</p>
+
+<!-- more -->
+
+
+<h2>选择合适的数据结构</h2>
+
+<p>对于一个程序员来说，分析具体的问题，选择适合的数据结构，有时候比算法更重要。好的数据结构可以帮助程序员解决大部分效率问题。Soctt Meyers 在《Effective STL》的第一条就提到：“仔细选择你的容器”。</p>
+
+<p><code>std::unordered_map</code> 与 <code>std::map</code> 的区别是, <code>std::map</code> 是按照 <code>operator&lt;</code> 比较判断元素是否相同，以及比较元素的大小，然后选择合适的位置插入到树中。所以，如果对 map 进行遍历（中序遍历）的话，输出的结果是有序的。顺序就是按照 <code>operator&lt;</code> 定义的大小排序。</p>
+
+<p>而 <code>std::unordered_map</code> 是计算元素的 hash 值，根据 hash 值判断元素是否相同。所以，对 <code>unordered_map</code> 进行遍历，结果是无序的。</p>
+
+<p>用法的区别是，<code>std::map</code> 的 key 需要定义 <code>operator&lt;</code> 。 而 <code>std::unordered_map</code> 需要定义 <code>hash_value</code> 函数并且重载 <code>operator==</code>。
+对于内置类型，如 <code>std::string</code>, 这些都不用操心。对于自定义的类型做 key, 就需要自己重载 <code>operator&lt;</code> 或者 <code>hash_value()</code> 了。</p>
+
+<p>选择时,请基于时间和空间的综合考虑, <em>当不关心空间, 也不需要结果排好序时, 可以选择 <code>unordered_map</code> 获得更好的时间效率。</em></p>
+
+<p><code>std::map</code> 对应与 java 中的 <code>TreeMap</code>, 而 <code>std::unordered_map</code> 对应于 java 中的 <code>HashMap</code>. 对于标准库中的散列表无法取名为 <code>hash_*</code>, 只能叫 <code>unordered_*</code>, 我只能说… 标准库进展太慢，结果好白菜都让猪给拱了……遗憾啊……</p>
+]]></content>
+  </entry>
+  
+</feed>

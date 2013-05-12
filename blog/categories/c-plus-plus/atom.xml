@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: C++ | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/c-plus-plus/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/05/12/gotw1/"/>
+    <updated>2013-05-12T02:55:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/05/12/gotw1</id>
+    <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
+
+<p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
+
+<h2>JG 问题</h2>
+
+<p>1. 下面的代码有什么不同?</p>
+
+<p>```cpp
+widget w;                   // (a)</p>
+
+<p>widget w();                 // (b)
+widget w{};                 // &copy;</p>
+
+<p>widget w(x);                // (d)
+widget w{x};                // (e)</p>
+
+<p>widget w = x;               // (f)
+widget w = {x};             // (g)</p>
+
+<p>auto w = x;                 // (h)
+auto w = widget{x};         // (i)
+```</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 下面的每一行代码做了什么?</p>
+
+<p>```cpp
+vector<int> v1( 10, 20 );   // (a)</p>
+
+<p>vector<int> v2{ 10, 20 };   // (b)
+```</p>
+
+<p>3. 除了上面的情况以外, 使用 <code>{ }</code> 初始化对象还有什么其他的好处?</p>
+
+<p>4. 什么时候使用 <code>( )</code> 以及 <code>{ }</code> 来初始化对象? 为什么?</p>
+
+<!-- more -->
+
+
+<h2>解决方案</h2>
+
+<p>这几个问题展示了几件事:</p>
+
+<ul>
+<li>默认初始化, 显式初始化, 拷贝初始化, 以及初始化列表之间的区别.</li>
+<li>初始化时 <code>( )</code> 与 <code>{ }</code> 之间的差异.</li>
+<li>在现代 C++ 中要避免的, 看起来像初始化, 但完全和初始化无关的东西</li>
+</ul>
+
+
+<p>不过, 最重要的是: 如果你坚持问题 #4 中的两个简单的指导的话, 就可以忽略这些情况, 规则相当的简单, 而且默认情况下可以获得高效的性能.</p>
+
+<h3>1. 下面的代码有什么不同?</h3>
+
+<p>让我们一条一条的来看.</p>
+
+<p><strong>情况 (a) 是默认初始化</strong></p>
+
+<p><code>cpp
+widget w;                   // (a)
+</code></p>
+
+<p>这一行代码声明了一个 <code>widget</code> 类型的变量 <code>w</code>, 假定 <code>widget</code> 是一个 <code>class</code> 类型, 它会使用默认构造函数 <code>widget::widget()</code> 来初始化.</p>
+
+<p><strong>情况 (b) 是一个 &ldquo;恼人&rdquo; 的无关转移, 是历史遗留问题</strong></p>
+
+<p><code>cpp
+widget w();                 // (b)
+</code></p>
+
+<p>这是 C++ 的一个陷阱: 第一眼看上去, 它看上去像另一个调用默认构造函数 <code>widget::widget()</code> 的变量声明. 事实上, 感谢语法二义性, 这是一个函数声明. 一个名为 <code>w</code>, 无参, 返回值是 <code>widget</code> 类型的函数声明. (如果你无法一眼看出的话, 考虑下上面的代码其实与 <code>int f()</code> 没有任何的差别, 而这个函数声明是显而易见的对吧.)</p>
+
+<p>避免你认为 &ldquo;吖, 但是那些 <code>()</code> 是多于的, 这是程序员自己的错误, 因为他们没有直接写 <code>widget w;</code>&rdquo;, 注意, 这个的问题也会出现在你以为你正在使用临时对象初始化变量的时候:</p>
+
+<p><code>cpp
+// same problem (gadget and doodad are types)
+//
+widget w( gadget(), doodad() );  // pitfall: not a variable declaration
+</code></p>
+
+<p>Scott Meyers 很多年前就称这个是 &ldquo;C++ 中最恼人的语法解析&rdquo;, 因为标准中解决语法二义性是这么说的: &ldquo;如果能够被解析为函数声明, 那么它就是一个函数声明.&rdquo;</p>
+
+<p>好消息是, 这个问题将要成为历史, 在新的代码中你将不会遇到它, 因为 C++11 移除了这个陷阱. 注意 C++11 并没有修改语义 &ndash; C++11 的向后兼容 C++98 做的非常好, 包括这个语法二义性, 仍然是它原有的含义. 但是, C++11 通过提供新的语法取代情况 (b), 因此我们再也不会掉到这个陷阱中了.</p>
+
+<p><strong>情况 (c) 干净明确</strong></p>
+
+<p><code>cpp
+widget w{};                 // (c)
+</code></p>
+
+<p>在这儿我们有了第一个使用 <code>{ }</code> 而不使用 <code>()</code> 的理由: 对于任意的 class 类型 <code>widget</code>, 情况 (c) 做的事情像 (a) 一样的明确 &ndash; 无二义性, 干净, 明确.</p>
+
+<p>&ldquo;哈哈, 但是等等, 它可没有那么简单!&rdquo; 有些人可能会反对. &ldquo;如果 <code>widget</code> 有一个接受 <code>std::initializer_list</code> 的构造函数那会怎么样呢? 他们都是被优先选择的, 所以, 如果 <code>widget</code> 有这么一个构造函数, 这个写法不会调用它吗?&rdquo;</p>
+
+<p>答案是不会, 这个真的像你看到的一样简单, 因为标准中明确了, 如果可以的话, 空的 <code>{ }</code> 列表意味着调用默认构造函数. 不过, 能意识到 <code>initializer_list</code> 是好的, 让我们在后面再讨论它.</p>
+
+<p><strong>情况 (d) 和 情况 (e) 是直接初始化</strong></p>
+
+<p><code>cpp
+widget w(x);                // (d)
+widget w{x};                // (e)
+</code></p>
+
+<p>假设 <code>x</code> 不是一个类型名, 这两个都是直接初始化. 因为变量 <code>w</code> 是由 <code>x</code> 直接调用 <code>widget::widget(x)</code> 初始化的. 如果 <code>x</code> 也是 <code>widget</code> 类型, 它会调用拷贝构造函数. 否则的话, 调用一个转换构造函数.</p>
+
+<p>但是, 注意 <code>{x}</code>, 它会创建一个 <code>initializer_list</code>. 如果 <code>widget</code> 有接受 <code>initializer_list</code> 的构造函数的话, 这个构造函数是被优先选择的; 否则, 如果 <code>widget</code> 有接受任意 <code>x</code> 的类型的构造函数的话(包括类型转换), 这个构造函数将会被调用.</p>
+
+<p>情况 (e) 有两个优于 (d) 的地方: 一, 与 (c) 一样, (e) 是明确, 无二义性的. 如果 <code>x</code> 是一个类型名, 那么 (d) 就是一个函数声明, 即使在作用域内有一个名为 <code>x</code> 的变量 (看下文), 而 (e) 不可能是一个函数声明.</p>
+
+<p>第二: (e) 更安全, 因为它不允许有损转换, 一些内建类型是允许的. 考虑下面的代码:</p>
+
+<p><code>cpp
+int i1( 12.345 );           // ok: loss .345, we didn't like it anyway
+int i2{ 12.345 };           // error: would be lossy implicit narrowing
+</code></p>
+
+<p><strong>情况 (f) 与 (g) 是拷贝初始化和拷贝类表初始化</strong></p>
+
+<p>这是最后两个 non-auto 的情况:</p>
+
+<p><code>cpp
+widget w = x;               // (f)
+</code></p>
+
+<p>这就是所谓的拷贝初始化. <em>从概念上来讲</em>, 变量 <code>w</code> 是由 <code>widget</code> 的转移构造函数或者拷贝构造函数初始化的. 有可能是在调用一个隐式转换函数之后(显式转换不会调用).</p>
+
+<blockquote><p><strong>通常的错误:</strong> 这个绝对是初始化; 绝不是赋值, 所以绝对不会调用 <code>T::operator=()</code>. 是的, 我知道这有一个<code>=</code>赋值符号, 但是不要让这个符号影响到你 &ndash; 这仅仅是从 C 继承而来的符号, 不是赋值操作符.</p></blockquote>
+
+<p>下面是语义:</p>
+
+<ul>
+<li>如果 <code>x</code> 的类型是 <code>widget</code>, (f) 与 (d) <code>widget w(x);</code> 的含义完全一致, 除非明确的构造函数不能使用. 他保证了只有一个构造函数被调用.</li>
+<li>如果 <code>x</code> 是其他类型, <em>从概念上来讲</em>编译器首先将 <code>x</code> 隐式转换为 <code>widget</code> 类型的临时对象, 然后对临时右值使用转移构造函数, 如果没有好的转移构造函数, 那么会使用拷贝构造函数 &ndash; &ldquo;低效的转移"作为备选. 假设存在可用的隐式转换, (f) 就与 <code>widget w(widget(x))</code> 一致了.</li>
+</ul>
+
+
+<p>注意, 上面说了几次<em>从概念上来讲</em>. 这是因为通常编译器都会做优化, 优化掉临时变量, 如果存在隐式转换, 从 (f) 转换为 (d), 那么就优化掉了额外的转移操作. 但是, 尽管编译器这么做了, <code>widget</code> 的拷贝构造函数也必须是可访问的, 即使没有调用 &ndash; 拷贝构造函数的副作用可能发生也可能不发生, 就这些.</p>
+
+<p>现在来注意一下增加的符号 <code>=</code>:</p>
+
+<p><code>cpp
+widget w = {x};             // (g)
+</code></p>
+
+<p>这个是所谓的拷贝列表初始化. 它与 <code>widget w{x};</code> 的含义一致 除非显示的构造函数无法使用. 它保证了只有咦个的构造函数被调用.</p>
+
+<p><strong>情况 (h) 和 (i) 也是拷贝初始化, 但是更简单</strong></p>
+
+<p><code>cpp
+auto w = x;                 // (h)
+auto w = widget{x};         // (i)
+</code></p>
+
+<p>语义与 (f) 和 (g) 一样, 但是学习起来更简单, 因为使用了 <code>auto</code> 保证了右侧表达式类型推导的准确性. 需要注意的是 (i) 在隐式转换与显式转换的情况下都能正常工作.</p>
+
+<p>(h) 与 (d) 的含义一致, <code>type_of_x w(x);</code>. 只有一个拷贝构造函数被调用. 它可以保证类型发生变化时, 程序还总是正确的: 因为 (h) 没有明确特性的类型, 它有两个有效的保证, 因为这不会存在类型的转换, 以及更好的维护性, 因为当程序中 <code>x</code> 的类型变更时, &lsquo;w&rsquo; 会自动变更类型与 <code>x</code> 保持一致.</p>
+
+<p>当你想要明确类型或者需要显式的类型转换时, (i) 是最风格一致的, 而且一旦使用了 <code>{ }</code> 就可以避免有损的类型转换了. 大部分的编译器实现, 只会有一个构造函数调用 &ndash; 和我们看到的 (f) 与 (g) 相似, 概念上来讲会有两个构造函数调用, 一个转换构造函数或者拷贝构造函数用来创建临时的 <code>widget{x}</code> 然后紧接着一个转移构造函数来构造 <code>w</code>, 但是编译器会把后一个优化掉.</p>
+
+<p>通常情况下, 我推荐你尝试这两种用法, 并倾向于使用它来伴随你舒服的成长. 现在几乎所有我写的局部变量声明都采用这种方式. (我知道会有一些人怀疑这种方式 &ndash; 更多的关于关键字 <code>auto</code> 的问题在其他的 GotW 中讨论.)</p>
+
+<h3>2. 下面的每一行代码做了什么?</h3>
+
+<p>在第二个问题的代码中, 我们创建了一个 <code>vector&lt;int&gt;</code> 并将参数 <code>10</code> 和 <code>20</code> 传给它的构造函数 &ndash; 第一种情况是 <code>(10, 20)</code>, 第二种情况是 <code>{10, 20}</code>.</p>
+
+<p>两个都会调用构造函数, 但是会调用哪个呢? 嗯, <code>vector&lt;int&gt;</code> 有很多接受两个参数的构造函数, 但是只有下面两个能够正确的接受参数 <code>10</code> 和 <code>20</code>. 为了简单, 忽略掉默认的分配器参数, 两个构造函数应该是下面的样子:</p>
+
+<p>```cpp
+vector( size_t n, const int&amp; value );    // A: n copies of value</p>
+
+<p>vector( initializer_list<int> values );  // B: copy of values
+```</p>
+
+<p>有两个简单的规则可以帮助我们确定哪个函数将被调用:</p>
+
+<ul>
+<li>在表达式的上下文中使用 <code>{ }</code> 你会得到一个 <code>initializer_list</code>.</li>
+<li>接受 <code>initializer_list</code> 参数的构造函数会优于其他构造函数被选择, 同时会隐藏其他构造函数, 否则可能是可行的.</li>
+</ul>
+
+
+<p>有了这两条, 答案就很简单了:</p>
+
+<p>```cpp
+vector<int> v1( 10, 20 );    // (a) calls A: 10 copies of the value 20
+assert( v1.size() == 10 );</p>
+
+<p>vector<int> v2{ 10, 20 };    // (b) calls B: the values 10 and 20
+assert( v2.size() == 2 );
+```</p>
+
+<h3>3. 除了上面的情况以外, 使用 <code>{ }</code> 初始化对象还有什么其他的好处?</h3>
+
+<p>首先, 这叫做统一初始化, 因为它统一 &ndash; 所有的类型, 包括 <code>structs</code>, 数组, 标准库容器, 而且也不存在恼人的语法解析问题.</p>
+
+<p>```cpp
+struct mystruct { int x, y; };</p>
+
+<p>// C++98
+rectangle       w( origin(), extents() );       // oops, vexing parse
+complex<double> c( 2.71828, 3.14159 );
+mystruct        m = { 1, 2 };
+int             a[] = { 1, 2, 3, 4 };
+vector<int>     v;                              // urk, need more code
+for( int i = 1; i &lt;= 4; ++i ) v.push_back(i);   //   to initialize this</p>
+
+<p>// C++11 (note: &ldquo;=&rdquo; is optional)
+rectangle       w   = { origin(), extents() };
+complex<double> c   = { 2.71828, 3.14159 };
+mystruct        m   = { 1, 2 };
+int             a[] = { 1, 2, 3, 4 };
+vector<int>     v   = { 1, 2, 3, 4 };
+```</p>
+
+<p>注意, 这不仅仅是个审美的问题. 考虑编写通用的能够初始化任何类型的代码&hellip; 我们正在做的, 让我们使用完美转发做为例子:</p>
+
+<p>```cpp
+template<typename T, typename ...Args>
+void forwarder( Args&amp;&amp;&hellip; args ) {</p>
+
+<pre><code>// ...
+T local = { std::forward&lt;Args&gt;(args)... };
+// ...
+</code></pre>
+
+<p>}</p>
+
+<p>forwarder<int>            ( 42 );                  // ok
+forwarder<rectangle>      ( origin(), extents() ); // ok
+forwarder&lt;complex<double>>( 2.71828, 3.14159 );    // ok
+forwarder<mystruct>       ( 1, 2 );                // ok because of {}
+forwarder&lt;int[]>          ( 1, 2, 3, 4 );          // ok because of {}
+forwarder&lt;vector<int>>    ( 1, 2, 3, 4 );          // ok because of {}
+```</p>
+
+<p>如果 <code>forwarder</code> 内部使用了 <code>( )</code> 做初始化符号的话, 那么最后三条是不合法的.</p>
+
+<p>新的符号 <code>{ }</code> 在任何地方都能完美的工作, 包括类成员的初始化:</p>
+
+<p><code>cpp
+widget::widget( /*...*/ ) : mem1{init1}, mem2{init2, init3} { /*...*/ }
+</code></p>
+
+<p>另外, 它还能简单清晰的表达传递函数参数, 返回值, 而不需要一个具名的临时对象:</p>
+
+<p>```cpp
+void draw_rect( rectangle );</p>
+
+<p>draw_rect( rectangle(origin, selection) );         // C++98
+draw_rect({ origin, selection });                  // C++11</p>
+
+<p>rectangle compute_rect() {
+   // &hellip;
+   if(cpp98) return rectangle(origin, selection);  // C++98
+   else      return {origin, selection};           // C++11
+}
+```</p>
+
+<h3>4. 什么时候使用 <code>( )</code> 以及 <code>{ }</code> 来初始化对象? 为什么?</h3>
+
+<p>下面是简单的指导:</p>
+
+<blockquote><p><strong>准则:</strong> 尽量在初始化时使用 <code>{ }</code>, 比如 <code>vector&lt;int&gt; v = { 1, 2, 3, 4 };</code> 或者 <code>auto v = vector&lt;int&gt;{ 1, 2, 3, 4 };</code>, 因为它有更好的一致性, 更正确, 可以避免去了解过去的陷阱. 在单参数的情况下你可能会仅仅看到一个赋值符号 <code>=</code>, 就像 <code>int i = 42;</code> 一样, 这种情况下, 省略括号是好的&hellip;</p></blockquote>
+
+<p>上面的准则可以覆盖绝大部分情况, 但是也有一个例外:</p>
+
+<blockquote><p>&hellip; 在极端情况下, 比如 <code>vector&lt;int&gt; v(10,20);</code> 或者 <code>auto v = vector&lt;int&gt;(10,20);</code> 时, 使用 <code>( )</code> 明确的调用会被 <code>initializer_list</code> 构造函数隐藏的构造函数.</p></blockquote>
+
+<p>但是, 这个仅仅是在极端情况下, 因为默认构造函数以及拷贝构造函数已经很特别, 并且能与括号 <code>{ }</code> 很好的工作, 现在一个好的类的设计会避免用到 <code>()</code> 来提供用户定义的构造函数, 因为下面的设计准则:</p>
+
+<blockquote><p><strong>准则</strong>: 当你设计一个类时, 避免提供一个与 <code>initializer_list</code> 构造函数会产生二义性的构造函数, 这样用户就不需要使用 <code>()</code> 来访问会被隐藏掉的构造函数.</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[使用静态多态辅助动态多态]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism/"/>
+    <updated>2013-04-09T23:13:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism</id>
+    <content type="html"><![CDATA[<h2>静态多态 (编译期多态) 与动态多态 (运行期多态)</h2>
+
+<p>关键字: 重载/模版和虚函数</p>
+
+<p>类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
+编译期多态 (重载/模版), 运行期多态 (虚函数)</p>
+
+<p>应用形式上:
+静多态是发散式的, 让相同的实现代码应用于不同的场合.
+动多态是收敛式的, 让不同的实现代码应用于相同的场合.</p>
+
+<p>思维方式上:
+静多态是泛型式编程风格, 它看重的是算法的普适性.
+动多态是对象式编程风格, 它看重的是接口和实现的分离度.</p>
+
+<h2>std::shared_ptr 中的 deleter 是如何工作的?</h2>
+
+<p>标准库中的引用计数智能指针 shared_ptr 很有趣——你可以向其构造器传递一个函数或者仿函数 (function object, 或 functor), 当引用计数归零的时候, 它将在被引用对象上调用删除器 (deleter). 乍一看, 似乎没啥了不起啊, 但请看代码:</p>
+
+<p>```cpp
+template<typename T>
+class shared_ptr {
+public:
+  template<typename U, typename D>
+  explicit shared_ptr(U* ptr, D deleter);
+  //&hellip;</p>
+
+<p>};
+```</p>
+
+<!-- more -->
+
+
+<p>注意 <code>shared_ptr&lt;T&gt;</code> 必然在析构时调用类型为 D 的删除器, 然而它根本不知道 D 为何物. 这个对象不能包含类型为 D 的数据成员, 也不能指向类型为 D 的对象, 因为声明其数据成员时, D 对它而言还是未知的. 那么, shared_ptr 对象如何跟踪删除器 (它在构造阶段传入: 当 T 对象将被销毁时, 还得使用它) 呢? 更通俗地说, 构造器如何将未知类型的信息传递给它正在构造的对象, 而这个对象本身对信息类型完全无知? 答案很简单: 让此对象包含一个指向已知类型基类的指针 (标准库中叫它 sp_counted_base), 然后让构造器以 D 为参数实例化一个派生于上述基类的模板 (标准库中叫 sp_counted_impl_p 和 sp_counted_impl_pd), 最后用声明于基类, 实现于派生类的虚函数 (标准库中使用 dispose) 去调用删除器. 关于这个问题, Scott Meyers 在 06 年 9 月份的一篇文章中已经有阐述, 详见: <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a>.</p>
+
+<h2>结合静态多态和动态多态实现类型无关的容器</h2>
+
+<p>使用 std::shared_ptr 中 deleter 的实现方式, 可以实现类型无关的容器. 代码主干如下:</p>
+
+<p>```cpp
+class any
+{
+public:
+  any() : content(nullptr) {}
+  template<typename ValueType>
+  any(const ValueType&amp; value) : content(new holder<ValueType>(value)) {}
+  any(const any&amp; other) : content(other.content ? other.content->clone() : 0) {}
+  ~any() { delete content; }
+  any&amp; swap(any&amp; rhs)
+  {</p>
+
+<pre><code>std::swap(content, rhs.content);
+return *this;
+</code></pre>
+
+<p>  }
+  template<typename ValueType>
+  any&amp; operator=(const ValueType&amp; rhs)
+  {</p>
+
+<pre><code>any(rhs).swap(*this);
+return *this;
+</code></pre>
+
+<p>  }
+  any&amp; operator=(any rhs)
+  {</p>
+
+<pre><code>rhs.swap(*this);
+return *this;
+</code></pre>
+
+<p>  }
+  bool empty() const { return !content; }</p>
+
+<p>  const std::type_info&amp; type() const { return content ? content->type() : typeid(void); }</p>
+
+<p>private:
+  class placeholder
+  {
+  public:</p>
+
+<pre><code>virtual ~placeholder() {}
+virtual const std::type_info&amp; type() const = 0;
+virtual placeholder* clone() const = 0;
+</code></pre>
+
+<p>  };</p>
+
+<p>  template<typename ValueType>
+  class holder : public placeholder
+  {
+  public:</p>
+
+<pre><code>holder(const ValueType&amp; value) : held(value) {}
+virtual const std::type_info&amp; type() const { return typeid(ValueType); }
+virtual placeholder* clone() const { return new holder(held); }
+ValueType held;
+</code></pre>
+
+<p>  private:</p>
+
+<pre><code>holder&amp; operator=(const holder&amp;);
+</code></pre>
+
+<p>  };</p>
+
+<p>private:
+  placeholder* content;
+};
+```</p>
+
+<p>在上面的代码中, any 类持有一个 placeholder 的基类指针, 在构造 any 对象时, 通过 any 的模板构造函数, 根据具体类型创建具体的 placeholder 子类类型, any 类提供 type() 接口, 用于查询 any 类中存储的实际类型.boost::any 中有类似的实现.</p>
+
+<p>使用方式如下：</p>
+
+<p>```cpp
+int main()
+{
+  std::array&lt;bitdewy::any, 3> any_array;
+  any_array[0] = 1;
+  any_array[1] = std::string(&ldquo;hello&rdquo;);
+  any_array[2] = .1;</p>
+
+<p>  std::for_each(std::begin(any_array),</p>
+
+<pre><code>            std::end(any_array),
+            [](const bitdewy::any&amp; a) {
+if (a.type() == typeid(int)) {
+  std::cout &lt;&lt; bitdewy::any_cast&lt;int&gt;(a) &lt;&lt; std::endl;
+
+} else if (a.type() == typeid(std::string)) {
+  std::cout &lt;&lt; bitdewy::any_cast&lt;std::string&gt;(a) &lt;&lt; std::endl;
+
+} else if (a.type() == typeid(double)) {
+  std::cout &lt;&lt; bitdewy::any_cast&lt;double&gt;(a) &lt;&lt; std::endl;
+
+} else {
+  //LOG ...
+}
+</code></pre>
+
+<p>  });
+  return 0;
+}
+```</p>
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="http://svn.boost.org/svn/boost/trunk/boost/any.hpp">boost::any</a></li>
+<li><a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[QtScript 与信号槽]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
+    <updated>2013-03-21T14:53:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
+    <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
+
+<h2>在 QtScript 中使用信号槽</h2>
+
+<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
+
+<ol>
+<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
+<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
+<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
+</ol>
+
+
+<!-- more -->
+
+
+<p>使用 <code>qScriptConnect()</code> 函数连接 C++ 信号到 script 函数上. 下面的例子中, handler 用来处理 <code>QLineEdit::textChanged()</code> 信号:</p>
+
+<p><code>cpp
+QScriptEngine eng;
+QLineEdit *edit = new QLineEdit();
+QScriptValue handler = eng.evaluate(
+"(function(text) { print('text was changed to', text); })");
+qScriptConnect(edit, SIGNAL(textChanged(const QString &amp;)), QScriptValue(), handler);
+</code></p>
+
+<p><code>qScriptConnect()</code> 的前两个参数与 <code>QObject::connect()</code> 的完全一致. 第三个参数是 script 对象, 当 signal handler 被调用时, 它充当 <code>this</code> 的角色. 在上面的代码中, 我们传入了一个不可用的值, 此时 <code>this</code> 是全局对象. 第四个参数是 script 函数, 相当于槽函数.
+下面的代码展示如何使用 <code>this</code> 参数:</p>
+
+<p>```cpp
+QLineEdit <em>edit1 = new QLineEdit();
+QLineEdit </em>edit2 = new QLineEdit();</p>
+
+<p>QScriptValue handler = eng.evaluate(&ldquo;(function() { print(&lsquo;I am&rsquo;, this.name); })&rdquo;);
+QScriptValue obj1 = eng.newObject();
+obj1.setProperty(&ldquo;name&rdquo;, &ldquo;the walrus&rdquo;);
+QScriptValue obj2 = eng.newObject();
+obj2.setProperty(&ldquo;name&rdquo;, &ldquo;Sam&rdquo;);</p>
+
+<p>qScriptConnect(edit1, SIGNAL(returnPressed()), obj1, handler);
+qScriptConnect(edit2, SIGNAL(returnPressed()), obj2, handler);
+```</p>
+
+<p>我们创建了两个 <code>QLineEdit</code> 对象, 然后定义了信号响应函数. 信号槽链接使用了相同的响应函数, 但是使用不同的 <code>this</code> 对象, 具体使用哪个, 取决于哪个对象发出信号, 因此 <code>print()</code> 语句输出的内容将会有所不同.</p>
+
+<p>在某个项目中,设计之初曾经考虑过以下的交互方式: javascript 传入 json 对象, 其中某个 value 是匿名 function, 来实现异步调用. 这种方式看起来很美, 也与第一种方式类似, 但是存在问题. C++ 无法获得当前 webkit 的 javascript 运行环境. QtScript 曾考虑过提供 API 来访问 webkit 的 javascript 运行环境, 详细信息可以参考：<a href="https://bugreports.qt-project.org/browse/QTWEBKIT-2">https://bugreports.qt-project.org/browse/QTWEBKIT-2</a>, 但由于种种原因最终放弃了, 不得不说这是个遗憾.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qt-project.org/doc/qt-4.8/qtscript.html">http://qt-project.org/doc/qt-4.8/qtscript.html</a></li>
+<li><a href="http://qt-project.org/doc/qt-4.8/scripting.html">http://qt-project.org/doc/qt-4.8/scripting.html</a></li>
+<li><a href="http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html">http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[空基类优化]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/"/>
+    <updated>2013-02-25T07:50:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>优化空类数据成员的存储空间</p>
+
+<h2>别名</h2>
+
+<p>EBCO: Empty Base Class Optimization
+Empty Member Optimization</p>
+
+<h2>动机</h2>
+
+<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
+
+<p><code>cpp
+class EmptyClass {};
+EmptyClass arr[10]; // Size of this array can’t be zero.
+</code></p>
+
+<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
+
+<!-- more -->
+
+
+<h2>解决方案&amp;示例代码</h2>
+
+<p>在 C++ 中, 如果一个空类作为基类被继承时, 情况会和上面的有些区别. 编译器允许继承层次结构扁平化, 被继承的空基类不占用空间. 例如下面的代码中 <code>sizeof(AnInt)</code> 在 32 位架构中是 4 字节, <code>sizeof(AnotherEmpty)</code> 是 1 字节, 虽然这两个类都继承自 <code>EmptyClass</code></p>
+
+<p><code>cpp
+class AnInt : public EmptyClass
+{
+   int data;
+};   // size = sizeof(int)
+class AnotherEmpty : public EmptyClass {};  // size =  1
+</code></p>
+
+<p>EBCO 有效的利用了这个特性. 这并不是说简单, 天真的将数据成员的空类变成基类是可取的, 因为这可能会暴露原本需要对用户隐藏的接口. 例如下面的 EBCO 实现方式, 可能会有副作用: 类 <code>Foo</code> 的用户现在可以看到一些方法 (如果在 E1, E2 中存在的话), 虽然他们是私有继承而来的, 不可访问.</p>
+
+<p><code>cpp
+class E1 {};
+class E2 {};
+// **** before EBCO ****
+class Foo {
+  E1 e1;
+  E2 e2;
+  int data;
+}; // sizeof(Foo) = 8
+// **** after EBCO ****
+class Foo : private E1, private E2 {
+  int data;
+}; // sizeof(Foo) = 4
+</code></p>
+
+<p>一种实现 EBCO 的实用方法是: 将空的类成员组合到单一的存储结构扁平的成员中. 下面的模板 <code>BaseOptimization</code> 的前两个模板参数是用来实现 EBCO的. 使用 <code>BaseOptimization</code> 改写类 <code>Foo</code> 如下:</p>
+
+<p>```cpp
+template <class Base1, class Base2, class Member>
+struct BaseOptimization : Base1, Base2
+{
+   Member member;
+   BaseOptimization() {}
+   BaseOptimization(Base1 const&amp; b1, Base2 const &amp; b2, Member const&amp; mem)</p>
+
+<pre><code>   : Base1(b1), Base2(b2), member(mem) { }
+</code></pre>
+
+<p>   Base1 * first()  { return this; }
+   Base2 * second() { return this; }
+};</p>
+
+<p>class Foo {
+  BaseOptimization&lt;E1, E2, int> data;
+}; // sizeof(Foo) = 4
+```</p>
+
+<p>使用 EBCO 并没有改变类 Foo 的继承体系. 保证基类不会互相冲突, 这是至关重要的. 也就是说 Base1 与 Base2 是独立的集成体系中的一部分.</p>
+
+<p><strong>注意</strong>: 对象身份标识的问题, 不同的编译器处理起来是不相同的. 空对象的地址可能是相同的, 也可能是不同的. 例如: BaseOptimization 的成员函数 first 和 second 返回的指针, 在有些编译器上可能是相同的, 而有些编译器上可能是不同的. 更多的讨论请看这里：<a href="http://stackoverflow.com/questions/7694158/boost-compressed-pair-and-addresses-of-empty-objects">stackoverflow</a></p>
+
+<h2>已知的用途</h2>
+
+<p><a href="http://www.boost.org/doc/libs/1_53_0/libs/utility/compressed_pair.htm">boost::compressed_pair</a> 使用了该惯用法, 来优化 pair 的存储空间
+C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.html">unique­_ptr</a> 也使用了该惯用法</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.informit.com/articles/article.aspx?p=31473&amp;seqNum=2">The Empty Base Class Optimization (EBCO)</a></li>
+<li><a href="http://www.cantrip.org/emptyopt.html">The &ldquo;Empty Member&rdquo; C++ Optimization</a></li>
+<li><a href="http://www.ibm.com/developerworks/aix/library/au-boostutilities/index.html">Internals of boost::compressed_pair</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在 C++03 中实现强类型安全的枚举类型]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
+    <updated>2013-02-05T21:53:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
+    <content type="html"><![CDATA[<h2>意图</h2>
+
+<p>改进 C++ 枚举的类型安全性</p>
+
+<h2>动机</h2>
+
+<p>在 C++03 中枚举类型的类型安全性不够强, 有可能导致意想不到的错误. 虽然枚举是语言内置的特性, 但也可能由于编译器的不同, 而存在可移植性的问题. 枚举的问题基本上可以分为3类:</p>
+
+<ul>
+<li>隐式转换</li>
+<li>无法指定类型</li>
+<li>作用域问题</li>
+</ul>
+
+
+<p>C++03 中枚举类型是部分类型安全的, 比如你将一个枚举类型的值直接赋值给另一个枚举类型, 而且无法从整形隐式转换到枚举类型. 但是, 最常见的枚举类型错误是: 它可以自动提升成整形. 例如下面的代码, 只有少数几个的编译器（比如 GNU 的 g++）会发出警告, 而 VC++ 不会有任何的提示.</p>
+
+<p><code>cpp
+enum color { red, green, blue };
+enum shape { circle, square, triangle };
+color c = red;
+bool flag = (c &gt;= triangle); // Unintended!
+</code></p>
+
+<!-- more -->
+
+
+<p>C++03 中枚举类型另外的问题是无法指定枚举存储时的类型. 这可能导致数据大小以及符号问题在各个编译器上表现不同而导致不可移植的问题. 最后, 是作用域问题, 在相同的作用域内不能有两个相同名称的枚举值.</p>
+
+<p>强类型的枚举已经进入 C++11 标准中. 详细内容参考: <a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class</a>
+下面是 C++03 强类型安全的枚举实现。</p>
+
+<h2>解决方案&amp;示例代码</h2>
+
+<p>```cpp
+template<typename def, typename inner = typename def::type>
+class safe_enum : public def
+{
+  typedef typename def::type type;
+  inner val;</p>
+
+<p>public:</p>
+
+<p>  safe_enum(type v) : val(v) {}
+  inner underlying() const { return val; }</p>
+
+<p>  bool operator == (const safe_enum &amp; s) const { return this->val == s.val; }
+  bool operator != (const safe_enum &amp; s) const { return this->val != s.val; }
+  bool operator &lt;  (const safe_enum &amp; s) const { return this->val &lt;  s.val; }
+  bool operator &lt;= (const safe_enum &amp; s) const { return this->val &lt;= s.val; }
+  bool operator >  (const safe_enum &amp; s) const { return this->val >  s.val; }
+  bool operator >= (const safe_enum &amp; s) const { return this->val >= s.val; }
+};</p>
+
+<p>struct color_def {
+  enum type { red, green, blue };
+};
+typedef safe_enum&lt;color_def> color;</p>
+
+<p>struct shape_def {
+  enum type { circle, square, triangle };
+};
+typedef safe_enum&lt;shape_def, unsigned char> shape; // unsigned char representation</p>
+
+<p>int main(void)
+{
+  color c = color::red;
+  bool flag = (c >= shape::triangle); // Compiler error.
+}
+```</p>
+
+<p>在上述解决方案的代码中, 实际的枚举类型包裹在 <code>color_def</code> 和 <code>shape_def</code> 结构体中. <code>safe_enum</code> 模板帮我们实现了一个类型安全的枚举. <code>safe_enum</code> 使用了 <a href="http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Parameterized_Base_Class">Parameterized Base Class</a> 惯用法. 它继承了模板参数 <code>color_def</code> 以及 <code>shape_def</code>, 使得 color 以及 shape 变成了强类型安全的枚举.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf">Strongly Typed Enums (revision 3)</a></li>
+<li><a href="http://scottmeyers.blogspot.hk/2013/01/effective-c11-content-and-status.html">Effective C++11: Content and Status -Prefer enum classes to enums.</a></li>
+<li><a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class &mdash; scoped and strongly typed enums</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,1093 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Qt | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/qt/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[QtScript 与信号槽]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
+    <updated>2013-03-21T14:53:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
+    <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
+
+<h2>在 QtScript 中使用信号槽</h2>
+
+<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
+
+<ol>
+<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
+<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
+<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
+</ol>
+
+
+<!-- more -->
+
+
+<p>使用 <code>qScriptConnect()</code> 函数连接 C++ 信号到 script 函数上. 下面的例子中, handler 用来处理 <code>QLineEdit::textChanged()</code> 信号:</p>
+
+<p><code>cpp
+QScriptEngine eng;
+QLineEdit *edit = new QLineEdit();
+QScriptValue handler = eng.evaluate(
+"(function(text) { print('text was changed to', text); })");
+qScriptConnect(edit, SIGNAL(textChanged(const QString &amp;)), QScriptValue(), handler);
+</code></p>
+
+<p><code>qScriptConnect()</code> 的前两个参数与 <code>QObject::connect()</code> 的完全一致. 第三个参数是 script 对象, 当 signal handler 被调用时, 它充当 <code>this</code> 的角色. 在上面的代码中, 我们传入了一个不可用的值, 此时 <code>this</code> 是全局对象. 第四个参数是 script 函数, 相当于槽函数.
+下面的代码展示如何使用 <code>this</code> 参数:</p>
+
+<p>```cpp
+QLineEdit <em>edit1 = new QLineEdit();
+QLineEdit </em>edit2 = new QLineEdit();</p>
+
+<p>QScriptValue handler = eng.evaluate(&ldquo;(function() { print(&lsquo;I am&rsquo;, this.name); })&rdquo;);
+QScriptValue obj1 = eng.newObject();
+obj1.setProperty(&ldquo;name&rdquo;, &ldquo;the walrus&rdquo;);
+QScriptValue obj2 = eng.newObject();
+obj2.setProperty(&ldquo;name&rdquo;, &ldquo;Sam&rdquo;);</p>
+
+<p>qScriptConnect(edit1, SIGNAL(returnPressed()), obj1, handler);
+qScriptConnect(edit2, SIGNAL(returnPressed()), obj2, handler);
+```</p>
+
+<p>我们创建了两个 <code>QLineEdit</code> 对象, 然后定义了信号响应函数. 信号槽链接使用了相同的响应函数, 但是使用不同的 <code>this</code> 对象, 具体使用哪个, 取决于哪个对象发出信号, 因此 <code>print()</code> 语句输出的内容将会有所不同.</p>
+
+<p>在某个项目中,设计之初曾经考虑过以下的交互方式: javascript 传入 json 对象, 其中某个 value 是匿名 function, 来实现异步调用. 这种方式看起来很美, 也与第一种方式类似, 但是存在问题. C++ 无法获得当前 webkit 的 javascript 运行环境. QtScript 曾考虑过提供 API 来访问 webkit 的 javascript 运行环境, 详细信息可以参考：<a href="https://bugreports.qt-project.org/browse/QTWEBKIT-2">https://bugreports.qt-project.org/browse/QTWEBKIT-2</a>, 但由于种种原因最终放弃了, 不得不说这是个遗憾.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://qt-project.org/doc/qt-4.8/qtscript.html">http://qt-project.org/doc/qt-4.8/qtscript.html</a></li>
+<li><a href="http://qt-project.org/doc/qt-4.8/scripting.html">http://qt-project.org/doc/qt-4.8/scripting.html</a></li>
+<li><a href="http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html">http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 lambda in Qt5]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
+    <updated>2012-12-23T22:32:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
+    <content type="html"><![CDATA[<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
+
+<h2>lambda 函数与表达式</h2>
+
+<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
+
+<!-- more -->
+
+
+<p>假设你想计算某个字符串包含多少个大写字母，使用 for_each() 遍历一个 char 数组，下面的 lambda 表达式确定每个字母是否是大写字母，每当它发现一个大写字母，lambda 表达式给 Uppercase 加 1：</p>
+
+<p>``` cpp
+int main()
+{</p>
+
+<pre><code>char s[] = "Hello World!";
+int Uppercase = 0; //modified by the lambda  
+for_each(s, s+sizeof(s), [&amp;Uppercase] (char c) {
+    if (isupper(c))
+        Uppercase++;
+});
+</code></pre>
+
+<p> cout &lt;&lt; Uppercase &lt;&lt; &ldquo; uppercase letters in: &rdquo; &lt;&lt; s &lt;&lt; endl;
+}
+```</p>
+
+<p>匿名函数的威力当然不是只有这么一点，不过这不是本文的重点，关于匿名函数和闭包可以向会 javascript 的同学学习。</p>
+
+<h2>Qt5</h2>
+
+<h3>old signal &amp; slot</h3>
+
+<p>Qt5 终于在末日前一天——12月20日正式发布了，信号槽有了新的用法。</p>
+
+<p>在 Qt5 之前，信号槽连接要这么写：</p>
+
+<p>``` cpp
+connect(sender, SIGNAL(valueChanged(QString,QString)),</p>
+
+<pre><code>         receiver, SLOT(updateValue(QString)));
+</code></pre>
+
+<p>```</p>
+
+<p>Qt 利用 SIGNAL 和 SLOT 这两个宏，把函数名转换成一个字符串。然后后，moc 将会扫描全部文件，将所有的 signal 和 slot 提取出来做成一个映射表。QObject::connect() 函数会从这个映射表里面找到该字符串，从 signal 的名字就可以找到 slot 的名字，就知道了在 signal emit 的时候，该去调用哪一个 slot 函数。</p>
+
+<p>但是，由于信号槽都被处理成了字符串，所以编译期间是无法检查的，所有检查都是在运行时完成的。而且，由于是字符串，所以 slot 中的参数类型名必须与 signal 的完全一致。</p>
+
+<h3>new signal &amp; slot</h3>
+
+<p>在 Qt5 中我们有了更好的选择（原来的语法仍然支持）：使用函数指针</p>
+
+<p>``` cpp
+connect(sender, &amp;Sender::valueChanged,</p>
+
+<pre><code>    receiver, &amp;Receiver::updateValue);
+</code></pre>
+
+<p>```</p>
+
+<p>看起来和之前的版本很类似，但新的用法有很多好处：</p>
+
+<ul>
+<li>编译期类型检查，以及 <code>Q_OBJECT</code> 宏检查</li>
+<li>可以随意使用 typedef 和 namespace 了</li>
+<li>支持参数类型的隐式转换，比如(QString 转换为 QVariant)</li>
+<li>可以连接任何成员函数，不仅仅是槽函数</li>
+</ul>
+
+
+<p>坏处是，槽函数从此以后不能用默认参数了。(也没那么坏，是吧)</p>
+
+<p>更有威力的是，connect 可以连接简单函数了，不仅仅是 QObject 对象的成员函数：</p>
+
+<p><code>cpp
+connect(sender, &amp;Sender::valueChanged, someFunction);
+</code></p>
+
+<p>看到这儿，就能想到最开始的 lambda 了吧，没错，<code>someFunction</code> 可以是个 function 也可以是一个 lambda 表达式，新的连接方式可以和 <code>tr1::bind(std::bind)</code> 以及 lambda 表达式完美的配合。</p>
+
+<p>``` cpp
+connect(sender, &amp;Sender::valueChanged,</p>
+
+<pre><code>tr1::bind(receiver, &amp;Receiver::updateValue, "senderValue", tr1::placeholder::_1));
+</code></pre>
+
+<p>connect(sender, &amp;Sender::valueChanged, <a href="const%20QString%20&amp;newValue">=</a> {</p>
+
+<pre><code>    receiver-&gt;updateValue("senderValue", newValue);
+});
+</code></pre>
+
+<p>```</p>
+
+<p>唯一的坏处就是： <code>receiver</code> 在销毁的时候，无法自动断开连接</p>
+
+<h3>异步操作变的更简单</h3>
+
+<p>有了 C++11 的 lambda 表达式，与 STL 的算法一样，关于网络的一些异步操作同样变的非常简单了。</p>
+
+<p>``` cpp
+void doYourStuff(const QByteArray &amp;page)
+{</p>
+
+<pre><code>QTcpSocket *socket = new QTcpSocket;
+socket-&gt;connectToHost("qt.nokia.com", 80);
+QObject::connect(socket, &amp;QTcpSocket::connected, [socket, page] () {
+    socket-&gt;write(QByteArray("GET " + page + "\r\n"));
+});
+QObject::connect(socket, &amp;QTcpSocket::readyRead, [socket] () {
+    qDebug()&lt;&lt; "GOT DATA "&lt;&lt; socket-&gt;readAll();
+});
+</code></pre>
+
+<p>}
+```</p>
+
+<p>下面是一个 <code>QDialog</code> 的例子，代码没有被割裂，也没有重入消息循环，看起来干净多了。</p>
+
+<p>``` cpp
+void Doc::saveDocument() {</p>
+
+<pre><code>QFileDialog *dlg = new QFileDialog();
+dlg-&gt;open();
+QObject::connect(dlg, &amp;QDialog::finished, [dlg, this](int result) {
+    if (result) {
+        QFile file(dlg-&gt;selectedFiles().first());
+        // ...
+    }
+    dlg-&gt;deleteLater();
+});
+</code></pre>
+
+<p>}
+```</p>
+
+<p>虽然 C++ 不推崇函数式，但 lambda 的引入绝对是一大进步，据说 Java 8 也会引入 lambda，不过 Java 8 什么时候发布都还没谱呢……</p>
+
+<h3>参考</h3>
+
+<ul>
+<li>wikipedia: <a href="http://en.wikipedia.org/wiki/C%2B%2B11">C++11</a></li>
+<li><a href="http://qt-project.org/wiki/New_Signal_Slot_Syntax">New Signal Slot Syntax Coming in Qt 5</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello/"/>
+    <updated>2012-12-09T13:10:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello</id>
+    <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
+
+<p>其次，准备好 Xcode 先。正文开始：</p>
+
+<h2>安装Qt library</h2>
+
+<p>Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点<a href="http://qt-project.org/downloads">这里</a>，MAC 版的 release 和 debug 库是分开的，可以自由选择。一路安装，下一步就 OK。</p>
+
+<!-- more -->
+
+
+<h2>生成 xcodeproj</h2>
+
+<p>生成 xcodeproj 文件(夹)，(它是文件还是文件夹？)，先创建目录，然后进入，使用 <code>qmake -project</code> 生成 pro 文件，如果找不到 <code>qmake</code>，那就需要手工找，或者重新安装 Qt library 了，生成 pro 文件之后，就可以用 <code>qmake -spec macx-xcode</code> 生成 xcodeproj 了，然后，就没有然后了，直接用 Xcode 打开就 OK。</p>
+
+<p><code>sh
+localhost:~ bitdewy$ mkdir Projects/qt_xcode_hello  #建个文件夹先
+localhost:~ bitdewy$ cd Projects/qt_xcode_hello/    #进入新建的文件夹
+localhost:qt_xcode_hello bitdewy$ qmake -project    #生成pro文件
+localhost:qt_xcode_hello bitdewy$ ls                #看看生成了啥玩意儿
+qt_xcode_hello.pro
+localhost:qt_xcode_hello bitdewy$ qmake -spec macx-xcode  #生成xcodeproj
+localhost:qt_xcode_hello bitdewy$ ls                      #再看看
+qt_xcode_hello.pro      qt_xcode_hello.xcodeproj
+localhost:qt_xcode_hello bitdewy$ open qt_xcode_hello.xcodeproj/  #用 Xcode 打开
+</code></p>
+
+<h2>配置 Xcode 工程</h2>
+
+<p>打开个空工程，自然是毛也没有，首先工程中新建个文件，然后新建 target 选 other &ndash;> External Build System ，Product Name 就叫 qmake，Build Tool 指定到 qmake 的路径，Finish 之后，删除 Arguments 中的 <code>$(ACTION)</code>。Command + D，Duplicate 出来个 qmake copy，改名 <code>qmake -project</code>，Arguments 填上 <code>-project</code>，先run <code>qmake -project</code>，再run <code>qmake</code>，xcode 工程就和谐了，现在可以写代码跑了。</p>
+
+<p>明白人一看就知道上面是在干什么了，新建文件，然后 <code>qmake -project</code> 更新pro文件，再 <code>qmake</code> 生成 makefile。整个过程实际上就三行 shell 搞定。</p>
+
+<p><code>sh
+localhost:qt_xcode_hello bitdewy$ touch qt_xcode_hello.cpp
+localhost:qt_xcode_hello bitdewy$ qmake -project
+localhost:qt_xcode_hello bitdewy$ qmake
+</code></p>
+
+<h2>为毛不直接生成能用的 Xcode 工程</h2>
+
+<p>更明白的人可能要说脏话了，你妹的搞这么麻烦，生成 xcodeproj 之前补上一句 <code>touch qt_xcode_hello.cpp</code> 不就不用配置 XCode 工程了么？ bitdewy 也不是二货，为毛要配置 Xcode 工程？ 因为 Qt 的 Meta Object Compile，用到 signal 和 slot 的时候，都需要 qmake 生成 moc 文件，所以先配置一下没什么坏处这样。</p>
+
+<h4>参考</h4>
+
+<ol>
+<li><a href="http://qtnode.net/wiki/Qt4_with_Xcode">Qt4 with Xcode</a></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[译]Threads, Events and QObjects]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/05/28/threads-events-qobjects/"/>
+    <updated>2012-05-28T23:53:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/05/28/threads-events-qobjects</id>
+    <content type="html"><![CDATA[<p>前言: <a href="http://qt-project.org/wiki/">Qt wiki</a> 中这篇文章3月份再次更新，文章对 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 的用法，使用场景，有很好的论述，可以作为 Qt 多线程编程的使用指南，原文在<a href="http://qt-project.org/wiki/Threads_Events_QObjects">这里</a>，原作者 <a href="http://qt-project.org/member/5319">peppe</a> 开的讨论贴在<a href="http://developer.qt.nokia.com/forums/viewthread/2423/">这里</a>。</p>
+
+<p>原文以姓名标识-相同方式分享 2.5 通用版发布</p>
+
+<p><a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 Generic</a></p>
+
+<h2>背景</h2>
+
+<p>在 <a href="irc://irc.freenode.net/#qt">#qt IRC channel</a> [irc.freenode.net] 中，讨论最多的话题之一就是多线程。很多同学选择了多线程并行编程，然后……呃，掉进了并行编程的无尽的陷阱中。</p>
+
+<p>由于缺乏 Qt 多线程编程经验（尤其是结合Qt 信号槽机制的异步网络编程）加上一些现有的其他语言（工具）的使用经验，导致在使用 Qt 时，一些同学有朝自己脚开枪的行为。Qt 的多线程支持是一把双刃剑：虽然 Qt 的多线程支持使得多线程编程变得简单，但同时也引入了一些其他特性（尤其是与 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 的交互），这些特性需要特别小心。</p>
+
+<p>本文的目的不是教你如何使用多线程，加锁、并行、扩展性，这不是本文的重点，而且这些问题已经有非常多的讨论，可以参考<a href="http://qt-project.org/doc/qt-4.8/threads.html#recommended-reading">这里</a> [doc.qt.nokia.com] 的推荐。本文作为 Qt 多线程的指南，目的是帮助开发者避免常见的陷阱，开发出更健壮的程序。</p>
+
+<!-- more -->
+
+
+<h3>知识背景</h3>
+
+<p>本文不是介绍多线程编程的文章，继续阅读下面的内容你需要以下的知识背景：</p>
+
+<ul>
+<li>C++ 基础（强烈推荐，其他语言亦可）</li>
+<li>Qt 基础：QObject，信号槽，事件处理</li>
+<li>什么是线程，以及一个线程和其他线程、进程和操作系统之间的关系</li>
+<li>在主流的操作系统上，如何启动和停止一个线程，如何等待线程结束</li>
+<li>如何使用互斥量（mutex），信号量（semaphore），条件等待（wait condition）创建线程安全/可重入的函数，结构和类。</li>
+</ul>
+
+
+<p>本文中使用 Qt 的<a href="http://doc.qt.nokia.com/latest/threads-reentrancy.html">名词定义</a> [doc.qt.nokia.com]：</p>
+
+<ul>
+<li><strong>可重入</strong> 如果多个线程同时访问某个类的（多个）对象且一个对象同时只有一个线程访问，是安全的，那么这个类是可重入的。如果多个线程同时调用一个函数且只访问该线程可见的数据，是安全的，那么这个函数是可重入的。换句话说，访问这些对象/共享数据时，必须通过外部加锁机制来实现串行访问，保证安全。</li>
+<li><strong>线程安全</strong> 如果多个线程同时访问某个类的对象是安全的，那么这个类是线程安全的。如果多个线程同时调用一个函数（即使访问了共享数据）是安全的，那么这个函数时线程安全的。</li>
+</ul>
+
+
+<h2>事件与事件循环</h2>
+
+<p>作为一个事件驱动的系统，事件和事件分发在 Qt 的架构中扮演着核心角色。本文不会全面覆盖这个主题；我们主要阐述和线程相关的一些概念（有关 Qt 事件系统的文章，请看<a href="http://doc.qt.nokia.com/latest/eventsandfilters.html">这里</a>，还有<a href="http://doc.qt.nokia.com/qq/qq11-events.html">这里</a>）。</p>
+
+<p>在 Qt 中，一个事件是一个对象，它表示一个有趣的事情发生了；信号(signal)和事件(event)的主要区别在于：在我们的程序中事件的目标是确定的对象（这个对象决定如何处理该事件），但信号可以发到“任何地方”。从代码级别来讲，所有的事件对象都是 <a href="http://doc.qt.nokia.com/latest/qevent.html">QEvent</a>  [doc.qt.nokia.com] 的子类，所有继承自 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 的类都可以重写 <code>QObject::event()</code> 虚函数，来作为事件的目标处理者。</p>
+
+<p>事件即可以来自应用程序内部，也可以来自外部；例如：</p>
+
+<ul>
+<li>QKeyEvent 和 QMouseEvent 对象代表鼠标、键盘的交互，这些事件来自于窗口管理器。</li>
+<li>QTimerEvent 对象会在计时器超时的时候发送给另一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a>，这些事件（通常）来自于操作系统。</li>
+<li>QChildEvent 对象会在添加或删除一个 child 时，发送给另一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a>，这些事件来自于你的程序中。</li>
+</ul>
+
+
+<p>关于事件，有一个很重要的事情，那就是事件不会一产生就发送给需要处理这个事件的对象；而是放到事件队列中，然后再发送。事件分发器会循环处理事件队列，把每个在队列中的事件分发给相应的对象，因此又叫做事件循环。从理论上讲，事件循环看起来是这样的：</p>
+
+<p>``` cpp
+while (is_active)
+{</p>
+
+<pre><code>while (!event_queue_is_empty)
+    dispatch_next_event();
+
+wait_for_more_events();
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在 Qt 的使用中，通过调用 <code>QCoreApplication::exec()</code> 进入 Qt 的主事件循环；这个函数会阻塞，直到调用 <code>QCoreApplication::exit()</code> 或 <code>QCoreApplication::quit()</code>，结束事件循环。</p>
+
+<p>函数 &ldquo;wait_for_more_events()&rdquo; 会阻塞（不是忙等）直到有事件产生。稍加考虑我们就会发现，在这时事件一定是从外部产生的（事件分发器已经结束并且也没有新的事件在事件队列中等待分发）。因此，事件循环可以在以下几种情况下被唤醒：</p>
+
+<ul>
+<li>窗口管理器（键盘/鼠标点击，和窗口的交互，等）</li>
+<li>套接字（sockets）（数据可读、可写、有新连接，等）</li>
+<li>定时器（定时器超时）</li>
+<li>从其他线程发送来的事件（稍后讨论）</li>
+</ul>
+
+
+<p>在 Unix-like 系统中，窗口管理器的活动（例如 X11）是通过套接字（socket）（Unix Domain or TCP/IP）通知给应用程序的，因为客户端是通过套接字和 X Server 通信的。如果我们使用内部的 socketpair(2) 来实现跨线程的消息发送，那么我们要做的就是通过某些活动唤醒事件循环：</p>
+
+<ul>
+<li>套接字（socket）</li>
+<li>定时器</li>
+</ul>
+
+
+<p>系统调用 select(2) 是这么工作的：它监听着一个活动的文件描述符的集合，如果一段时间（可配置超时事件）内都没有活动那么它就会超时。Qt 所需要做的就是把 select 返回的结果转化为一个 <a href="http://doc.qt.nokia.com/latest/qevent.html">QEvent</a> 对象（子类对象）然后把它放入事件队列中。现在你应该知道消息循环内部事怎么回事儿了吧。</p>
+
+<h3>哪些东西需要事件循环</h3>
+
+<p>下面不是完整的列表，不过稍微思考一下，你就能猜出那些类需要消息循环了。</p>
+
+<ul>
+<li><strong>Widget 绘图（painting）和交互</strong>：当接收到 QPaintEvent 对象时，函数 <code>QWidget::paintEvent()</code> 会被调用，QPaintEvent 对象的产生，有可能是调用 <code>QWidget::update()</code> (应用程序内部调用) 函数，或者来自窗口管理器（例如：把一个隐藏的窗口显示出来）。其他类型的交互（鼠标、键盘，等）也是一样的：这些事件都需要一个事件循环来分发事件。</li>
+<li><strong>定时器</strong>：简单说，当 <code>select(2)</code> 或类似的调用超时的时候，定时器超时事件被触发，因此你需要事件循换来处理这些调用。</li>
+<li><strong>网络通信</strong>：所有 low-level 的 Qt 网络通信类（QTcpSocket, QUdpSocket, QTcpServer，等）都设计为异步的。当调用 <code>read()</code> 函数时，它们仅仅返回当前可用的数据，当调用 <code>write()</code> 函数时，它们会安排稍后再写。仅仅当程序返回事件循环的时候，读/写操作才真正发生。注意虽然提供有同步的方法（那些以 waitFor* 命名的函数），但是它们并不好用，因为在等待的同时它们阻塞了事件循换。像 QNetworkAccessManager 这样的 high-level 类，同样需要事件循换，但不提供任何同步调用的接口。</li>
+</ul>
+
+
+<h3>阻塞事件循环</h3>
+
+<p>在讨论为什么我们<strong>不应该阻塞</strong>事件循环之前，先说明一下“阻塞”的含义是什么。想像一下，有一个在点击时可以发送信号的按钮，信号绑定到我们的工作类对象的一个槽函数上，这个槽函数会做很多工作。当你点击按钮时，函数调用栈看起来应该像下面这样（栈底在上）：</p>
+
+<p><code>cpp
+main(int, char **)
+QApplication::exec()
+[…]
+QWidget::event(QEvent *)
+Button::mousePressEvent(QMouseEvent *)
+Button::clicked()
+[…]
+Worker::doWork()
+</code></p>
+
+<p>在 main() 函数中，我们通过调用 <code>QApplication::exec()</code> （第2行） 启动了一个事件循换。窗口管理器发送一个鼠标点击的事件，Qt 内核会得到这个事件，然后转化为一个 QMouseEvent 对象，通过 <code>QApplication::notify()</code>（此处没有列出）函数发送给 widget 的 <code>event()</code> 函数（第4行）。如果按钮没有重写 <code>event()</code> 函数，那么它的基类（QWidget）实现的 <code>event()</code> 函数会被调用。<code>QWidget::event()</code>检测到鼠标点击事件，然后调用相应的事件处理函数，就是上面代码中的 <code>Button::mousePressEvent()</code>（第5行）函数。我们重写了这个函数，让它发送一个 <code>Button::clicked()</code> 信号（第6行），这个信号会调用 Worker 类对象的槽函数 <code>Worker::doWork()</code> （第8行）。</p>
+
+<p>当 Worker 对象正在忙于工作的时候，事件循环在做什么？我们也许已经猜到了：什么也不做了！事件循环分发了鼠标点击事件然后等待，等待事件处理者返回。我们<strong>阻塞了事件循环</strong>，这意味在槽函数 <code>doWork()</code> 返回之前，不会再有事件被分发出去，事件会不断进入事件队列而不能得到及时的处理。
+当事件分发被卡住的时候，<strong>窗口不会刷新</strong>（QPaintEvent 对象在事件队列中），<strong>不能响应其他的交互行为</strong>（和前面的原因一样），<strong>定时器超时事件不会触发</strong>、<strong>网络通信变慢然后停止</strong>。此外，很多窗口管理器会检测到你的程序不再处理事件，而提示<strong>程序无响应</strong>。这就是为什么迅速的处理事件然后返回事件循环如此重要的原因。</p>
+
+<h3>强制分发事件</h3>
+
+<p>那么，如果有一个耗时的任务同时我们又不想阻塞消事件循环，这时该如何去做？一个可能的回答是：把这个耗时的任务移动到其他的线程中，下一节中我们可以看到如何做。我们还有一个可选的办法，那就是在我们耗时的任务中通过调用 <code>QCoreApplication::processEvents()</code> 来手动强制跑起事件循环。<code>QCoreApplication::processEvents()</code> 会处理所有队列上的事件然后返回。
+另一个可选的方案，我们可以利用 <a href="http://doc.qt.nokia.com/latest/qeventloop.html">QEventLoop</a> [doc.qt.nokia.com] 强制再加入一个事件循环。通过调用 <code>QEventLoop::exec()</code> 函数，我们加入一个事件循环，然后连接一个信号到  <code>QEventLoop::quit()</code> 槽函数上，来让循环退出。例如：</p>
+
+<p><code>cpp
+QNetworkAccessManager qnam;
+QNetworkReply *reply = qnam.get(QNetworkRequest(QUrl(...)));
+QEventLoop loop;
+QObject::connect(reply, SIGNAL(finished()), &amp;loop, SLOT(quit()));
+loop.exec();
+/* reply has finished, use it */
+</code></p>
+
+<p>QNetworkReply 不提供阻塞的接口，同时需要一个事件循环。我们进入了一个局部的 QEventLoop，当 reply 发出 finished 信号时，这个事件循环就结束了。
+通过“其他路径”重入事件循环时需要特别小心：这可能导致不期望的递归！回到刚才的按钮例子中。如果我们在槽函数 <code>doWork()</code> 中调用 <code>QCoreApplication::processEvents()</code> ，同时用户再次点击了按钮，这个槽函数 <code>doWork()</code> 会<strong>再一次</strong>被调用：</p>
+
+<p><code>cpp
+main(int, char **)
+QApplication::exec()
+[…]
+QWidget::event(QEvent *)
+Button::mousePressEvent(QMouseEvent *)
+Button::clicked()
+[…]
+Worker::doWork() // first, inner invocation
+QCoreApplication::processEvents() // we manually dispatch events and…
+[…]
+QWidget::event(QEvent * ) // another mouse click is sent to the Button…
+Button::mousePressEvent(QMouseEvent *)
+Button::clicked() // which emits clicked() again…
+[…]
+Worker::doWork() // DANG! we’ve recursed into our slot.
+</code></p>
+
+<p>一个快速简单的规避办法是给 <code>QCoreApplication::processEvents()</code> 传入一个参数 <code>QEventLoop::ExcludeUserInputEvents</code>，它会告诉事件循环不要分发任何用户输入的事件（这些事件会停留在队列中）。
+幸运的是，同样的问题<strong>不会</strong>出现在<strong>删除事件</strong>中（调用 <code>QObject::deleteLater()</code> 会发送该事件到事件队列中）。事实上，Qt 使用了特别的办法来处理它，当事件循环比 deleteLater 调用发生的事件循环更外层时，删除事件才会被处理。例如：</p>
+
+<p><code>cpp
+QObject *object = new QObject;
+object-&gt;deleteLater();
+QDialog dialog;
+dialog.exec();
+</code></p>
+
+<p>这不会导致 object 空悬指针（<code>QDialog::exec()</code> 中的事件循环，比 deleteLater 调用发生的地方层次更深）。同样的事情也会发生在 QEventLoop 启动的事件循环中。我只发现过一个例外（在 Qt 4.7.3 中），如果在没有任何事件循环的时候调用了 deleteLater，那么第一个启动的事件循环会处理这个消息，删除该对象。这是很合理的，因为 Qt 知道不会有任何会执行删除动作的“外层”循环，因此会立即删除该对象。</p>
+
+<h2>Qt线程类</h2>
+
+<p>Qt 支持多线程已经很多年（2000 年9月22日发布的 Qt 2.2 引入了 QThread 类），4.0 版本在所有平台上都默认开启多线程支持（多线程支持是可以关闭的，更多细节看<a href="http://doc.qt.nokia.com/latest/fine-tuning-features.html">这里</a>[doc.qt.nokia.com]）。Qt 现在提供了很多类来实现多线程；下面就来看一下。</p>
+
+<h3>QThread</h3>
+
+<p><a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> [doc.qt.nokia.com] 是 Qt 中多线程支持的核心的 low-level 类。一个 QThread 对象表示一个执行的线程。由于 Qt 的跨平台特性，<a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 设法隐藏了不同操作系统在线程操作中的所有平台相关的代码。</p>
+
+<p>为了使用 <a href="http://doc.qt.nokia.com/latest/qthread.html">Qthread</a> 在一个线程中执行代码，我们继承 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 然后重写 <code>QThread::run()</code> 函数：</p>
+
+<p>``` cpp
+class Thread : public QThread {
+protected:</p>
+
+<pre><code>void run() {
+    /* your thread implementation goes here */
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>然后这么使用</p>
+
+<p><code>cpp
+Thread *t = new Thread;
+t-&gt;start(); // start(), not run()!
+</code></p>
+
+<p>来启动一个新的线程。注意，从 Qt 4.4 开始，QThread 不再是抽象类，现在虚函数 <code>QThread::run()</code> 有了调用 <code>QThread::exec()</code>的默认实现；它会启动线程自己的事件循环（稍后详细说明）。</p>
+
+<h3>QRunnable 和 QThreadPool</h3>
+
+<p><a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> [doc.qt.nokia.com] 是一个轻量级的抽象类，它可以在另一个线程中启动一个任务，适用于“运行完就丢掉”这种情况。实现这个功能，我们需要做的就是继承 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 然后实现纯虚函数 <code>run()</code>:</p>
+
+<p>``` cpp
+class Task : public QRunnable {
+public:</p>
+
+<pre><code>void run() {
+    /* your runnable implementation goes here */
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>我们使用 <a href="http://doc.qt.nokia.com/latest/qthreadpool.html">QThreadPool</a> [doc.qt.nokia.com] 类，它管理着一个线程池，来真正运行一个 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 对象。当调用 <code>QThreadPool::start(runnable)</code> 时，我们将 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 对象放入 <a href="http://doc.qt.nokia.com/latest/qthreadpool.html">QThreadPool</a> 的执行队列中；当线程可用时，<a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 对像会启动，然后在线程中执行。所有的 Qt 应用程序都有一个全局的线程池，可以通过调用  <code>QThreadPool::globalInstance()</code> 来获得，但是也可以创建一个私有的 <a href="http://doc.qt.nokia.com/latest/qthreadpool.html">QThreadPool</a> 对象来显式的管理。</p>
+
+<p>注意，<a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 不是一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a>，因此没有 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 内建的和其他一些组建通信的机制；你不得不使用 low-level 线程原语手工处理（例如用互斥量保护队列来收集结果等）。</p>
+
+<h3>QtConcurrent</h3>
+
+<p><a href="http://doc.qt.nokia.com/latest/threads-qtconcurrent.html">QtConcurrent</a> [doc.qt.nokia.com] 是 high-level API，在 <a href="http://doc.qt.nokia.com/latest/qthreadpool.html">QThreadPool</a> 基础上构建而成，它可以应用在大部分常用的并行计算范式中：<a href="http://en.wikipedia.org/wiki/Map_(higher-order_function">map</a> [en.wikipedia.org]), <a href="http://en.wikipedia.org/wiki/Fold_(higher-order_function">reduce</a> [en.wikipedia.org]), 和 <a href="http://en.wikipedia.org/wiki/Filter_(higher-order_function">filter</a> [en.wikipedia.org])；它同时提供 <code>QtConcurrent::run()</code>方法，可以简单的在另一个线程中启动一个函数。</p>
+
+<p>与 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 和 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 不同，<a href="http://doc.qt.nokia.com/latest/threads-qtconcurrent.html">QtConcurrent</a> 不需要我们使用 low-level 的同步原语：所有 <a href="http://doc.qt.nokia.com/latest/threads-qtconcurrent.html">QtConcurrent</a> 函数返回一个 <a href="http://doc.qt.nokia.com/latest/qfuture.html">QFuture</a> [doc.qt.nokia.com] 对象，它可以用来查询计算状态（进展），暂停/恢复/取消计算，同时它也包含计算的结果。<a href="http://doc.qt.nokia.com/latest/qfuturewatcher.html">QFutureWatcher</a> [doc.qt.nokia.com] 类可以用来监测 <a href="http://doc.qt.nokia.com/latest/qfuture.html">QFuture</a> 的进展，也可以通过信号槽来和 <a href="http://doc.qt.nokia.com/latest/qfuture.html">QFuture</a> 交互（注意，<a href="http://doc.qt.nokia.com/latest/qfuture.html">QFuture</a> 作为一个值语义的类，没有继承自 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a>）。</p>
+
+<p> <strong>特性对比</strong></p>
+
+<pre><code>\                        QThread  QRunnable  QtConcurrent
+high level 接口           n        n          y
+面向任务                   n        y          y
+内建支持暂停、恢复、取消      n        n          y
+支持优先级                 y        n          n
+可以运行消息循环            y        n          n
+</code></pre>
+
+<p>QtConcurrent::run 是个例外，因为它是使用 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 实现的，所以带有 <a href="http://doc.qt.nokia.com/latest/qrunnable.html">QRunnable</a> 的特性。</p>
+
+<h2>线程和QObject</h2>
+
+<h3>每个线程一个事件循环</h3>
+
+<p>到现在为止，我们已经讨论过“事件循环”，但讨论的仅仅是在一个 Qt 应用程序中只有一个事件循环的情况。但不是下面这种情况：QThread 对象可以启动一个自己线程中的事件循环。因此，我们把在 <code>main()</code> 函数中通过调用 <code>QCoreApplication::exec()</code>（该函数只能在主线程中调用）启动的事件循环叫做<strong>主事件循环</strong>。它也叫做 <strong>GUI 线程</strong>，因为 UI 相关的操作只能（应该）在该线程中执行。一个 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 局部事件循环可以通过调用 <code>QThread::exec()</code> 来启动（在 run() 函数中）:</p>
+
+<p>``` cpp
+class Thread : public QThread {
+protected:</p>
+
+<pre><code>void run() {
+    /* ... initialize ... */
+
+    exec();
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>上面我们提到，从 Qt 4.4 开始，<code>QThread::run()</code> 不再是一个纯虚函数，而是默认调用 <code>QThread::exec()</code>。和 QCoreApplication 一样，<a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 也有 <code>QThread::quit()</code> 和 <code>QThread::exit()</code> 函数，来停止事件循环。</p>
+
+<p>一个线程的事件循环为所有在这个线程中的 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象分发事件；默认的，它包括所有在这个线程中创建的对象，或者从其他线程中移过来的对象（接下来详细说明）。同时，一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象的线程相关性是确定的，也就是说这个对象生存在这个线程中。这个适用于在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 对象的构造函数中创建的对象：</p>
+
+<p>``` cpp
+class MyThread : public QThread
+{
+public:</p>
+
+<pre><code>MyThread()
+{
+    otherObj = new QObject;
+}    
+</code></pre>
+
+<p>private:</p>
+
+<pre><code>QObject obj;
+QObject *otherObj;
+QScopedPointer&lt;QObject&gt; yetAnotherObj;
+</code></pre>
+
+<p>};
+```</p>
+
+<p>在创建一个 MyThread 对象之后，obj，otherObj，yetAnotherObj 的线程相关性如何？我们必须看看创建这些对象的线程：它是运行 MyThread 构造函数的线程。因此，所有这三个对象都不属于 MyThread 线程，而是创建了 MyThread 对象的线程（MyThread 对象也属于该线程）。</p>
+
+<p><img src="http://doc.qt.nokia.com/4.7/images/threadsandobjects.png" alt="" /></p>
+
+<p>我们可以使用线程安全的 <code>QCoreApplication::postEvent()</code> 函数来给对象发送事件。它会把事件放入该对象所在事件循环的事件队列中；因此，只有这个线程有事件循环，事件才会被分发。</p>
+
+<p>理解 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 和它的子类<strong>不是线程安全</strong>的（虽然它是可重入的）这非常重要；由于它不是线程安全的，所以你不能同时在多个线程中同时访问同一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象，除非你自己串行化了所有对这些内部数据的访问（比如使用了互斥量来保护内部数据）。记住当你从其他线程访问 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象时，这个对象有可能正在处理它所在的事件循环分发给它的事件。同样的，你也不能从另一个线程中删除一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象，而必须使用 <code>QObject::deleteLater()</code> 函数，它会发送一个事件到对象所在线程中，然后在该线程中删除对象。</p>
+
+<p>此外，QWidget 和它的所有子类，还有其他的 UI 相关类（非 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 子类，比如 QPixmap）还是<strong>不可重入</strong>的：他们仅仅可以在 UI 线程中使用。</p>
+
+<p>我们可以通过调用 <code>QObject::moveToThread()</code> 来改变 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象和线程之前的关系，它会改变对象本身以及它的孩子与线程之前的关系。由于 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 不是线程安全的，所以我们必须在它所在的线程中使用；也就是说，你仅仅可以在他们所处的线程中把它移动到另一个线程<strong>去</strong>，而不能从其他线程中把它从所在的线程中移动过<strong>来</strong>。而且，Qt 要求一个 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象的孩子必须和他的父亲在同一个线程中，也就是说：</p>
+
+<ul>
+<li>如果一个对象有父亲，那么你不能使用 <code>QObject::moveToThread()</code> 把它移动到其他线程</li>
+<li>你不能在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 类中以 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 为父亲创建对象</li>
+</ul>
+
+
+<p>``` cpp
+class Thread : public QThread {</p>
+
+<pre><code>void run() {
+    QObject *obj = new QObject(this); // WRONG!!!
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>这是因为 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> <strong>对象所在的线程是另外的线程</strong>，即 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 对象所在的线程是创建它的线程。</p>
+
+<p>Qt 要求所有在线程中的对象必须在线程结束之前销毁；利用 <code>QThread::run()</code> 函数，在该函数中仅创建栈上的对象，这一点可以很容易的做到。</p>
+
+<h3>跨线程信号槽</h3>
+
+<p>有了这些前提，我们如何调用另一个线程中 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 对象的函数？ Qt 提供了一个非常漂亮和干净的解决方案：我们发送一个事件到线程的事件队列中，事件的处理，将调用我们感兴趣的函数（当然这个线程需要启动一个事件循环）。该设施围绕 Qt 的元对象编译器（MOC）提供的方法内省而构建：因此，信号，槽，函数，只要使用了 <code>Q_INVOKABLE</code> 宏，那么就可以从另外的线程调用它。</p>
+
+<p><code>QMetaObject::invokeMethod()</code> 静态方法为我们实现了这个功能：</p>
+
+<p>``` cpp
+QMetaObject::invokeMethod(object, &ldquo;methodName&rdquo;,</p>
+
+<pre><code>                      Qt::QueuedConnection,
+                      Q_ARG(type1, arg1),
+                      Q_ARG(type2, arg2));
+</code></pre>
+
+<p>```</p>
+
+<p>注意，由于参数需要在消息传递时拷贝，这些类型的参数需要提供公有的构造函数，析构函数和拷贝构造函数，而且要使用 <code>qRegisterMetaType()</code> 函数将类型注册到 Qt 类型系统中。</p>
+
+<p>跨线程的信号槽工作方式是类似的。当我们将信号和曹连接时，<code>QObject::connect</code> 函数的第5个参数可以指定连接的类型：</p>
+
+<ul>
+<li><strong>direct connection</strong>：意思是槽函数会在信号发送的线程中直接被调用</li>
+<li><strong>queued connection</strong>：意思是事件会发送到接收者所在线程的消息队列中，消息循环会稍后处理该事件然后调用槽函数</li>
+<li><strong>blocking queued connection</strong>：和 queued connection 类似，但是发送线程会阻塞，直到接收者所在线程的事件循环处理了该事件，调用了槽函数之后，才会返回</li>
+</ul>
+
+
+<p>在任何情况下，记住发送者所在的线程一点都不重要！在自动连接的情况下，Qt 会检查信号调用的线程，然后与接收者所在线程比较，然后决定使用哪种连接类型。特别的，<a href="http://doc.qt.nokia.com/4.7/threads-qobject.html">Threads and QObjects</a> [doc.qt.nokia.com] (4.7.1) 在下面的情况下是<strong>错误的</strong>：</p>
+
+<p><em>自动连接（默认值），如果发送者和接收者在同一线程它和直接连接（direct connection）的行为是一样的；如果发送者和接收者在不同的线程它和队列连接（queued connection）的行为是一样的。</em></p>
+
+<p>因为发送者所在的线程和无关紧要的。例如：</p>
+
+<p>``` cpp
+class Thread : public QThread
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>signals:</p>
+
+<pre><code>void aSignal();
+</code></pre>
+
+<p>protected:</p>
+
+<pre><code>void run() {
+    emit aSignal();
+}
+</code></pre>
+
+<p>};</p>
+
+<p>/<em> &hellip; </em>/
+Thread thread;
+Object obj;
+QObject::connect(&amp;thread, SIGNAL(aSignal()), &amp;obj, SLOT(aSlot()));
+thread.start();
+```</p>
+
+<p>信号 aSignal() 会在一个新的线程中发送（Thread 对象创建的线程）；因为这不是 Object 对象所在的线程（但这时，Object 对象与 Thread 对象在同一个线程中，再次强调，发送者所在线程是无关紧要的），这时将使用 queued connection。</p>
+
+<p>另一个常见的陷阱：</p>
+
+<p>``` cpp
+class Thread : public QThread
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>slots:</p>
+
+<pre><code>void aSlot() {
+    /* ... */
+}
+</code></pre>
+
+<p>protected:</p>
+
+<pre><code>void run() {
+    /* ... */
+}
+</code></pre>
+
+<p>};</p>
+
+<p>/<em> &hellip; </em>/
+Thread thread;
+Object obj;
+QObject::connect(&amp;obj, SIGNAL(aSignal()), &amp;thread, SLOT(aSlot()));
+thread.start();
+obj.emitSignal();
+```</p>
+
+<p>当“obj” 发送 aSignal() 信号时，将会使用哪种连接类型？你应该已经猜到了：direct connection。这是因为 Thread 对象所在线程就是信号发送的线程。在槽函数 aSlot() 中，我们可能访问 Thread 类的成员，而同时 run() 函数可能也在访问，它们会同时进行：这是完美的灾难配方。</p>
+
+<p>另一个例子，或许也是最重要的一个：</p>
+
+<p>``` cpp
+class Thread : public QThread
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>slots:</p>
+
+<pre><code>void aSlot() {
+    /* ... */
+}
+</code></pre>
+
+<p>protected:</p>
+
+<pre><code>void run() {
+    QObject *obj = new Object;
+    connect(obj, SIGNAL(aSignal()), this, SLOT(aSlot()));
+    /* ... */
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>在上面的情形中，连接类型是 queued connection，因此你需要在 Thread 对象所在线程启动一个事件循环。</p>
+
+<p>下面是一个你经常可以在论坛、博客或其他地方看到的解决方案。那就是在 Thread 的构造函数中增加一个 <code>moveToThread(this)</code> 函数：</p>
+
+<p>``` cpp
+class Thread : public QThread {</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>public:</p>
+
+<pre><code>Thread() {
+    moveToThread(this); // WRONG
+}
+
+/* ... */
+</code></pre>
+
+<p>};
+```</p>
+
+<p>这确实可以工作（因为现在线程对象所在的线程的确改变了），但是这是个非常糟糕的设计。错误在于我们误解了 thread 对象（<a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 子类）的目的：<em><a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 对象不是线程本身</em>；它是用于管理线程的，因此它应该在另一个线程中使用（通常就是创建它的线程）。</p>
+
+<p>一个好的办法是：把“工作”部分从“控制”部分分离出来，创建 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 子类对象，然后使用 <code>QObject::moveToThread()</code> 来改变对象所在的线程：</p>
+
+<p>``` cpp
+class Worker : public QObject
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>public slots:</p>
+
+<pre><code>void doWork() {
+    /* ... */
+}
+</code></pre>
+
+<p>};</p>
+
+<p>/<em> &hellip; </em>/
+QThread <em>thread = new QThread;
+Worker </em>worker = new Worker;
+connect(obj, SIGNAL(workReady()), worker, SLOT(doWork()));
+worker->moveToThread(thread);
+thread->start();
+```</p>
+
+<h3>应该做&amp;不应该做</h3>
+
+<p><strong>你可以…</strong></p>
+
+<ul>
+<li>在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 子类中添加信号。这是很安全的，而且可以“正确工作”（前面提到；发送者所在线程是无关紧要的）</li>
+</ul>
+
+
+<p><strong>你不应该…</strong></p>
+
+<ul>
+<li>使用 <code>moveToThread(this)</code></li>
+<li>强制连接类型：这通常说明你在做一些错误的事情，例如混合了 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 控制接口和程序逻辑（它应该在该线程创建的对象中）</li>
+<li>在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 子类中增加槽函数：它们会在“错误的”线程中被调用，不是在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 管理的线程中，而是在 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 对象创建的线程，迫使你使用 direct connection 或使用 <code>moveToThread(this)</code> 函数</li>
+<li>使用 <code>QThread::terminate</code> 函数</li>
+</ul>
+
+
+<p><strong>禁止…</strong></p>
+
+<ul>
+<li>在线程还在运行时退出程序。应使用 QThread::wait 等待线程终止</li>
+<li>当 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 管理的线程还在运行时，删除 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 对象。如果你想要“自动析构”，你可以将 <code>finished()</code> 信号连接到 <code>deleteLater()</code> 槽函数上</li>
+</ul>
+
+
+<h2>什么时候应该使用线程？</h2>
+
+<h3>当使用阻塞 API 时</h3>
+
+<p>如果你需要使用没有提供非阻塞API的库（例如信号槽，事件，回调函数，等），那么避免阻塞事件循环的唯一解决方案就是开启一个进程或线程。由于创建一个工作进程，让它完成任务并通过进程通信返回结果与开启一个线程相比是困难并且昂贵的，所以创建一个线程是更普遍的做法。</p>
+
+<p><strong>地址解析</strong>（只是举个例子，不是在讨论蹩脚的 API。这是每一个 C 语言函数库中包含的东西）就是一个很好的例子，它把主机名转换为地址。它会调用域名解析系统（DNS）来查询。虽然一般情况下，它会立即返回，但是远程服务器有可能故障，有可能丢包，有可能网络突然中断，等等。简而言之，它可能需要等待很长时间才相应我们发出的请求。</p>
+
+<p>UNIX 系统中的标准 API 是阻塞的（不仅仅是旧的 API <code>gethostbyname(3)</code>，新的更好的 <code>getservbyname(3)</code> 和 <code>getaddrinfo(3)</code> 也是一样）。<a href="http://doc.qt.nokia.com/latest/qhostinfo.html">QHostInfo</a> [doc.qt.nokia.com] 是处理主机名解析的 Qt 类，它使用 <a href="http://doc.qt.nokia.com/latest/qthreadpool.html">QThreadPool</a> 来使得请求在后台运行（看<a href="http://qt.gitorious.com/qt/qt/blobs/master/src/network/kernel/qhostinfo.cpp">这里</a> [qt.gitorious.com]；如果线程支持被关闭的话，它会切换为阻塞方式）。</p>
+
+<p>另一个简单的例子是图像加载和缩放。<a href="http://doc.qt.nokia.com/latest/qimagereader.html">QImageReader</a> [doc.qt.nokia.com] 和 <a href="http://doc.qt.nokia.com/latest/qimage.html">QImage</a> [doc.qt.nokia.com] 只提供阻塞方法来从设备读取图像，或改变图像的分辨率。如果你正在处理非常大的图像，这些操作可能会花费数十秒。</p>
+
+<h3>当你想要充分利用多CPU时</h3>
+
+<p>多线程可以让你的程序更好的利用多处理器系统。每个线程是由操作系统独立调用的，如果你的程序运行在这样的机器上，线程调度就可以让多个处理器同时运行不同的线程。</p>
+
+<p>比如，考虑一个批量生成缩略图的程序。一个有 n 个线程的<strong>线程农场</strong>（有固定线程数目的线程池），n 是系统中可用 CPU 的数量（可参考 <code>QThread::idealThreadCount()</code>），它可以将处理任务分布到多个cpu上，这样我们就可以获得与cpu数量有关的效率线性增长（简单的，我们把CPU考虑为瓶颈）。</p>
+
+<h3>当你不想被阻塞时</h3>
+
+<p>呃…从一个例子开始会更好。</p>
+
+<p>这是一个高级话题，你可以暂时忽略。Webkit 中的 QNetworkAccessManager 是一个很好的例子。Webkit 是一个流行的浏览器引擎，它是处理网页布局和显式的一组类的集合，Qt 中 QWebView 类使用了它。</p>
+
+<p>QNetworkAccessManager 是 Qt 中处理 HTTP 请求和响应的类，我们可以把它当作浏览器的引擎。Qt 4.8 之前，它没有使用任何工作线程；所有的处理都在 QNetworkAccessManager 和 QNetworkReply 所在的同一个线程。</p>
+
+<p>虽然在网络通信中使用线程是一个好办法，但是它也存在问题：如果你没有尽快从 socket 中读取数据，内核缓冲会被其他数据填充，数据包将被丢掉，可想而知，数据传输速率将下降。</p>
+
+<p>socket 活动（也就是 socket 是否可读）是由 Qt 的事件循环还管理的。阻塞事件循环会导致传输性能下降，因为这时没有人会被告知现在数据已经可读（所以没有人会去读取数据）。</p>
+
+<p>但是什么会阻塞消息循环？可悲的是：WebKit 自己阻塞了消息循环。一旦消息可读，Webkit 开始处理网页布局。不幸的是，这个处理是复杂而昂贵的，它会阻塞消息循换一（小）会儿，但足以影响传输效率（宽带连接这里起到了作用，在短短几秒内就可填满内核缓存）。</p>
+
+<p>总结一下，这个过程发生的事情：</p>
+
+<ul>
+<li>Webkit 发起请求</li>
+<li>一些响应数据开始到达</li>
+<li>Webkit 开始使用到达的数据来网页布局，阻塞了事件循环</li>
+<li>没有了事件循环，操作系统接收到了数据，但没有人从 QNetworkAccessManager 的 socket 中读取数据</li>
+<li>内核缓冲将被其他数据填充，从而导致传输效率下降</li>
+</ul>
+
+
+<p>整个页面的加载时间由于 Webkit 自己引起的问题而变得很慢。</p>
+
+<p>注意，由于 QNetworkAccessManager 和 QNetworkReply 都是 QObject，它们都不是线程安全的，因此你不能将它移动到另一个线程然后继续在你的线程中继续使用它，因为你可能从两个线程中同时访问它：你自己的线程和它所在的线程，因为它所在的消息循环会将事件分发给它处理。</p>
+
+<p>在 Qt 4.8 中，QNetworkAccessManager 现在默认使用单独的线程处理 HTTP 请求，因此 UI 反应慢和系统缓冲被填充过快的问题得以解决。</p>
+
+<h2>什么时候不应该使用线程？</h2>
+
+<h3>定时器</h3>
+
+<p>这可能是最糟糕的线程滥用。如果你不得不重复调用一个方法（例如，每秒调用一次），很多人会这么做：</p>
+
+<p>``` cpp
+// VERY WRONG
+while (condition) {</p>
+
+<pre><code>doWork();
+sleep(1); // this is sleep(3) from the C library
+</code></pre>
+
+<p>}
+```</p>
+
+<p>然后会发现这<strong>阻塞了事件循环</strong>，然后决定使用线程来解决：</p>
+
+<p>``` cpp
+// WRONG
+class Thread : public QThread {
+protected:</p>
+
+<pre><code>void run() {
+    while (condition) {
+        // notice that "condition" may also need volatiness and mutex protection
+        // if we modify it from other threads (!)
+        doWork();
+        sleep(1); // this is QThread::sleep()
+    }
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>一个<strong>更好更简单</strong>的办法是使用计时器，一个超时时间为1秒的 <a href="http://doc.qt.nokia.com/latest/qtimer.html">QTimer</a> [doc.qt.nokia.com] 对象，和 <code>doWork()</code> 槽函数：</p>
+
+<p>``` cpp
+class Worker : public QObject
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>public:</p>
+
+<pre><code>Worker() {
+    connect(&amp;timer, SIGNAL(timeout()), this, SLOT(doWork()));
+    timer.start(1000);
+}
+</code></pre>
+
+<p>private slots:</p>
+
+<pre><code>void doWork() {
+    /* ... */
+}
+</code></pre>
+
+<p>private:</p>
+
+<pre><code>QTimer timer;
+</code></pre>
+
+<p>};
+```</p>
+
+<p>我们所需要做的就是启动一个消息循环，然后 doWork() 函数会每一秒调用一次。</p>
+
+<h3>网络通信/状态机</h3>
+
+<p>下面是一个非常常见的网络通信的设计：</p>
+
+<p>``` cpp
+socket->connect(host);
+socket->waitForConnected();</p>
+
+<p>data = getData();
+socket->write(data);
+socket->waitForBytesWritten();</p>
+
+<p>socket->waitForReadyRead();
+socket->read(response);</p>
+
+<p>reply = process(response);</p>
+
+<p>socket->write(reply);
+socket->waitForBytesWritten();
+/<em> &hellip; and so on &hellip; </em>/
+```</p>
+
+<p>不用多说，这些 waitFor*() 函数调用会阻塞消息循环，冻结 UI，等等。注意，上面的代码没有任何的错误处理，不然它会更繁琐。上面的错误在于我们忘记了最初<strong>网络设计的就是异步的</strong>，如果我们使用同步处理，那就是朝自己的脚开枪。解决上面的问题，许多人会简单的把它移动到不同的线程中。</p>
+
+<p>另一个更抽象的例子：</p>
+
+<p>``` cpp
+result = process_one_thing();</p>
+
+<p>if (result->something())</p>
+
+<pre><code>process_this();
+</code></pre>
+
+<p>else</p>
+
+<pre><code>process_that();
+</code></pre>
+
+<p>wait_for_user_input();
+input = read_user_input();
+process_user_input(input);
+/<em> &hellip; </em>/
+```</p>
+
+<p>它和上面网络的例子有着同样的陷阱。</p>
+
+<p>让我们退一步，从更高的视角来看看我们构建的东西，我们构建了一个状态机来处理输入。</p>
+
+<ul>
+<li>空闲 –> 连接中（调用 connectToHost()）</li>
+<li>连接中 –> 已连接 （发出 connected() 信号）</li>
+<li>已连接 –> 发送登陆数据（发送登陆数据到服务器）</li>
+<li>发送登陆数据 –> 登陆成功（服务器返回 ACK）</li>
+<li>发送登陆数据 –> 登陆失败（服务器返回 NACK）</li>
+</ul>
+
+
+<p>等等。</p>
+
+<p>现在，我们有很多办法来构建一个状态机（Qt 就为我们提供了一个可使用的类：<a href="http://doc.qt.nokia.com/4.7/qstatemachine.html">QStateMachine</a> [doc.qt.nokia.com]），最简单的办法就是使用枚举（整型）来记录当前的状态。我们可以重写上面的代码：</p>
+
+<p>``` cpp
+class Object : public QObject
+{</p>
+
+<pre><code>Q_OBJECT
+
+enum State {
+    State1, State2, State3 /* and so on */
+};
+
+State state;
+</code></pre>
+
+<p>public:</p>
+
+<pre><code>Object() : state(State1)
+{
+    connect(source, SIGNAL(ready()), this, SLOT(doWork()));
+}
+</code></pre>
+
+<p>private slots:</p>
+
+<pre><code>void doWork() {
+    switch (state) {
+        case State1:
+            /* ... */
+            state = State2;
+            break;
+        case State2:
+            /* ... */
+            state = State3;
+            break;
+        /* etc. */
+    }
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>“source” 对象和“ready()”信号是什么？我们想要的是：拿网络例子来说，我们想要把 <code>QAbstractSocket::connected()</code> 和 <code>QIODevice::readyRead()</code> 连接到我们的槽函数上。当然，如果再多些槽函数更好的话，我们也可以增加更多（比如错误处理的槽函数，由 <code>QAbstractSocket::error()</code> 事件来发起）。这是真正的异步，事件驱动的设计！</p>
+
+<h3>把任务分解成小块</h3>
+
+<p>想想一下我们有个很耗时但是无法移动到其它线程的任务（或者根本不能移动到其它线程，因为它可能必须在 UI 线程中执行）。如果我们<strong>把任务分解成小块</strong>，那么我们就可以返回事件循环，让事件循环分发事件，然后让它调用处理后续任务块的函数。如果我们还记得 queued connection 如何实现的话，那就很容易解决这个问题了：事件发送到接收者所在的事件循环中，当事件被分发的时候，相应的槽函数被调用。</p>
+
+<p>我们可以使用 <code>QMetaObject::invokeMethod()</code> 函数，用参数 <code>Qt::QueuedConnection</code> 指定连接类型，来实现这个功能；这需要函数可调用，也就是说函数必须是个槽函数或者使用了 <code>Q_INVOKABLE</code>宏修饰。如果我们还要给函数传递参数，那么我们要保证参数类型已经通过函数 <code>qRegisterMetaType()</code> 注册到了 Qt 的类型系统中。下面的代码给我们展示了这种做法：</p>
+
+<p>``` cpp
+class Worker : public QObject
+{</p>
+
+<pre><code>Q_OBJECT
+</code></pre>
+
+<p>public slots:</p>
+
+<pre><code>void startProcessing()
+{
+    processItem(0);
+}
+
+void processItem(int index)
+{
+    /* process items[index] ... */
+
+    if (index &lt; numberOfItems)
+        QMetaObject::invokeMethod(this,
+                                 "processItem",
+                                 Qt::QueuedConnection,
+                                 Q_ARG(int, index + 1));
+
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>因为这里没有线程调用，所以它可以很容易的暂停/恢复/取消任务，也可以很容易的得到计算结果。</p>
+
+<h4>参考</h4>
+
+<ul>
+<li>Bradley T. Hughes: <a href="http://labs.qt.nokia.com/2010/06/17/youre-doing-it-wrong/">You’re doing it wrong…</a> [labs.qt.nokia.com], Qt Labs blogs, 2010-06-17</li>
+<li>Bradley T. Hughes: <a href="http://labs.qt.nokia.com/2006/12/04/threading-without-the-headache/">Threading without the headache</a> [labs.qt.nokia.com], Qt Labs blogs, 2006-12-04</li>
+</ul>
+
+
+<h4>分类</h4>
+
+<ul>
+<li><a href="http://qt-project.org/wiki/Category:Developing-with-Qt">Developing with Qt</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

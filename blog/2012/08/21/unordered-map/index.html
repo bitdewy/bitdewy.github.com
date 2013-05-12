@@ -1,0 +1,215 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>C++11 std::unordered_map - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="历史 在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
+由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。 例如，GCC 的 lisbstdc++ , &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">C++11 Std::unordered_map</h2>
+	<div class="entry-content"><h2>历史</h2>
+
+<p>在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
+由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。</p>
+
+<p>例如，GCC 的 lisbstdc++ , 以及微软的 MSVC 标准库。在这些公用的名字后面，有不同的实现，呃，不同的实现。它们在接口、能力、内在数据结构和支持操作的相关效率方面不同。写出使用哈希表的可移植代码是可能的，但不可能像使用标准库中的容器一样容易。（知道标准的重要性了吧。）好在 <code>hash_*</code> 这一组类加入了 C++ TR1 , 可惜由于名字被非标准的各家实现占用，只能退而求其次，改名为 <code>unordered_*</code>。</p>
+
+<p>C++11 中，不排序的关联容器已经正式进入标准库。现在再选择的话，可以毫不犹豫的放弃非标准的 <code>hash_*</code> 而选择标准库中的 <code>unordered_*</code> 系类了。boost &lt;<a href="http://www.boost.org/doc/libs/1_53_0/boost/unordered_map.hpp">boost/unordered_map.hpp</a>> 中同样有实现。</p>
+
+<!-- more -->
+
+
+<h2>选择合适的数据结构</h2>
+
+<p>对于一个程序员来说，分析具体的问题，选择适合的数据结构，有时候比算法更重要。好的数据结构可以帮助程序员解决大部分效率问题。Soctt Meyers 在《Effective STL》的第一条就提到：“仔细选择你的容器”。</p>
+
+<p><code>std::unordered_map</code> 与 <code>std::map</code> 的区别是, <code>std::map</code> 是按照 <code>operator&lt;</code> 比较判断元素是否相同，以及比较元素的大小，然后选择合适的位置插入到树中。所以，如果对 map 进行遍历（中序遍历）的话，输出的结果是有序的。顺序就是按照 <code>operator&lt;</code> 定义的大小排序。</p>
+
+<p>而 <code>std::unordered_map</code> 是计算元素的 hash 值，根据 hash 值判断元素是否相同。所以，对 <code>unordered_map</code> 进行遍历，结果是无序的。</p>
+
+<p>用法的区别是，<code>std::map</code> 的 key 需要定义 <code>operator&lt;</code> 。 而 <code>std::unordered_map</code> 需要定义 <code>hash_value</code> 函数并且重载 <code>operator==</code>。
+对于内置类型，如 <code>std::string</code>, 这些都不用操心。对于自定义的类型做 key, 就需要自己重载 <code>operator&lt;</code> 或者 <code>hash_value()</code> 了。</p>
+
+<p>选择时,请基于时间和空间的综合考虑, <em>当不关心空间, 也不需要结果排好序时, 可以选择 <code>unordered_map</code> 获得更好的时间效率。</em></p>
+
+<p><code>std::map</code> 对应与 java 中的 <code>TreeMap</code>, 而 <code>std::unordered_map</code> 对应于 java 中的 <code>HashMap</code>. 对于标准库中的散列表无法取名为 <code>hash_*</code>, 只能叫 <code>unordered_*</code>, 我只能说… 标准库进展太慢，结果好白菜都让猪给拱了……遗憾啊……</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-21T17:54:00+08:00" pubdate data-updated="true">Aug 21<span>st</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2012/08/21/unordered-map/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2012/08/21/unordered-map/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2012/08/21/unordered-map/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

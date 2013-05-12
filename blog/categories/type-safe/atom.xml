@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: type safe | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/type-safe/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[在 C++03 中实现强类型安全的枚举类型]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
+    <updated>2013-02-05T21:53:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
+    <content type="html"><![CDATA[<h2>意图</h2>
+
+<p>改进 C++ 枚举的类型安全性</p>
+
+<h2>动机</h2>
+
+<p>在 C++03 中枚举类型的类型安全性不够强, 有可能导致意想不到的错误. 虽然枚举是语言内置的特性, 但也可能由于编译器的不同, 而存在可移植性的问题. 枚举的问题基本上可以分为3类:</p>
+
+<ul>
+<li>隐式转换</li>
+<li>无法指定类型</li>
+<li>作用域问题</li>
+</ul>
+
+
+<p>C++03 中枚举类型是部分类型安全的, 比如你将一个枚举类型的值直接赋值给另一个枚举类型, 而且无法从整形隐式转换到枚举类型. 但是, 最常见的枚举类型错误是: 它可以自动提升成整形. 例如下面的代码, 只有少数几个的编译器（比如 GNU 的 g++）会发出警告, 而 VC++ 不会有任何的提示.</p>
+
+<p><code>cpp
+enum color { red, green, blue };
+enum shape { circle, square, triangle };
+color c = red;
+bool flag = (c &gt;= triangle); // Unintended!
+</code></p>
+
+<!-- more -->
+
+
+<p>C++03 中枚举类型另外的问题是无法指定枚举存储时的类型. 这可能导致数据大小以及符号问题在各个编译器上表现不同而导致不可移植的问题. 最后, 是作用域问题, 在相同的作用域内不能有两个相同名称的枚举值.</p>
+
+<p>强类型的枚举已经进入 C++11 标准中. 详细内容参考: <a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class</a>
+下面是 C++03 强类型安全的枚举实现。</p>
+
+<h2>解决方案&amp;示例代码</h2>
+
+<p>```cpp
+template<typename def, typename inner = typename def::type>
+class safe_enum : public def
+{
+  typedef typename def::type type;
+  inner val;</p>
+
+<p>public:</p>
+
+<p>  safe_enum(type v) : val(v) {}
+  inner underlying() const { return val; }</p>
+
+<p>  bool operator == (const safe_enum &amp; s) const { return this->val == s.val; }
+  bool operator != (const safe_enum &amp; s) const { return this->val != s.val; }
+  bool operator &lt;  (const safe_enum &amp; s) const { return this->val &lt;  s.val; }
+  bool operator &lt;= (const safe_enum &amp; s) const { return this->val &lt;= s.val; }
+  bool operator >  (const safe_enum &amp; s) const { return this->val >  s.val; }
+  bool operator >= (const safe_enum &amp; s) const { return this->val >= s.val; }
+};</p>
+
+<p>struct color_def {
+  enum type { red, green, blue };
+};
+typedef safe_enum&lt;color_def> color;</p>
+
+<p>struct shape_def {
+  enum type { circle, square, triangle };
+};
+typedef safe_enum&lt;shape_def, unsigned char> shape; // unsigned char representation</p>
+
+<p>int main(void)
+{
+  color c = color::red;
+  bool flag = (c >= shape::triangle); // Compiler error.
+}
+```</p>
+
+<p>在上述解决方案的代码中, 实际的枚举类型包裹在 <code>color_def</code> 和 <code>shape_def</code> 结构体中. <code>safe_enum</code> 模板帮我们实现了一个类型安全的枚举. <code>safe_enum</code> 使用了 <a href="http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Parameterized_Base_Class">Parameterized Base Class</a> 惯用法. 它继承了模板参数 <code>color_def</code> 以及 <code>shape_def</code>, 使得 color 以及 shape 变成了强类型安全的枚举.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf">Strongly Typed Enums (revision 3)</a></li>
+<li><a href="http://scottmeyers.blogspot.hk/2013/01/effective-c11-content-and-status.html">Effective C++11: Content and Status -Prefer enum classes to enums.</a></li>
+<li><a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class &mdash; scoped and strongly typed enums</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

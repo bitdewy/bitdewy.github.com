@@ -1,0 +1,417 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[译] GotW #100: Compilation Firewalls (Difficulty: 6/10) - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="[这是 GotW #24 的 C++11 更新版] 原文在这里 GotW #100: Compilation Firewalls (Difficulty: 6/10) JG 问题 1. Pimpl 惯用法是什么？为什么要使用它？ Guru 问题 2. 怎样才是 Pimpl 惯用法在 C++11 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[译] GotW #100: Compilation Firewalls (Difficulty: 6/10)</h2>
+	<div class="entry-content"><p>[这是 <a href="http://www.gotw.ca/gotw/024.htm">GotW #24</a> 的 C++11 更新版]</p>
+
+<p>原文在这里 <a href="http://herbsutter.com/gotw/_100/">GotW #100: Compilation Firewalls (Difficulty: 6/10)</a></p>
+
+<h2>JG 问题</h2>
+
+<p>1. Pimpl 惯用法是什么？为什么要使用它？</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</p>
+
+<p>3. 类中的那些部分应该放到 impl 对象中？一些可能的选择包括：</p>
+
+<ul>
+<li>所有私有数据（非函数）</li>
+<li>所有私有成员</li>
+<li>所有私有和保护成员</li>
+<li>所有私有非虚成员</li>
+<li>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</li>
+</ul>
+
+
+<p>它们的每一个的缺点和优点是什么？你怎么选择？</p>
+
+<p>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</p>
+
+<!-- more -->
+
+
+<h2>解决方案</h2>
+
+<h3>1. Pimpl 惯用法是什么？为什么要使用它？</h3>
+
+<p>在 C++ 中，当头文件中的类定义改变时，所有使用了这个类的用户都必须重新编译，甚至仅仅更改了那些用户无法访问的类的私有成员，也是如此。这是因为 C++ 的构建模型是基于文本包含的，并且 C++ 假定调用者知道以下两件事，而这些是会受到私有成员影响的：</p>
+
+<ul>
+<li><strong>大小和布局</strong>：调用的代码必须知道一个类的大小和布局，包括私有数据成员。调用者总是知道被调用者的实现，这个约束导致了调用者和被调用者之间更紧密的耦合，但这是 C++ 对象模型的核心和哲学，因为保证编译器默认情况下可以直接访问对象，是允许编译器进行深度性能优化的重要组成部分。</li>
+<li><strong>函数</strong>：调用的代码必须决定调用类的哪个成员，包括那些不可访问的，重载了非私有函数的私有函数——如果私有函数时更好的匹配，那么调用代码将编译失败。（C++ 经过深思熟虑的设计决定，由于安全问题，重载决议将在访问控制权限之前进行。举个例子，这可以保证当改变访问权限，把私有函数改为公有时，它不会改变合法的已有的代码的行为。）</li>
+</ul>
+
+
+<p>为了减小编译依赖，最通常的技术是使用一个不透明的指针，隐藏实现的细节，下面是基本思路：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Pimpl idiom - basic idea</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// :::</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">impl</span><span class="p">;</span>        <span class="c1">// things to be hidden go here</span>
+</span><span class='line'>    <span class="n">impl</span><span class="o">*</span> <span class="n">pimpl_</span><span class="p">;</span>       <span class="c1">// opaque pointer to forward-declared class</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>类 widget 使用了 handle/body 惯用法的变体，参见 Coplien 的文章[1]，handle/body 过去主要用途是引用计数共享的实体，但是它还有更通用的隐藏实现的功能。为了方便，下面我会把类 widget 叫做可见类，impl 叫做 &ldquo;Pimpl class” [2]</p>
+
+<p>这个惯用法最大的好处是打破了编译时的依赖。首先，由于使用 Pimpl 可以消除多余的 #include，这使得编译过程更快了。我曾经在一个项目中仅仅把一些使用广泛的可见类转换为使用 Pimpls 就使得编译生成时间减少了一半。第二，它使得代码更改对编译的影响减小了，因为在类的 Pimpl 中的这一部分可以自由更改了——成员可以自由的添加或者删除，而不用重新编译客户端的代码。因为它可以在仅仅更改隐藏的成员时避免重新编译客户代码，所以它又被称为“编译防火墙”。</p>
+
+<p><img src="http://y6b2pg.bay.livefilestore.com/y1pI_P3uHZCpkMFb96zRCFLihUxgDDQB7L3qbpfLfmSTYl74ZUZlc5KuGqow_81iGfYsiKOU_Ap1G4/firewalls.png" alt="" /></p>
+
+<p>但是这还留下了一些问题：pimpl 应当是裸指针吗？哪些东西应该放到 Pimpl class 中？让我们看看这些和其他重要的细节吧。</p>
+
+<h3>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</h3>
+
+<p>避免使用裸指针和显式的 delete。仅仅使用标准 C++ 设施，最适当的选择是使用只能指针 unique_ptr 持有这个 Pimpl 对象，因为可见类是 Pimpl 对象的唯一所有者。使用 unique_ptr 也可以是代码变得简单。[3]</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// in implementation file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// :::</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>                   <span class="c1">// or =default</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意这个模式的关键部分：</p>
+
+<ul>
+<li>使用 unique_ptr 来持有 Pimpl 对象是更好的选择。它比使用 shared_ptr 更高效，而且更能正确表达意图，Pimpl 对象是不应该共享的。</li>
+<li>在你自己的实现文件中定义和使用 Pimpl 对象。隐藏细节。</li>
+<li>在可见类的非内联构造函数中分配 Pimpl 对象。</li>
+<li>你仍然需要自己在可见类的实现文件中定义和实习它的析构函数，即使它和编译器生成的版本一模一样。这是因为虽然 unique_ptr 和 shared_ptr 可以实例化不完整的类型，但是 unique_ptr 的析构函数需要完整的类型，以便调用 delete（与 shared_ptr 不同，shared_ptr 可以在构造时获得更多的信息）。在实现 impl 的同时，自己实现它的析构函数，这可以有效的防止编译器自动生成析构函数。</li>
+<li>上面的模式没有生成默认的拷贝和转移语义，因为 C++11 编译器没有那么热心为你生成拷贝和转移操作。由于我们已经自己定义了析构函数，这使得编译器不再为我们生成转移构造和转移赋值。如果你想要支持拷贝和/或转移语义，和析构函数一样，你需要在实现中定义拷贝和转移操作。</li>
+</ul>
+
+
+<p>C++11 中 Pimpl 另一个优势是，它是转移友好的，因为它仅仅需要拷贝单个指针就可以了。so cool。</p>
+
+<p>让我们考虑一下上面提出的选择，哪些东西应该放到隐藏的 Pimpl 中。</p>
+
+<h2>什么是 Pimpl ？[4]</h2>
+
+<h3>3. 类中的那些部分应该放到 impl 对象中？</h3>
+
+<p>一些可能的选择包括：</p>
+
+<ul>
+<li><strong>所有私有数据（非函数）</strong></li>
+</ul>
+
+
+<p>选择1（得分：6/10）：这是一个好的开始，因为我们可以前向声明任何数据类，这比 #include 类的实际声明要好，它会造成代码依赖。</p>
+
+<p>但是它也存在缺点：一个小问题，我们需要在可见类的实现中不停的写 pimpl-> 。还有个大问题，当增加和删除私有成员函数时，我们还是需要重新编译，而且在极少数情况下，如果重载了非私有函数的话，它会干扰重载决议。</p>
+
+<p>有更好的选择吗？</p>
+
+<ul>
+<li><strong>所有私有成员</strong></li>
+</ul>
+
+
+<p>选择2（得分：9/10）：这（几乎）是我最近的一贯做法。毕竟，在 C++中，我们说的“外部代码不应该也不能关心的部分”就是私有 private。</p>
+
+<p>下面是三条注意事项，第一个就是我上面所说的“几乎”的原因：</p>
+
+<ul>
+<li> 你不能隐藏虚函数到 Pimpl 中，即使虚函数是私有的。如果重写了继承来的虚函数，它必须出现在派生中，即使这个类是 final 类。如果虚函数是 new 函数，那么它必须出现在可见类中，这样才能让派生类重写。</li>
+<li> 如果你需要使用可见类中的函数，那么 Pimpl 类的函数就需要一个指向可见类对象的反向指针，这增加了间接层。</li>
+<li><p> 一个好的折中办法是，使用“选择2”的同时，把那些私有成员需要调用的非私有成员函数一起放到 Pimpl 中（参考下面的“反向指针”）。</p></li>
+<li><p><strong>所有私有和保护成员</strong></p></li>
+</ul>
+
+
+<p>选择3（得分：0/10）：多余的把保护成员移动到 Pimpl 中式绝对错误的。虚成员和保护成员不应该移动到 Pimpl 中，因为这会让他们变得没有价值。毕竟，保护成员仅仅可以让派生类访问，如果让他们不可见或不可用那就没有任何价值了。派生类只能强制了解 Pimpl 的细节，然后再继承 Pimlp，然后维护一个并行的两个对象的继承体系。</p>
+
+<p>但是，仍然有合理的原因把虚函数放到 Pimpl-like（body/implementation） 类中。但是它的动机和 Pimpl 惯用法是不同的，这是桥接模式[5]，它把一个类分成两部分，这两部分都可以包含实现以及独立的可扩展的虚函数。但是这是和 Pimpl 动机不同的另外的模式。</p>
+
+<ul>
+<li><strong>所有私有非虚成员</strong></li>
+</ul>
+
+
+<p>选择4（得分：10/10）：这是理想的情况。为了避免保存或者传递一个反向指针，你可能需要把那些私有函数调用的公有函数也放到 Pimpl 中，然后在可见类中提供一个接口转发。但是你不应该移动保护成员和虚函数到 Pimpl 中，就像上面提到的。</p>
+
+<ul>
+<li><strong>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</strong></li>
+</ul>
+
+
+<p>选择5（得分：8/10某种情况下）：这在某种情况下是有用的，并且它可以有效避免反向指针，因为所有东西都在 Pimpl 类中了。主要的缺点是多了一层封装，并且它使得可见类无法通过继承来扩展了。</p>
+
+<p><strong>它们的每一个的缺点和优点是什么？你怎么选择？</strong></p>
+
+<p>完整的答案事实上比上面我们讨论的要简单的多。抛开经验和具体的分析，我们需要回顾，然后从第一条原则开始回答。</p>
+
+<p>深呼吸，放松，好的。</p>
+
+<p>主要考察的是面向对象语言[6]中的三个部分。它们是：</p>
+
+<ol>
+<li>调用者的接口=公有成员。挺合适所有外部调用者可见和可用的部分。</li>
+<li>派生类的接口=保护和虚成员，这些是仅派生类可见和可用的。</li>
+<li>其他=私有和非虚成员，根据定义，这些是属于实现的细节。</li>
+</ol>
+
+
+<p><img src="http://y6argw.bay.livefilestore.com/y1pw2uUN6-6uSwVzVAKo9bJMQozoiWhrAoEreB-STKa-ZYSV3d-ma_-tB_ex-iUTRD1Br7A5NGdbrQ/impl.png" alt="" /></p>
+
+<p>仅仅第3条，所有第3条涵盖的内容，可以隐藏也应该隐藏到 Pimpl 中。这样我们就能继承所有上面提到的其他东西；举个例子，我们不能把虚成员放到 Pimpl 中，因为我们在第2条中提到的，派生类需要它可见。</p>
+
+<p>上面的表格描述了不同设计的选择。包括 Pimpl，以及引出的其他设计，Coplien 提出的 Handle/Body ，还有桥接模式，虽然某些地方和 Pimpl 类似，但是它的动机和结构是非常不同的。</p>
+
+<h3>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</h3>
+
+<p>答案是：有时候，很不幸，是的。毕竟，我们所做的就是（人为地，不自然的）把对象分为两部分，来隐藏其中一部分。</p>
+
+<p>考虑下面的情况：当可见类的一个函数被调用的时候，通常隐藏部分的函数或者数据是需要协助完成请求的。这没问题也很合理。但是上面已经讨论过，有时候 Pimpl 中的函数必须调用可见类中的非私有或者虚函数。这时候，需要一个指向可见类的指针。</p>
+
+<p>有两个选择：</p>
+
+<ul>
+<li>在 Pimpl 中保存一个反向指针。这会带来轻微的开销，而且会一直保存着这个指针无论你用还是不用。此外，when you repeat yourself you can lie——如果你不小心维护指针的正确性让它指向正确的可见对象，反向指针会存在同步问题，举个例子，默认情况下转移操作之后，它就不再正确了。</li>
+<li>（推荐）通过参数传递 this 指针给 Pimpl 中的函数（例如：pimpl->func(this, params)）。这仅仅会在函数调用(简单)时，带来栈上(廉价的)很小的空间开销，而且也不可能存在同步问题。但是，这意味着给每一个需要的隐藏函数增加个多余的参数。</li>
+</ul>
+
+
+<h2>感谢</h2>
+
+<p>感谢 Edd, pizer, and Howard Hinnant 阐明为什么 ~unique_ptr<T> 需要 T 是完整类型, 并需要用户自己在外部实现类的析构函数；感谢 Stephan Lavavej and Alisdair Meredith 提醒我在转移构造和转移赋值时使用 =default；感谢 Howard Hinnant 指出即使使用了 =default，转移赋值函数仍然需要在实现文件中以非内联函数形式实现，因为它需要类型完整（确保能够 delete）。</p>
+
+<h2>注解</h2>
+
+<p>[1] James O. Coplien. “<a href="http://users.rcn.com/jcoplien/Patterns/C++Idioms/EuroPLoP98.html">C++ Idioms</a>” (EuroPLoP98).</p>
+
+<p>[2] 一开始我使用 impl_ 作为指针的变量名。pimpl 是从 1996 年开始使用的，分享给我这个名字的是同学兼好友 Jeff Sumner，使用字母 “p” 作为指针变量的前缀，同时我也发现了之前变量名的可怕的双关。</p>
+
+<p>[3] 这是 C++ 11 中最简单的模型。最主要的替代方案是使用 shared_ptr 或者裸指针来代替 unique_ptr，这两个的正确实现都比它复杂，存在潜在的错误，编译器生成的函数会产生不正确的行为：如果你使用 shared_ptr，你可以默认得到正确的析构函数，转移构造函数转移赋值函数，但是编译器生成的拷贝操作将是错误的，所以你需要手工明确的实现，或者使用 =delete 禁止它们（如果你忘记了，那你就默默得到了错误的语义），一个无用但是却存在的引用计数。如果你使用裸指针，你需要手动实现5个操作，析构函数，拷贝构造函数，拷贝赋值函数，转移构造函数，还有转移赋值函数。</p>
+
+<p>[4] 不要发关于这个标题的笑话给我，大部分答案我都能想到。</p>
+
+<p>[5] Gamma et al. <a href="http://en.wikipedia.org/wiki/Design_Patterns">Design Patterns: Elements of Reusable Object-Oriented Software</a> (Addison-Wesley, 1994).</p>
+
+<p>[6] 一个类中不需要包含全部特性，举个例子，#2 不适用于那些不存在继承的值语义类。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-30T01:20:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2012/06/30/gotw100/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2012/06/30/gotw100/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2012/06/30/gotw100/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ORM | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/orm/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-05-12T23:39:09+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[C++ ORM 框架 ODB]]></title>
+    <link href="http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb/"/>
+    <updated>2012-08-21T22:03:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb</id>
+    <content type="html"><![CDATA[<h2>什么是 ORM？</h2>
+
+<p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
+
+<p>面向对象是从软件工程基本原则（如耦合、聚合、封装）的基础上发展起来的，而关系数据库则是从数学理论发展而来的，两套理论存在显著的区别。为了解决这个不匹配的现象，对象关系映射技术应运而生。</p>
+
+<p>简单的说：ORM相当于中继数据。通俗的说，ORM就是将对象和它们之间的关系映射成关系数据库的表，以及在数据库中它们的关系。目标就是确定一种持久化对象数据的有效策略，在考虑类之间继承结构的同时，存储各个对象的数据属性和对象间的关系。</p>
+
+<!-- more -->
+
+
+<h2>成熟的 ORM 产品</h2>
+
+<ul>
+<li>Java: 广泛使用的 ORM 框架Hibernate</li>
+<li>Python: web框架 Django 中包含了 ORM</li>
+<li>C++: ODB，QxOrm，LiteSQL 等</li>
+</ul>
+
+
+<p>这里有一个 ORM 产品的列表：<a href="http://en.wikipedia.org/wiki/List_of_object-relational_mapping_software">List of object-relational mapping software</a></p>
+
+<h2>ODB</h2>
+
+<p>ODB 是一个开源的，支持多平台，支持多数据库的 C++ 的 ORM 框架，可将 C++ 对象数据库表映射，进行轻松的数据库查询和操作。
+下面是常规的 C++ 代码：</p>
+
+<p>```cpp
+class person
+{</p>
+
+<pre><code>//...
+</code></pre>
+
+<p>private:</p>
+
+<pre><code>std::string email_;
+
+std::string name_;
+unsigned short age_;
+</code></pre>
+
+<p>};
+```</p>
+
+<p>下面是ODB所需的持久化之后的 C++ 代码， ODB可以根据下面的代码自动生成数据库：</p>
+
+<p>```cpp</p>
+
+<h1>pragma db object</h1>
+
+<p>class person
+{</p>
+
+<pre><code>//...
+</code></pre>
+
+<p>private:</p>
+
+<pre><code>friend class odb::access;
+person() {}
+</code></pre>
+
+<h1>pragma db id</h1>
+
+<pre><code>std::string email_;
+
+std::string name_;
+unsigned short age_;
+</code></pre>
+
+<p>};
+```</p>
+
+<p>有了上面的声明，我们就可以对 person 对象进行一系列的数据库操作了，下面是一个 SQLite 的例子：</p>
+
+<p>```cpp
+odb::sqlite::database db(&ldquo;people.db&rdquo;);</p>
+
+<p>person john(&ldquo;<a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#58;&#x6a;&#x6f;&#x68;&#110;&#x40;&#x64;&#x6f;&#x65;&#x2e;&#111;&#x72;&#x67;">&#x6a;&#x6f;&#104;&#110;&#x40;&#x64;&#x6f;&#x65;&#46;&#x6f;&#114;&#x67;</a>&rdquo;, &ldquo;John Doe&rdquo;, 31);
+person jane(&ldquo;<a href="&#109;&#x61;&#105;&#108;&#x74;&#111;&#58;&#106;&#97;&#110;&#x65;&#x40;&#x64;&#111;&#101;&#46;&#111;&#x72;&#103;">&#x6a;&#97;&#110;&#x65;&#64;&#x64;&#x6f;&#x65;&#x2e;&#111;&#114;&#x67;</a>&rdquo;, &ldquo;Jane Doe&rdquo;, 29);</p>
+
+<p>odb::transaction t(db.begin());</p>
+
+<p>db.persist(john);
+db.persist(jane);</p>
+
+<p>typedef odb::query<person> person_query;</p>
+
+<p>for (auto&amp; p: db.query<person>(person_query::age &lt; 30))</p>
+
+<pre><code>cout &lt;&lt; p &lt;&lt; endl;
+</code></pre>
+
+<p>jane.age(jane.age() + 1);
+db.update(jane);</p>
+
+<p>t.commit();
+```</p>
+
+<p>有了 ORM 所有的数据库的操作也变得面向对象了，代码中不会夹杂着 SQL语句，写起代码来应该会更顺手了。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,310 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>空基类优化 - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="目的 优化空类数据成员的存储空间 别名 EBCO: Empty Base Class Optimization
+Empty Member Optimization 动机 大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 EmptyClass &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">空基类优化</h2>
+	<div class="entry-content"><h2>目的</h2>
+
+<p>优化空类数据成员的存储空间</p>
+
+<h2>别名</h2>
+
+<p>EBCO: Empty Base Class Optimization
+Empty Member Optimization</p>
+
+<h2>动机</h2>
+
+<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">EmptyClass</span> <span class="p">{};</span>
+</span><span class='line'><span class="n">EmptyClass</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span> <span class="c1">// Size of this array can’t be zero.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
+
+<!-- more -->
+
+
+<h2>解决方案&amp;示例代码</h2>
+
+<p>在 C++ 中, 如果一个空类作为基类被继承时, 情况会和上面的有些区别. 编译器允许继承层次结构扁平化, 被继承的空基类不占用空间. 例如下面的代码中 <code>sizeof(AnInt)</code> 在 32 位架构中是 4 字节, <code>sizeof(AnotherEmpty)</code> 是 1 字节, 虽然这两个类都继承自 <code>EmptyClass</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">AnInt</span> <span class="o">:</span> <span class="k">public</span> <span class="n">EmptyClass</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>   <span class="c1">// size = sizeof(int)</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">AnotherEmpty</span> <span class="o">:</span> <span class="k">public</span> <span class="n">EmptyClass</span> <span class="p">{};</span>  <span class="c1">// size =  1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>EBCO 有效的利用了这个特性. 这并不是说简单, 天真的将数据成员的空类变成基类是可取的, 因为这可能会暴露原本需要对用户隐藏的接口. 例如下面的 EBCO 实现方式, 可能会有副作用: 类 <code>Foo</code> 的用户现在可以看到一些方法 (如果在 E1, E2 中存在的话), 虽然他们是私有继承而来的, 不可访问.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">E1</span> <span class="p">{};</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">E2</span> <span class="p">{};</span>
+</span><span class='line'><span class="c1">// **** before EBCO ****</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">E1</span> <span class="n">e1</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">E2</span> <span class="n">e2</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 8</span>
+</span><span class='line'><span class="c1">// **** after EBCO ****</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="o">:</span> <span class="k">private</span> <span class="n">E1</span><span class="p">,</span> <span class="k">private</span> <span class="n">E2</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一种实现 EBCO 的实用方法是: 将空的类成员组合到单一的存储结构扁平的成员中. 下面的模板 <code>BaseOptimization</code> 的前两个模板参数是用来实现 EBCO的. 使用 <code>BaseOptimization</code> 改写类 <code>Foo</code> 如下:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Base1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Base2</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Member</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">BaseOptimization</span> <span class="o">:</span> <span class="n">Base1</span><span class="p">,</span> <span class="n">Base2</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="n">Member</span> <span class="n">member</span><span class="p">;</span>
+</span><span class='line'>   <span class="n">BaseOptimization</span><span class="p">()</span> <span class="p">{}</span>
+</span><span class='line'>   <span class="n">BaseOptimization</span><span class="p">(</span><span class="n">Base1</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">b1</span><span class="p">,</span> <span class="n">Base2</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">b2</span><span class="p">,</span> <span class="n">Member</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">mem</span><span class="p">)</span>
+</span><span class='line'>       <span class="o">:</span> <span class="n">Base1</span><span class="p">(</span><span class="n">b1</span><span class="p">),</span> <span class="n">Base2</span><span class="p">(</span><span class="n">b2</span><span class="p">),</span> <span class="n">member</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'>   <span class="n">Base1</span> <span class="o">*</span> <span class="n">first</span><span class="p">()</span>  <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>   <span class="n">Base2</span> <span class="o">*</span> <span class="n">second</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">BaseOptimization</span><span class="o">&lt;</span><span class="n">E1</span><span class="p">,</span> <span class="n">E2</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用 EBCO 并没有改变类 Foo 的继承体系. 保证基类不会互相冲突, 这是至关重要的. 也就是说 Base1 与 Base2 是独立的集成体系中的一部分.</p>
+
+<p><strong>注意</strong>: 对象身份标识的问题, 不同的编译器处理起来是不相同的. 空对象的地址可能是相同的, 也可能是不同的. 例如: BaseOptimization 的成员函数 first 和 second 返回的指针, 在有些编译器上可能是相同的, 而有些编译器上可能是不同的. 更多的讨论请看这里：<a href="http://stackoverflow.com/questions/7694158/boost-compressed-pair-and-addresses-of-empty-objects">stackoverflow</a></p>
+
+<h2>已知的用途</h2>
+
+<p><a href="http://www.boost.org/doc/libs/1_53_0/libs/utility/compressed_pair.htm">boost::compressed_pair</a> 使用了该惯用法, 来优化 pair 的存储空间
+C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.html">unique­_ptr</a> 也使用了该惯用法</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.informit.com/articles/article.aspx?p=31473&amp;seqNum=2">The Empty Base Class Optimization (EBCO)</a></li>
+<li><a href="http://www.cantrip.org/emptyopt.html">The &ldquo;Empty Member&rdquo; C++ Optimization</a></li>
+<li><a href="http://www.ibm.com/developerworks/aix/library/au-boostutilities/index.html">Internals of boost::compressed_pair</a></li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-25T07:50:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/idiom/'>idiom</a>
+
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/02/25/empty-base-optimization/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/';
+        var disqus_url = 'http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>
