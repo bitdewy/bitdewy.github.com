@@ -240,7 +240,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">auto</span><span class="o">&amp;</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>                     <span class="c1">// arr2&#39;s type is const char (&amp;)[13]</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>            <span class="c1">// someFunc is function, type is void(int, double)</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>            <span class="c1">// someFunc is function, type is void(int, double)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">auto</span> <span class="n">func1</span> <span class="o">=</span> <span class="n">someFunc</span><span class="p">;</span>                 <span class="c1">// func1&#39;s type is void(*)(int, double)</span>
 </span><span class='line'>
@@ -255,7 +255,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -277,7 +277,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span><span class='line'><span class="k">auto</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -290,7 +290,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>        <span class="c1">// type is int, value is 27</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>         <span class="c1">// ditto</span>
+</span><span class='line'><span class="k">auto</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>         <span class="c1">// ditto</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>    <span class="c1">// type is std::initializier_list&lt;int&gt;, value is { 27 }</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>       <span class="c1">// ditto</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -345,7 +345,7 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">createInitList</span><span class="p">()</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="nf">createInitList</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">return</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>    <span class="c1">// error: can&#39;t deduce type for { 1, 2, 3 }</span>
 </span><span class='line'><span class="p">}</span>
@@ -461,6 +461,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

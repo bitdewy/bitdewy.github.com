@@ -206,7 +206,7 @@
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">any</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="n">any</span><span class="p">()</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="n">nullptr</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class='line'>  <span class="n">any</span><span class="p">()</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="k">nullptr</span><span class="p">)</span> <span class="p">{}</span>
 </span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">ValueType</span><span class="o">&gt;</span>
 </span><span class='line'>  <span class="n">any</span><span class="p">(</span><span class="k">const</span> <span class="n">ValueType</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="k">new</span> <span class="n">holder</span><span class="o">&lt;</span><span class="n">ValueType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="p">{}</span>
 </span><span class='line'>  <span class="n">any</span><span class="p">(</span><span class="k">const</span> <span class="n">any</span><span class="o">&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="n">content</span> <span class="o">?</span> <span class="n">other</span><span class="p">.</span><span class="n">content</span><span class="o">-&gt;</span><span class="n">clone</span><span class="p">()</span> <span class="o">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{}</span>
@@ -289,7 +289,7 @@
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">bitdewy</span><span class="o">::</span><span class="n">any</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">any_array</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">any_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -409,6 +409,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

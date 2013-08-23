@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考 &hellip;">
+	<meta name="description" content="什么是 SFINAE? (Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例. SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,220 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/06/25/cpp-template-sfinae/">
+		
+			C++ 泛型编程之 SFINAE</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是 SFINAE?</h2>
+
+<p>(Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例.</p>
+
+<p>SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中, C++ 编译器会试图实例化一些候选的函数签名, 以确保函数调用时模板的精确匹配, 当找到一个不合适的匹配时(例如无效的参数或范围值), 则会将这个不合适的匹配从重载决议中删除, 而不是产生一个编译错误. 如果有且只有一个函数的话, 才会产生一个编译错误.</p>
+
+<p>考虑下面的简单的乘法计数器</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">long</span> <span class="nf">multiply</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">multiplication_result</span> <span class="n">multiply</span><span class="p">(</span><span class="n">T</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T</span> <span class="n">t2</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">t1</span> <span class="o">*</span> <span class="n">t2</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">multiply</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 main 函数中的函数调用 multiply, 会导致编译器对模板参数的实例化, 虽然第一个非模板函数 multiply 明显是一个更佳的匹配. 在实例化的过程中, 会产生一个非法的类型 int::multiplication_result. 根据 SFINAE, 这个非法的实例化会被自动丢弃. 最终, 非模板的 multiply 会被调用. 编译通过.</p>
+
+
+		
+		<a href="/blog/2013/06/25/cpp-template-sfinae/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-25T23:01:00+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/template/'>template</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/06/25/cpp-template-sfinae/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/06/14/cpp11-multithread-promise-future/">
+		
+			C++11 多线程, Std::future & Std::promise</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
+
+<h2>std::packaged_task</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 可以包装任何可调用的对象(函数, lambda 表达式, std::bind, 或其他函数对象), 以便异步调用, 调用结果保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中, 可以通过成员函数 get_future 访问. 需要注意的是, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 是不可拷贝的(move only).</p>
+
+<p>示例代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cmath&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;functional&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_lambda</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_lambda:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_bind</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_bind:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_thread</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">task_td</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">task</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">task_td</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_thread:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">task_lambda</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_bind</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_thread</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2013/06/14/cpp11-multithread-promise-future/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-14T22:36:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>, <a class='category' href='/blog/categories/multithread/'>multithread</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/06/14/cpp11-multithread-promise-future/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -228,7 +442,7 @@
 <p>在 c++03 中, 函数指针要这么写:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -317,10 +531,10 @@
 <span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">;</span>                   <span class="c1">// (a)</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">();</span>                 <span class="c1">// (b)</span>
+</span><span class='line'><span class="n">widget</span> <span class="nf">w</span><span class="p">();</span>                 <span class="c1">// (b)</span>
 </span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{};</span>                 <span class="c1">// (c)</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                <span class="c1">// (d)</span>
+</span><span class='line'><span class="n">widget</span> <span class="nf">w</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                <span class="c1">// (d)</span>
 </span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{</span><span class="n">x</span><span class="p">};</span>                <span class="c1">// (e)</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">widget</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>               <span class="c1">// (f)</span>
@@ -652,173 +866,18 @@ Empty Member Optimization</p>
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/01/03/you-dont-know-const-and-mutable/">
-		
-			你确定你懂 Const 和 Mutable ?</a>
-	</h2>
-	<div class="entry-content">
-		<p>const 和 mutable 是 C++ 中两个关键字，你确定你懂 const 和 mutable 吗？</p>
-
-<p>下面是一段完整的 C++11 代码;</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;utility&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
-</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
-</span><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">z</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="n">v</span><span class="p">};</span> <span class="p">});</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">z</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="n">v</span><span class="p">};</span> <span class="p">});</span>
-</span><span class='line'>  <span class="n">x</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">y</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面的程序能正确同步么? 有线程安全的问题吗?</p>
-
-<p>嗯, vector 是标准库的内置容器, 如果换成我们自己写的类呢? 比如下面的代码;</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;utility&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
-</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span><span class="cm">/*...*/</span><span class="p">}</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="n">widget</span><span class="p">,</span> <span class="n">widget</span><span class="o">&gt;</span> <span class="n">z</span><span class="p">{</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span> <span class="p">};</span> <span class="p">});</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">async</span><span class="p">([]{</span> <span class="n">pair</span><span class="o">&lt;</span><span class="n">widget</span><span class="p">,</span> <span class="n">widget</span><span class="o">&gt;</span> <span class="n">z</span><span class="p">{</span> <span class="n">w1</span><span class="p">,</span> <span class="n">w2</span> <span class="p">};</span> <span class="p">});</span>
-</span><span class='line'>  <span class="n">x</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">y</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>widget</code> 的线程安全性如何?</p>
-
-
-		
-		<a href="/blog/2013/01/03/you-dont-know-const-and-mutable/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-03T14:38:00+08:00" pubdate data-updated="true">Jan 3<span>rd</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/01/03/you-dont-know-const-and-mutable/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/">
-		
-			C++11 Lambda in Qt5</a>
-	</h2>
-	<div class="entry-content">
-		<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
-
-<h2>lambda 函数与表达式</h2>
-
-<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
-
-
-		
-		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-23T22:32:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
-        <a href="/blog/page/3/" class="prev">Prev</a>
+        
+            <a href="/posts//blog/page/3/" class="prev">Prev</a>
+        
     
     
-        <a href="/blog/page/5/" class="next">Next</a>
+        <a href="/posts//blog/page/5/" class="next">Next</a>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
-</nav></div>
+</nav>
+</div>
 	<footer id="footer" class="inner">Copyright &copy; 2014
 
     bitdewy
@@ -847,6 +906,18 @@ Empty Member Optimization</p>
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

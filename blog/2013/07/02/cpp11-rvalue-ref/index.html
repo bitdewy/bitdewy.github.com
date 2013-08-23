@@ -165,7 +165,7 @@ int& &hellip;">
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
 </span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>        <span class="c1">// OK;</span>
 </span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
 </span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>         <span class="c1">// Error: n is an lvalue</span>
@@ -179,8 +179,8 @@ int& &hellip;">
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">bar</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">bar</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>             <span class="c1">// calls bar(int&amp;&amp;)</span>
 </span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
 </span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>               <span class="c1">// calls bar(const int&amp;)</span>
@@ -211,10 +211,10 @@ int& &hellip;">
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">bool</span> <span class="nf">is_r_value</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="kt">bool</span> <span class="nf">is_r_value</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span> <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">test</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="p">)</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">test</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> <span class="c1">// i 为具名变量，即使被声明成右值也不會被认为是右值。</span>
 </span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">i</span><span class="p">));</span> <span class="c1">// 使用 std::move&lt;T&gt;() 取得右值。</span>
@@ -318,6 +318,18 @@ int& &hellip;">
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

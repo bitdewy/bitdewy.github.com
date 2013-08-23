@@ -127,8 +127,8 @@
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'><span class="k">private</span><span class="o">:</span>
 </span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
 </span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -178,8 +178,8 @@
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'><span class="k">private</span><span class="o">:</span>
 </span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
 </span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Attorney</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -271,7 +271,7 @@
 </span><span class='line'>  <span class="k">friend</span> <span class="kt">int</span> <span class="n">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">Derived</span> <span class="n">d</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">Attorney</span><span class="o">::</span><span class="n">callFunc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
@@ -378,6 +378,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

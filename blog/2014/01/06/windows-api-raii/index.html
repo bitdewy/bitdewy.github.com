@@ -127,14 +127,14 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="nf">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
 </span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">release1</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">Acquire</span> <span class="n">Resource2</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="nf">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
 </span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource2</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">release2</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
@@ -160,7 +160,7 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="nf">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="n">ON_SCOPE_EXIT</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
@@ -261,14 +261,14 @@
 </span><span class='line'>    <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="k">operator</span> <span class="n">bool_type</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">Traits</span><span class="o">::</span><span class="n">invalid</span><span class="p">()</span> <span class="o">!=</span> <span class="n">value_</span> <span class="o">?</span> <span class="o">&amp;</span><span class="n">bool_struct</span><span class="o">::</span><span class="n">member</span> <span class="o">:</span> <span class="n">nullptr</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">Traits</span><span class="o">::</span><span class="n">invalid</span><span class="p">()</span> <span class="o">!=</span> <span class="n">value_</span> <span class="o">?</span> <span class="o">&amp;</span><span class="n">bool_struct</span><span class="o">::</span><span class="nl">member</span> <span class="p">:</span> <span class="k">nullptr</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="k">private</span><span class="o">:</span>
 </span><span class='line'>  <span class="n">unique_handle</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">unique_handle</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">close</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">close</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">Traits</span><span class="o">::</span><span class="n">close</span><span class="p">(</span><span class="n">value_</span><span class="p">);</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -278,7 +278,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">struct</span> <span class="n">handle_traits</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">static</span> <span class="n">HANDLE</span> <span class="n">invalid</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">nullptr</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">close</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">handle</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">CloseHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
@@ -405,6 +405,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

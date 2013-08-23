@@ -178,14 +178,14 @@
 </span><span class='line'>
 </span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">buffer</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">kBufferMaxSize</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">kBufferMaxSize</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;&amp;</span> <span class="n">s</span><span class="p">)</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;&amp;</span> <span class="n">s</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">rdbuf</span><span class="p">();</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span> <span class="n">s</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">send</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">send</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="n">buffer</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kBufferMaxSize</span><span class="p">;</span> <span class="p">});</span>
@@ -194,7 +194,7 @@
 </span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">receive</span><span class="p">()</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">receive</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="o">!</span><span class="n">buffer</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">});</span>
@@ -204,7 +204,7 @@
 </span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">auto</span> <span class="n">future_producer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
 </span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
@@ -212,7 +212,7 @@
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>  <span class="p">});</span>
 </span><span class='line'>  <span class="k">auto</span> <span class="n">future_consumer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
-</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">receive</span><span class="p">();</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>  <span class="p">});</span>
@@ -315,6 +315,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

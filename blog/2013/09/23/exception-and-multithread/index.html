@@ -177,9 +177,9 @@
 </span><span class='line'><span class="cp">#include &lt;exception&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">calc</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span><span class="o">&amp;</span> <span class="n">eptr</span><span class="p">)</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">calc</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span><span class="o">&amp;</span> <span class="n">eptr</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">try</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
 </span><span class='line'>    <span class="n">s</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="c1">// throw out of range exception</span>
 </span><span class='line'>    <span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_exception_ptr</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="p">());</span> <span class="c1">// if no exception use default</span>
@@ -189,11 +189,11 @@
 </span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr</span><span class="p">;</span>
 </span><span class='line'>  <span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">ref</span><span class="p">(</span><span class="n">eptr</span><span class="p">)));</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">try</span> <span class="p">{</span>
 </span><span class='line'>    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
 </span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">eptr</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">rethrow_exception</span><span class="p">(</span><span class="n">eptr</span><span class="p">);</span>
@@ -303,6 +303,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

@@ -3,11 +3,12 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Xcode 配置 Qt 开发环境手记 - Bitdewy</title>
+	<title>[译] Item 6: Use the explicitly typed initializer idiom when auto deduces undesired types. - Bitdewy</title>
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。 其次，准备好 Xcode 先。正文开始： 安装Qt library Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点这里， &hellip;">
+	<meta name="description" content="Item 5 介绍了如何使用 auto 声明来获得好处，但是有时候 auto 类型推导的行为可能和你预期的不太一样。举个例子，假设我们有下面这样的一个函数： 1
+std::vector&lt;bool&gt; features(const Widget&amp; w); 第 5 位表示 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,21 +99,15 @@
 
 	
 	<div id="content" class="inner"><article class="post">
-	<h2 class="title">Xcode 配置 Qt 开发环境手记</h2>
-	<div class="entry-content"><p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
+	<h2 class="title">[译] Item 6: Use the Explicitly Typed Initializer Idiom When Auto Deduces Undesired Types.</h2>
+	<div class="entry-content"><p>Item 5 介绍了如何使用 <code>auto</code> 声明来获得好处，但是有时候 <code>auto</code> 类型推导的行为可能和你预期的不太一样。举个例子，假设我们有下面这样的一个函数：</p>
 
-<p>其次，准备好 Xcode 先。正文开始：</p>
-
-<h2>安装Qt library</h2>
-
-<p>Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点<a href="http://qt-project.org/downloads">这里</a>，MAC 版的 release 和 debug 库是分开的，可以自由选择。一路安装，下一步就 OK。</p>
-
-<!-- more -->
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>生成 xcodeproj</h2>
-
-<p>生成 xcodeproj 文件(夹)，(它是文件还是文件夹？)，先创建目录，然后进入，使用 <code>qmake -project</code> 生成 pro 文件，如果找不到 <code>qmake</code>，那就需要手工找，或者重新安装 Qt library 了，生成 pro 文件之后，就可以用 <code>qmake -spec macx-xcode</code> 生成 xcodeproj 了，然后，就没有然后了，直接用 Xcode 打开就 OK。</p>
+<p>第 5 位表示 <code>Widget</code> 是否有高优先级，我们的代码可能看起来像下面这样：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -120,46 +115,34 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>localhost:~ bitdewy<span class="nv">$ </span>mkdir Projects/qt_xcode_hello  <span class="c">#建个文件夹先</span>
-</span><span class='line'>localhost:~ bitdewy<span class="nv">$ </span><span class="nb">cd </span>Projects/qt_xcode_hello/    <span class="c">#进入新建的文件夹</span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -project    <span class="c">#生成pro文件 </span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>ls                <span class="c">#看看生成了啥玩意儿</span>
-</span><span class='line'>qt_xcode_hello.pro
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -spec macx-xcode  <span class="c">#生成xcodeproj</span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>ls                      <span class="c">#再看看</span>
-</span><span class='line'>qt_xcode_hello.pro        qt_xcode_hello.xcodeproj
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>open qt_xcode_hello.xcodeproj/  <span class="c">#用 Xcode 打开</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// is w high priority?</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// process w in accord</span>
+</span><span class='line'>                                     <span class="c1">// with its priority</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>配置 Xcode 工程</h2>
-
-<p>打开个空工程，自然是毛也没有，首先工程中新建个文件，然后新建 target 选 other &ndash;> External Build System ，Product Name 就叫 qmake，Build Tool 指定到 qmake 的路径，Finish 之后，删除 Arguments 中的 <code>$(ACTION)</code>。Command + D，Duplicate 出来个 qmake copy，改名 <code>qmake -project</code>，Arguments 填上 <code>-project</code>，先run <code>qmake -project</code>，再run <code>qmake</code>，xcode 工程就和谐了，现在可以写代码跑了。</p>
-
-<p>明白人一看就知道上面是在干什么了，新建文件，然后 <code>qmake -project</code> 更新pro文件，再 <code>qmake</code> 生成 makefile。整个过程实际上就三行 shell 搞定。</p>
+<p>上面的代码没有问题。可以很好的工作。但是如果我们把 <code>highPriority</code> 的明确类型声明改为 <code>auto</code>,</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>touch qt_xcode_hello.cpp
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -project
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span>  <span class="c1">// is w high priority ?</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>为毛不直接生成能用的 Xcode 工程</h2>
+<p>情况就不一样了。尽管编译完全没有问题，但是行为却变得完全不可预测：</p>
 
-<p>更明白的人可能要说脏话了，你妹的搞这么麻烦，生成 xcodeproj 之前补上一句 <code>touch qt_xcode_hello.cpp</code> 不就不用配置 XCode 工程了么？ bitdewy 也不是二货，为毛要配置 Xcode 工程？ 因为 Qt 的 Meta Object Compile，用到 signal 和 slot 的时候，都需要 qmake 生成 moc 文件，所以先配置一下没什么坏处这样。</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// undefined behavior!</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<h4>参考</h4>
 
-<ol>
-<li><a href="http://qtnode.net/wiki/Qt4_with_Xcode">Qt4 with Xcode</a></li>
-</ol>
+<p>就像注释中写的那样，调用 <code>processWidget</code> 会产生未定义行为。但是这是为什么？答案会让大家很惊讶。使用 <code>auto</code> 之后，<code>highPriority</code> 不再是 bool 类型了。</p>
 
+<h2>需要记住的</h2>
+
+<p>&ndash;</p>
 </div>
 
 
@@ -176,11 +159,11 @@
   
 
 
-<time datetime="2012-12-09T13:10:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
+<time datetime="2014-11-23T21:55:00+08:00" pubdate data-updated="true">Nov 23<span>rd</span>, 2014</time></div>
 	<div class="tags">
 
 
-	<a class='category' href='/blog/categories/qt/'>Qt</a>, <a class='category' href='/blog/categories/xcode/'>Xcode</a>
+	<a class='category' href='/blog/categories/effective-modern-c-plus-plus/'>Effective Modern C++</a>
 
 
 </div>
@@ -233,8 +216,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/';
-        var disqus_url = 'http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/';
+        var disqus_identifier = 'http://bitdewy.github.com/blog/2014/11/23/emcpp-item-6/';
+        var disqus_url = 'http://bitdewy.github.com/blog/2014/11/23/emcpp-item-6/';
         var disqus_script = 'embed.js';
       
     (function () {

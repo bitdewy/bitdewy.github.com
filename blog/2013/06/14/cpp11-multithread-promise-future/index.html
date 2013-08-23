@@ -152,7 +152,7 @@
 </span><span class='line'><span class="cp">#include &lt;future&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;functional&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">task_lambda</span><span class="p">()</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_lambda</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
@@ -162,7 +162,7 @@
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_lambda:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">task_bind</span><span class="p">()</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_bind</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">));</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
@@ -170,7 +170,7 @@
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_bind:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">task_thread</span><span class="p">()</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">task_thread</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">);</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
@@ -179,7 +179,7 @@
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_thread:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">task_lambda</span><span class="p">();</span>
 </span><span class='line'>    <span class="n">task_bind</span><span class="p">();</span>
@@ -237,7 +237,7 @@
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">try</span> <span class="p">{</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">try</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">X</span> <span class="n">res</span><span class="p">;</span>
 </span><span class='line'>    <span class="c1">// compute a value for res</span>
 </span><span class='line'>    <span class="n">p</span><span class="p">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
@@ -290,7 +290,7 @@
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;future&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="c1">// future from a packaged_task</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](){</span> <span class="k">return</span> <span class="mi">7</span><span class="p">;</span> <span class="p">});</span> <span class="c1">// wrap the function</span>
@@ -405,6 +405,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

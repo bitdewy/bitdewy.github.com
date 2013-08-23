@@ -215,7 +215,7 @@
 </span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;hex.h&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
 </span><span class='line'>
@@ -356,7 +356,7 @@
 </span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;rsa.h&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">InvertibleRSAFunction</span> <span class="n">params</span><span class="p">;</span>
@@ -371,7 +371,7 @@
 </span><span class='line'>  <span class="n">RSA</span><span class="o">::</span><span class="n">PublicKey</span> <span class="n">public_key</span><span class="p">(</span><span class="n">params</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Encryptor</span> <span class="n">e</span><span class="p">(</span><span class="n">public_key</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
 </span><span class='line'>
 </span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">encoded</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">HexEncoder</span> <span class="n">encoder</span><span class="p">;</span>
@@ -405,7 +405,7 @@
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Decryptor</span> <span class="n">d</span><span class="p">(</span><span class="n">private_key</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>
@@ -510,6 +510,18 @@
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

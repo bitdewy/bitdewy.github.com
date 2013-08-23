@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-11-18T01:20:24+08:00</updated>
+  <updated>2014-12-17T00:31:41+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,67 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[lua tutorial]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/12/16/lua-tutorial/"/>
+    <updated>2014-12-16T23:34:52+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/12/16/lua-tutorial</id>
+    <content type="html"><![CDATA[<iframe src="https://onedrive.live.com/embed?cid=DABFBDF91EE62075&resid=DABFBDF91EE62075%212133&authkey=ACSTWl1GIzIC9IE&em=2" width="402" height="327" frameborder="0" scrolling="no"></iframe>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 6: Use the explicitly typed initializer idiom when auto deduces undesired types.]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/11/23/emcpp-item-6/"/>
+    <updated>2014-11-23T21:55:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/11/23/emcpp-item-6</id>
+    <content type="html"><![CDATA[<p>Item 5 介绍了如何使用 <code>auto</code> 声明来获得好处，但是有时候 <code>auto</code> 类型推导的行为可能和你预期的不太一样。举个例子，假设我们有下面这样的一个函数：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第 5 位表示 <code>Widget</code> 是否有高优先级，我们的代码可能看起来像下面这样：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// is w high priority?</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// process w in accord</span>
+</span><span class='line'>                                     <span class="c1">// with its priority</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码没有问题。可以很好的工作。但是如果我们把 <code>highPriority</code> 的明确类型声明改为 <code>auto</code>,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span>  <span class="c1">// is w high priority ?</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>情况就不一样了。尽管编译完全没有问题，但是行为却变得完全不可预测：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// undefined behavior!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就像注释中写的那样，调用 <code>processWidget</code> 会产生未定义行为。但是这是为什么？答案会让大家很惊讶。使用 <code>auto</code> 之后，<code>highPriority</code> 不再是 bool 类型了。</p>
+
+<h2>需要记住的</h2>
+
+<p>&ndash;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] Item 5: Prefer auto to explicit type declarations.]]></title>
@@ -177,7 +238,7 @@
 <span class='line-number'>5</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unorderd_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
 </span><span class='line'><span class="c1">// ...</span>
-</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="nl">p</span> <span class="p">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="c1">// ...    do something with p</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -192,7 +253,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="nl">p</span> <span class="p">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="c1">// ...  as before</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -266,8 +327,8 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
-</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
+</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
 </span><span class='line'>                          <span class="c1">// see Item 3 for info on decltype</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -279,8 +340,8 @@
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">xType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
-</span><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span> <span class="n">yType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">xType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</span><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span> <span class="n">yType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -288,8 +349,8 @@
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">xType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="err">&#39;</span>
-</span><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">yType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span><span class="err">&#39;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">xType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="err">&#39;</span>
+</span><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">yType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span><span class="err">&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -426,7 +487,7 @@
 </span><span class='line'>  <span class="c1">// show T</span>
 </span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;T =     &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// show param&#39;s type</span>
-</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -524,7 +585,7 @@
 <span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// decltype(i) is const int</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">bool</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
+</span><span class='line'><span class="kt">bool</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
 </span><span class='line'>                            <span class="c1">// decltype(f) is bool(const Widget&amp;)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span>
@@ -542,7 +603,7 @@
 </span><span class='line'><span class="k">class</span> <span class="nc">vector</span> <span class="p">{</span>
 </span><span class='line'><span class="k">public</span><span class="o">:</span>
 </span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">);</span>
 </span><span class='line'>    <span class="c1">// ...</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -572,7 +633,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span>  <span class="c1">// works, but requires refinement </span>
+</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span>  <span class="c1">// works, but requires refinement </span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
@@ -631,7 +692,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>    <span class="c1">// C++14, works, but still requires refinement</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>    <span class="c1">// C++14, works, but still requires refinement</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
@@ -655,7 +716,7 @@
 </span><span class='line'><span class="k">auto</span> <span class="n">myWiget1</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>    <span class="c1">// auto type deduction:</span>
 </span><span class='line'>                       <span class="c1">// myWidget1&#39;s type is Widget</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">myWidget2</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>  <span class="c1">// decltype type deduction:</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">myWidget2</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>  <span class="c1">// decltype type deduction:</span>
 </span><span class='line'>                                <span class="c1">// myWidget2&#39;s type is const Widget&amp;</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -667,7 +728,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -693,7 +754,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>          <span class="c1">// c is now a </span>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// universal reference</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// universal reference</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -708,7 +769,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>  <span class="c1">// final C++14 version</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>  <span class="c1">// final C++14 version</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
@@ -725,7 +786,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>    <span class="c1">// final C++11 version</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
@@ -763,14 +824,14 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f1</span><span class="p">()</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f1</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// ...</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">x</span><span class="p">;</span>    <span class="c1">// decltype(x) is int, so f1 returns int</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f2</span><span class="p">()</span>
+</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f2</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// ...</span>
@@ -942,7 +1003,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">auto</span><span class="o">&amp;</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>                     <span class="c1">// arr2&#39;s type is const char (&amp;)[13]</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>            <span class="c1">// someFunc is function, type is void(int, double)</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>            <span class="c1">// someFunc is function, type is void(int, double)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">auto</span> <span class="n">func1</span> <span class="o">=</span> <span class="n">someFunc</span><span class="p">;</span>                 <span class="c1">// func1&#39;s type is void(*)(int, double)</span>
 </span><span class='line'>
@@ -957,7 +1018,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -979,7 +1040,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span><span class='line'><span class="k">auto</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -992,7 +1053,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>        <span class="c1">// type is int, value is 27</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>         <span class="c1">// ditto</span>
+</span><span class='line'><span class="k">auto</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>         <span class="c1">// ditto</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>    <span class="c1">// type is std::initializier_list&lt;int&gt;, value is { 27 }</span>
 </span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>       <span class="c1">// ditto</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -1047,7 +1108,7 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">createInitList</span><span class="p">()</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="nf">createInitList</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">return</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>    <span class="c1">// error: can&#39;t deduce type for { 1, 2, 3 }</span>
 </span><span class='line'><span class="p">}</span>
@@ -1391,14 +1452,14 @@
 <p>我们使用没有模板的情况先来观察，对，没错，下面的语法是合法的，</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">myFunc</span><span class="p">(</span><span class="kt">int</span> <span class="n">param</span><span class="p">[]);</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">myFunc</span><span class="p">(</span><span class="kt">int</span> <span class="n">param</span><span class="p">[]);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>但是数组参数的声明会被退化成指针，这意味着它和下面的声明是完全一致的：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">myFunc</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">param</span><span class="p">);</span>     <span class="c1">// same function as above</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">myFunc</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">param</span><span class="p">);</span>     <span class="c1">// same function as above</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1443,7 +1504,7 @@
 </span><span class='line'><span class="c1">// because we care only about the number of elements it contains.)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>                                <span class="c1">// info</span>
-</span><span class='line'><span class="n">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">arraySize</span><span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="o">&amp;</span><span class="p">)[</span><span class="n">N</span><span class="p">])</span> <span class="n">noexcept</span>    <span class="c1">// below on</span>
+</span><span class='line'><span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">arraySize</span><span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="o">&amp;</span><span class="p">)[</span><span class="n">N</span><span class="p">])</span> <span class="k">noexcept</span>    <span class="c1">// below on</span>
 </span><span class='line'><span class="p">{</span>                                                    <span class="c1">// constexpr</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">N</span><span class="p">;</span>                                        <span class="c1">// and</span>
 </span><span class='line'><span class="p">}</span>                                                    <span class="c1">// noexcept</span>
@@ -1487,7 +1548,7 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>    <span class="c1">// someFunc is a function;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>    <span class="c1">// someFunc is a function;</span>
 </span><span class='line'>                               <span class="c1">// type is void(int, double)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
@@ -1700,7 +1761,7 @@
 </pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="o">*</span><span class="nx">fib</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>  <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 </span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">yield</span> <span class="nx">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">yield</span> <span class="nx">i</span><span class="p">;</span>
 </span><span class='line'>    <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">i</span><span class="p">;</span>
 </span><span class='line'>    <span class="nx">i</span> <span class="o">=</span> <span class="nx">j</span><span class="p">;</span>
 </span><span class='line'>    <span class="nx">j</span> <span class="o">+=</span> <span class="nx">t</span><span class="p">;</span>
@@ -1742,10 +1803,10 @@
 <span class='line-number'>9</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Collection</span><span class="o">&gt;</span>
 </span><span class='line'><span class="k">typename</span> <span class="n">Collection</span><span class="o">::</span><span class="n">iterator</span> <span class="n">concat</span><span class="p">(</span><span class="n">Collection</span> <span class="n">a</span><span class="p">,</span> <span class="n">Collection</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">x</span> <span class="o">:</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="nl">x</span> <span class="p">:</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">yield</span> <span class="n">x</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">x</span> <span class="o">:</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="nl">x</span> <span class="p">:</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">yield</span> <span class="n">x</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
@@ -3146,7 +3207,7 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">F</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">F</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Lhs</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)),</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Rhs</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">)));</span>
@@ -3236,14 +3297,14 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="nf">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
 </span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">release1</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">Acquire</span> <span class="n">Resource2</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="nf">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
 </span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource2</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">release2</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
@@ -3269,7 +3330,7 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="nf">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="c1">// throw exception or return or...</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="n">ON_SCOPE_EXIT</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
@@ -3370,14 +3431,14 @@
 </span><span class='line'>    <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="k">operator</span> <span class="n">bool_type</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">Traits</span><span class="o">::</span><span class="n">invalid</span><span class="p">()</span> <span class="o">!=</span> <span class="n">value_</span> <span class="o">?</span> <span class="o">&amp;</span><span class="n">bool_struct</span><span class="o">::</span><span class="n">member</span> <span class="o">:</span> <span class="n">nullptr</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">Traits</span><span class="o">::</span><span class="n">invalid</span><span class="p">()</span> <span class="o">!=</span> <span class="n">value_</span> <span class="o">?</span> <span class="o">&amp;</span><span class="n">bool_struct</span><span class="o">::</span><span class="nl">member</span> <span class="p">:</span> <span class="k">nullptr</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="k">private</span><span class="o">:</span>
 </span><span class='line'>  <span class="n">unique_handle</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">unique_handle</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
 </span><span class='line'>  <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">unique_handle</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">close</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="nf">close</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">Traits</span><span class="o">::</span><span class="n">close</span><span class="p">(</span><span class="n">value_</span><span class="p">);</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -3387,7 +3448,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">struct</span> <span class="n">handle_traits</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">static</span> <span class="n">HANDLE</span> <span class="n">invalid</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">nullptr</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">close</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">handle</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">CloseHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
@@ -3648,7 +3709,7 @@
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span> <span class="n">set_of_s</span><span class="p">;</span> <span class="c1">// S is LessThanComparable</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">S</span> <span class="n">value</span><span class="p">{</span> <span class="mi">42</span><span class="p">,</span> <span class="s">&quot;Test&quot;</span><span class="p">,</span> <span class="mf">3.14</span> <span class="p">};</span>
@@ -3748,14 +3809,14 @@
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;tuple&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="n">int_</span><span class="p">{};</span>
+</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="n">int_</span><span class="p">{};</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Tuple</span><span class="o">&gt;</span>
 </span><span class='line'><span class="kt">void</span> <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">Functor</span><span class="o">&amp;&amp;</span> <span class="n">functor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">functor</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">Pos</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">Pos</span><span class="o">&gt;</span>
 </span><span class='line'><span class="kt">void</span> <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">Functor</span><span class="o">&amp;&amp;</span> <span class="n">functor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">Pos</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">functor</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="n">Pos</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
 </span><span class='line'>  <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Functor</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">functor</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">Pos</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">());</span>
@@ -3775,7 +3836,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;Test&quot;</span><span class="p">),</span> <span class="mf">3.14</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">F</span> <span class="n">f</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">tuple_visitor</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span>
@@ -3921,7 +3982,7 @@
 </span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;hex.h&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
 </span><span class='line'>
@@ -4062,7 +4123,7 @@
 </span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;rsa.h&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">InvertibleRSAFunction</span> <span class="n">params</span><span class="p">;</span>
@@ -4077,7 +4138,7 @@
 </span><span class='line'>  <span class="n">RSA</span><span class="o">::</span><span class="n">PublicKey</span> <span class="n">public_key</span><span class="p">(</span><span class="n">params</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Encryptor</span> <span class="n">e</span><span class="p">(</span><span class="n">public_key</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
 </span><span class='line'>
 </span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">encoded</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">HexEncoder</span> <span class="n">encoder</span><span class="p">;</span>
@@ -4111,7 +4172,7 @@
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Decryptor</span> <span class="n">d</span><span class="p">(</span><span class="n">private_key</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>
@@ -4172,9 +4233,9 @@
 </span><span class='line'><span class="cp">#include &lt;random&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Container</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">Container</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="n">Container</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">Container</span> <span class="n">c</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">rand</span><span class="p">());</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
@@ -4234,16 +4295,16 @@
 </span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Container</span><span class="o">&gt;</span>
 </span><span class='line'>  <span class="k">operator</span> <span class="n">Container</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">Container</span> <span class="n">c</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">rand</span><span class="p">());</span> <span class="c1">// push_back is not supported by all standard containers.</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>    <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'> <span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="n">size_t</span> <span class="n">count</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">size_t</span> <span class="n">count</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_s</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_v</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_l</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
@@ -4405,300 +4466,6 @@
 <li>Java: <a href="http://docs.spring.io/spring/docs/2.5.x/reference/aop.html">Spring AOP</a></li>
 <li><a href="http://www.lisha.ufsc.br/teaching/sce/aop_with_c++.pdf">Aspect-Oriented Programming with C++</a></li>
 <li><a href="http://www.aspectc.org/">AspectC++</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[异常与多线程]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread/"/>
-    <updated>2013-09-23T23:30:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread</id>
-    <content type="html"><![CDATA[<p>C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference).</p>
-
-<p>有些时候, 我们不得不使用多线程来提高工作的执行效率, 但由于异常都是基于线程的, 如何在线程间传递异常, 就成为了一个问题. C++11 之前异常是无法在线程之前传递的, C++11 在这方面提供了支持.</p>
-
-<h2>使用 C++11 中的异常相关内容实现在线程间传递异常</h2>
-
-<p>相关类如下:</p>
-
-<p><code>std::exception_ptr</code></p>
-
-<ul>
-<li>一个智能指针类型的异常对象, 支持 bool 操作符, 可以存储空异常 (null) 对象. 也支持比较 (operator==).</li>
-</ul>
-
-
-<p><code>std::current_exception</code></p>
-
-<ul>
-<li>当在异常处理块中 (catch块) 调用时, 会捕获当前异常对象并由被捕获的对象创建一个 <code>std::exception_ptr</code> 对象并返回.</li>
-</ul>
-
-
-<p><code>std::make_exception_ptr</code></p>
-
-<ul>
-<li>接受一个 Exception 对象参数, 并由这个异常对象创建一个 <code>std::exception_ptr</code> 对象</li>
-</ul>
-
-
-<p><code>std::rethrow_exception</code></p>
-
-<ul>
-<li>接受一个 <code>std::exception_ptr</code> 参数, 重新抛出这个异常</li>
-</ul>
-
-
-<p>(<em>以上的一切, 很大一部分都是因为 C++ 的值传递特性引起的一系列不适!!!</em>, !!(╯&#8217; &ndash; &lsquo;)╯︵ ┻━┻)</p>
-
-<!-- more -->
-
-
-<p>示例代码</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;future&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;exception&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">calc</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span><span class="o">&amp;</span> <span class="n">eptr</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">s</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="c1">// throw out of range exception</span>
-</span><span class='line'>    <span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_exception_ptr</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="p">());</span> <span class="c1">// if no exception use default</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(...)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">ref</span><span class="p">(</span><span class="n">eptr</span><span class="p">)));</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">eptr</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">rethrow_exception</span><span class="p">(</span><span class="n">eptr</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">what</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如代码所示:</p>
-
-<p>函数 calc 在子线程中工作, 并有可能抛出异常. 主线程中, 等待子线程返回结果, 并在返回后检测是否有异常, 如果有异常, 则重新抛出异常. 主线程将上述工作都放到 try 块中, 如果有异常则打印. 这样, 子线程 calc 函数的异常就被成功的转移到了主线程中.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li>《More Effective C++》Item 13: Catch exceptions by reference</li>
-<li>Cppreference.com <a href="http://en.cppreference.com/w/cpp/error">http://en.cppreference.com/w/cpp/error</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/09/02/atomic-operation/"/>
-    <updated>2013-09-02T23:34:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/09/02/atomic-operation</id>
-    <content type="html"><![CDATA[<p>所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, 但是原子操作更加接近底层, 因而效率更高.</p>
-
-<p>在以往的 C++ 标准中并没有对原子操作进行规定, 我们往往是使用汇编语言, 或者是借助第三方的线程库, 例如 intel 的 pthread 来实现. 在新标准 C++11, 引入了原子操作的概念, 并通过这个新的头文件提供了多种原子操作数据类型, 例如, atomic_bool, atomic_int 等等, 如果我们在多个线程中对这些类型的共享资源进行操作, 编译器将保证这些操作都是原子性的, 也就是说, 确保任意时刻只有一个线程对这个资源进行访问, 编译器将保证, 多个线程访问这个共享资源的正确性. 从而避免了锁的使用, 提高了效率.</p>
-
-<p>我们还是来看一个实际的例子. 假若我们要设计一个广告点击统计程序, 在服务器程序中, 使用多个线程模拟多个用户对广告的点击:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;time.h&gt;</span>
-</span><span class='line'><span class="c1">// 全局的结果数据</span>
-</span><span class='line'><span class="kt">long</span> <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="c1">// 点击函数</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">click</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// 对全局数据进行无锁访问</span>
-</span><span class='line'>    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="c1">// 计时开始</span>
-</span><span class='line'>  <span class="n">clock_t</span> <span class="n">start</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span><span class='line'>  <span class="c1">// 创建100个线程模拟点击统计</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">threads</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t</span><span class="p">(</span><span class="o">&amp;</span><span class="n">click</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">swap</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">join</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="c1">// 计时结束</span>
-</span><span class='line'>  <span class="n">clock_t</span> <span class="n">finish</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span><span class='line'>  <span class="c1">// 输出结果</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">total</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;duration:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">finish</span> <span class="o">-</span><span class="n">start</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;ms&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<p>执行结果如下:</p>
-
-<blockquote><p>result: 955700</p>
-
-<p>duration: 49ms</p></blockquote>
-
-<p>从执行的结果来看, 这样的方法虽然非常快, 但是结果不正确.</p>
-
-<p>很自然地, 我们会想到使用互斥对象来对全局共享资源的访问进行保护, 于是有了下面的实现:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">///</span>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">m</span><span class="p">;</span>
-</span><span class='line'><span class="c1">// 点击函数</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">click</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// 对全局数据进行无锁访问</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="c1">///</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>运行结果如下:</p>
-
-<blockquote><p>result: 1000000</p>
-
-<p>duration: 32350ms</p></blockquote>
-
-<p>互斥对象的使用, 保证了同一时刻只有唯一的一个线程对这个共享进行访问, 从执行的结果来看, 互斥对象保证了结果的正确性, 但是也有非常大的性能损失, 从刚才的 49ms 变成了现在的 32350ms. 这 TMD 差距也太大了.(感觉有些异常，差距没理由这么大的, 可能是线程太多, CPU 光忙着线程切换了 = =!)</p>
-
-<p>如果是在 C++11 之前, 我们的解决方案也就到此为止了. 但是, C++ 对性能的追求是永无止境的, 他总是想尽一切办法榨干 CPU 的性能. 在 C++11 中, 实现了原子操作的数据类型 (atomic_bool, atomic_int, atomic_long 等等), 对于这些原子数据类型的共享资源的访问, 无需借助 mutex 等锁机制, 也能够实现对共享资源的正确访问.</p>
-
-<p>将原本的 long 类型改为 std::atomic_long 类型即可</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">//long total = 0;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">atomic_long</span> <span class="n">total</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>运行结果如下:</p>
-
-<blockquote><p>result: 1000000</p>
-
-<p>duration: 117ms</p></blockquote>
-
-<p>结果正确, 时间上仅仅是不采用任何保护机制时的 3 倍左右, 和使用 mutex 做同步的版本不知差了几个数量级了.</p>
-
-<p>原子操作的实现跟普通数据类型类似, 但是它能够在保证结果正确的前提下, 提供比 mutex 等锁机制更好的性能, 如果我们要访问的共享资源可以用原子数据类型表示, 那么在多线程程序中使用这种新的等价数据类型, 是一个不错的选择.</p>
-
-<p>但值得注意的是, <code>std::atomic</code> 只能作用于基本类型以及 POD 类型上.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
-<li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
 </ul>
 
 ]]></content>

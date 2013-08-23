@@ -7,16 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="看下面的声明，很和谐 1
-int x; 等等，擦. 忘记初始化了，所以它的值是不确定的。也许，它可能会被初始化成 0。但是很遗憾这是不确定的。 再看看，解引用一个迭代器来初始化局部变量的例子： 1
-2
-3
-4
-5
-6
-7
-8
-template &lt;typename It&gt; // &hellip;">
+	<meta name="description" content=" Dec 16th, 2014 lua Comments ">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -107,6 +98,135 @@ template &lt;typename It&gt; // &hellip;">
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/12/16/lua-tutorial/">
+		
+			Lua Tutorial</a>
+	</h2>
+	<div class="entry-content">
+		<iframe src="https://onedrive.live.com/embed?cid=DABFBDF91EE62075&resid=DABFBDF91EE62075%212133&authkey=ACSTWl1GIzIC9IE&em=2" width="402" height="327" frameborder="0" scrolling="no"></iframe>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-16T23:34:52+08:00" pubdate data-updated="true">Dec 16<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/lua/'>lua</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/12/16/lua-tutorial/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/23/emcpp-item-6/">
+		
+			[译] Item 6: Use the Explicitly Typed Initializer Idiom When Auto Deduces Undesired Types.</a>
+	</h2>
+	<div class="entry-content">
+		<p>Item 5 介绍了如何使用 <code>auto</code> 声明来获得好处，但是有时候 <code>auto</code> 类型推导的行为可能和你预期的不太一样。举个例子，假设我们有下面这样的一个函数：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第 5 位表示 <code>Widget</code> 是否有高优先级，我们的代码可能看起来像下面这样：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// is w high priority?</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// process w in accord</span>
+</span><span class='line'>                                     <span class="c1">// with its priority</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码没有问题。可以很好的工作。但是如果我们把 <code>highPriority</code> 的明确类型声明改为 <code>auto</code>,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span>  <span class="c1">// is w high priority ?</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>情况就不一样了。尽管编译完全没有问题，但是行为却变得完全不可预测：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">processWidget</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">highPriority</span><span class="p">);</span>      <span class="c1">// undefined behavior!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就像注释中写的那样，调用 <code>processWidget</code> 会产生未定义行为。但是这是为什么？答案会让大家很惊讶。使用 <code>auto</code> 之后，<code>highPriority</code> 不再是 bool 类型了。</p>
+
+<h2>需要记住的</h2>
+
+<p>&ndash;</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-23T21:55:00+08:00" pubdate data-updated="true">Nov 23<span>rd</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/effective-modern-c-plus-plus/'>Effective Modern C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/11/23/emcpp-item-6/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -264,8 +384,8 @@ template &lt;typename It&gt; // &hellip;">
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
-</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
+</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
 </span><span class='line'>                          <span class="c1">// see Item 3 for info on decltype</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -347,7 +467,7 @@ template &lt;typename It&gt; // &hellip;">
 <span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// decltype(i) is const int</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">bool</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
+</span><span class='line'><span class="kt">bool</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
 </span><span class='line'>                            <span class="c1">// decltype(f) is bool(const Widget&amp;)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span>
@@ -365,7 +485,7 @@ template &lt;typename It&gt; // &hellip;">
 </span><span class='line'><span class="k">class</span> <span class="nc">vector</span> <span class="p">{</span>
 </span><span class='line'><span class="k">public</span><span class="o">:</span>
 </span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">);</span>
 </span><span class='line'>    <span class="c1">// ...</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -822,156 +942,14 @@ template &lt;typename It&gt; // &hellip;">
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/">
-		
-			Web 前端开发小测验, Part 1 之 CSS</a>
-	</h2>
-	<div class="entry-content">
-		<p>这是 <a href="http://www.devqin.com/">@devqin</a> 在 <a href="http://bb.ijser.cn/topic/46/%E7%9C%8B%E7%9C%8B%E4%BD%A0%E8%83%BD%E5%BE%97%E5%88%B0%E5%A4%9A%E5%B0%91%E5%88%86-%E8%87%AA%E6%88%91%E6%84%9F%E8%A7%89%E8%89%AF%E5%A5%BD%E8%80%85%E8%8E%AB%E5%85%A5-%E5%9B%A0%E4%B8%BA-%E5%AE%98%E6%96%B9%E8%AF%B4%E7%9A%84%E6%98%AF-maight-hurt-your-feelings">NADbb</a> 上发的一个找虐的测试. (原作者有个提示: Warning: might hurt your feelings).</p>
-
-<p>我来挨个找证据, 今天是 part 1, CSS 部分.</p>
-
-<h4>1)</h4>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">ul</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">MaRGin</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Are CSS property names case-sensitive?</p>
-
-<p>CSS 属性名是大小写敏感的吗 ?</p>
-
-<p><strong>答</strong>: 不敏感. <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/">Cascading Style Sheets, level 1</a> 的 <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/#forward-compatible-parsing">7.1 Forward-compatible parsing</a> 最后有这么一段话,</p>
-
-<blockquote><p>All CSS style sheets are case-insensitive, except for parts that are not under the control of CSS. I.e., in CSS1, font family names and URLs can be case-sensitive. Also, the case-sensitivity of the CLASS and ID attributes is under the control of HTML.</p></blockquote>
-
-<p>因此, 只有不受 CSS 控制的, 如 <code>font family</code> 的名字, <code>url</code>, 以及受 <code>HTML</code> 控制的 <code>ID</code> 和 <code>class</code> 大小写敏感, 其他受 CSS 控制的内容都是大小写不敏感的.</p>
-
-<h4>2) Does setting <code>margin-top</code> and <code>margin-bottom</code> have an affect on an inline element ?</h4>
-
-<p><code>margin-top</code> 与 <code>margin-bottom</code> 对内联元素是否有效 ?</p>
-
-<p><strong>答</strong>: 没效果, <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/">Cascading Style Sheets, level 1</a> 的 <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/#inline-elements">4.2 Inline elements</a> 中有如下描述:</p>
-
-<blockquote><p>If the inline element has margins, borders, padding or text decorations attached, these will have no effect where the element is broken.</p></blockquote>
-
-<p>CSS2.1 中, <a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom">8.3 Margin properties: &lsquo;margin-top&rsquo;, &lsquo;margin-right&rsquo;, &lsquo;margin-bottom&rsquo;, &lsquo;margin-left&rsquo;, and &lsquo;margin&rsquo;</a> 节关于 <code>margin-top</code> 和 <code>margin-bottom</code> 有如下描述:</p>
-
-<blockquote><p>These properties have no effect on non-replaced inline elements.</p></blockquote>
-
-<p>关于 non-replaced 与 replaced element 的定义可以参考 CSS2.1 中的 <a href="http://www.w3.org/TR/CSS21/conform.html#replaced-element">Replaced element</a></p>
-
-<h4>3) Does setting <code>padding-top</code> and <code>padding-bottom</code> on an inline element add to its dimensions ?</h4>
-
-
-		
-		<a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-09T01:30:00+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/css/'>css</a>, <a class='category' href='/blog/categories/web/'>web</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/01/28/passport/">
-		
-			护照, 往来港澳通行证以及大陆居民往来台湾地区通行证办理记录</a>
-	</h2>
-	<div class="entry-content">
-		<p>首先, 吐槽一下, 在自己国家的土地上都不能自由通行, 还需要办理各种证件. (╯‵□′)╯︵┻━┻</p>
-
-<p>以西安为例, 西安市出入境管理中心在科技路二号(西斜七路十字西南角), 工作时间为法定工作日 9:00-17:00. 据说中午有休息时间. 由于本人 14:50 才到, 中午休息时间未知. (如果一次性需要办多个证件, 需要填多张表格, 所以即使中午休息时间到也没有关系, 领表格自行填写, 填写完之后再办手续).</p>
-
-<p>表格的填写一般都有样例, 不过样例可能已经与现在填写的版本不一致, 这个不用担心, 主要填写基本信息, 不知如何填写的可以留空. 办理时, 工作人员会最后确认的. (这次给我办理的是个制服美女. O(∩_∩)O 哈哈~ 跑题了.</p>
-
-<h2>护照</h2>
-
-<p>护照是一个国家的公民出入本国国境和到国外旅行或居留时, 由本国发给的一种证明该公民国籍和身份的合法证件. 没有护照是没法出国的. 目前对大陆免签的国家非常少啊, 非常少. (╯‵□′)╯︵┻━┻</p>
-
-<p>护照申请表格一式一份 2 张, 需要本人填写的只有一些基本信息, 办理过程需要录入指纹, 申请表格有一栏是需要工作人员确认信息完成后, 当面签字的. 如果需要邮寄的话, 需要在最后填写邮寄地址. 如果旧护照已过期, 那么与首次申请办理护照没有区别, 旧护照可以自己留作纪念.</p>
-
-<h2>往来港澳通行证</h2>
-
-<p>内地居民因私往来香港或澳门特别行政区旅游, 探亲, 从事商务, 培训, 就业等非公务活动, 向户口所在地的市, 县公安出入境管理部门提出申请, 凭公安出入境管理部门签发的往来港澳通行证及有效签注才能前往.</p>
-
-<p>如果持有大陆护照, 以及入台的各种证件, 和香港转机机票, 则不需要往来港澳通行证即可在港澳最多停留 7 日.</p>
-
-<p>由于西安目前还不是港澳自由行的城市, 因此还不能办理个人 G 签, 只能办理团队 L 签. 如果只想去香港, 那么只能从深圳找当地旅行团协助过关. 至于有效期及签注次数个人自行选择. 本人选择的是澳门 1 次有效签注, 有效期 1 年. 香港 2 次有效签注, 有效期 1年.</p>
-
-<p>往来港澳通行证申请表格一式一份 1 张, 除了基本信息, 需要注意的是申请的签注类型, 首选个人 G 签, 如果所在城市不支持, 那工作人员会自动帮助你更改为团队 L 签. 如果需要邮寄的话, 需要在最后填写邮寄地址.</p>
-
-
-		
-		<a href="/blog/2014/01/28/passport/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-28T19:20:00+08:00" pubdate data-updated="true">Jan 28<span>th</span>, 2014</time></div>
-	<div class="tags">
-
-</div>
-	
-	<div class="comments"><a href="/blog/2014/01/28/passport/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
     
-        <a href="/blog/page/2/" class="next">Next</a>
+        <a href="/posts//blog/page/2/" class="next">Next</a>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
-</nav></div>
+</nav>
+</div>
 	<footer id="footer" class="inner">Copyright &copy; 2014
 
     bitdewy
@@ -1000,6 +978,18 @@ template &lt;typename It&gt; // &hellip;">
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

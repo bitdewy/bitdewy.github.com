@@ -530,7 +530,7 @@ high level 接口           n        n          y
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">Q_OBJECT</span>
 </span><span class='line'>
-</span><span class='line'><span class="nl">signals:</span>
+</span><span class='line'><span class="nl">signals</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">aSignal</span><span class="p">();</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">protected</span><span class="o">:</span>
@@ -576,7 +576,7 @@ high level 接口           n        n          y
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">Q_OBJECT</span>
 </span><span class='line'>
-</span><span class='line'><span class="nl">slots:</span>
+</span><span class='line'><span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">aSlot</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>        <span class="cm">/* ... */</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -620,7 +620,7 @@ high level 接口           n        n          y
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">Q_OBJECT</span>
 </span><span class='line'>
-</span><span class='line'><span class="nl">slots:</span>
+</span><span class='line'><span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">aSlot</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>        <span class="cm">/* ... */</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -684,7 +684,7 @@ high level 接口           n        n          y
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">Q_OBJECT</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">public</span> <span class="nl">slots:</span>
+</span><span class='line'><span class="k">public</span> <span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">doWork</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>        <span class="cm">/* ... */</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -853,7 +853,7 @@ high level 接口           n        n          y
 </span><span class='line'>        <span class="n">timer</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">private</span> <span class="nl">slots:</span>
+</span><span class='line'><span class="k">private</span> <span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">doWork</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>        <span class="cm">/* ... */</span>
 </span><span class='line'>    <span class="p">}</span>
@@ -923,7 +923,7 @@ high level 接口           n        n          y
 </span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="o">-&gt;</span><span class="n">something</span><span class="p">())</span>
 </span><span class='line'>    <span class="n">process_this</span><span class="p">();</span>
 </span><span class='line'><span class="k">else</span>
-</span><span class='line'>    <span class="n">process_that</span><span class="p">();</span>
+</span><span class='line'>    <span class="nf">process_that</span><span class="p">();</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">wait_for_user_input</span><span class="p">();</span>
 </span><span class='line'><span class="n">input</span> <span class="o">=</span> <span class="n">read_user_input</span><span class="p">();</span>
@@ -996,14 +996,14 @@ high level 接口           n        n          y
 </span><span class='line'>        <span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="n">ready</span><span class="p">()),</span> <span class="k">this</span><span class="p">,</span> <span class="n">SLOT</span><span class="p">(</span><span class="n">doWork</span><span class="p">()));</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">private</span> <span class="nl">slots:</span>
+</span><span class='line'><span class="k">private</span> <span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">doWork</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>        <span class="k">switch</span> <span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="k">case</span> <span class="nl">State1:</span>
+</span><span class='line'>            <span class="k">case</span> <span class="nl">State1</span><span class="p">:</span>
 </span><span class='line'>                <span class="cm">/* ... */</span>
 </span><span class='line'>                <span class="n">state</span> <span class="o">=</span> <span class="n">State2</span><span class="p">;</span>
 </span><span class='line'>                <span class="k">break</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">case</span> <span class="nl">State2:</span>
+</span><span class='line'>            <span class="k">case</span> <span class="nl">State2</span><span class="p">:</span>
 </span><span class='line'>                <span class="cm">/* ... */</span>
 </span><span class='line'>                <span class="n">state</span> <span class="o">=</span> <span class="n">State3</span><span class="p">;</span>
 </span><span class='line'>                <span class="k">break</span><span class="p">;</span>
@@ -1046,7 +1046,7 @@ high level 接口           n        n          y
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Worker</span> <span class="o">:</span> <span class="k">public</span> <span class="n">QObject</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>    <span class="n">Q_OBJECT</span>
-</span><span class='line'><span class="k">public</span> <span class="nl">slots:</span>
+</span><span class='line'><span class="k">public</span> <span class="nl">slots</span><span class="p">:</span>
 </span><span class='line'>    <span class="kt">void</span> <span class="n">startProcessing</span><span class="p">()</span>
 </span><span class='line'>    <span class="p">{</span>
 </span><span class='line'>        <span class="n">processItem</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
@@ -1168,6 +1168,18 @@ high level 接口           n        n          y
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 

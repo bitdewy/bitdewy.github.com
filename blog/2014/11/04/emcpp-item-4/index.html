@@ -141,8 +141,8 @@ const int &hellip;">
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
-</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
+</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
 </span><span class='line'>                          <span class="c1">// see Item 3 for info on decltype</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -154,8 +154,8 @@ const int &hellip;">
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">xType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
-</span><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span> <span class="n">yType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">xType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</span><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span> <span class="n">yType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -163,8 +163,8 @@ const int &hellip;">
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">xType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="err">&#39;</span>
-</span><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">yType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span><span class="err">&#39;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">xType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="err">&#39;</span>
+</span><span class='line'><span class="nl">error</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">yType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span><span class="err">&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -301,7 +301,7 @@ const int &hellip;">
 </span><span class='line'>  <span class="c1">// show T</span>
 </span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;T =     &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// show param&#39;s type</span>
-</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -441,6 +441,18 @@ const int &hellip;">
 </script>
 
 
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-57725802-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 
 
