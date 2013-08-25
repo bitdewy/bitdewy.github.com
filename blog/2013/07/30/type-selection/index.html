@@ -131,12 +131,12 @@
 </span><span class='line'>  <span class="k">typedef</span> <span class="n">R</span> <span class="n">type</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="nb">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">typedef</span> <span class="n">L</span> <span class="n">type</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="nb">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="nb">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -274,18 +274,6 @@
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

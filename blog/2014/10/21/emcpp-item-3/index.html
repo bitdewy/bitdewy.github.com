@@ -134,7 +134,7 @@
 <span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// decltype(i) is const int</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">bool</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
+</span><span class='line'><span class="kt">bool</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>    <span class="c1">// decltype(w) is const Widget&amp;</span>
 </span><span class='line'>                            <span class="c1">// decltype(f) is bool(const Widget&amp;)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">struct</span> <span class="n">Point</span> <span class="p">{</span>
@@ -152,7 +152,7 @@
 </span><span class='line'><span class="k">class</span> <span class="nc">vector</span> <span class="p">{</span>
 </span><span class='line'><span class="k">public</span><span class="o">:</span>
 </span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">);</span>
 </span><span class='line'>    <span class="c1">// ...</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -182,7 +182,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span>  <span class="c1">// works, but requires refinement </span>
+</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span>  <span class="c1">// works, but requires refinement </span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
@@ -241,7 +241,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>    <span class="c1">// C++14, works, but still requires refinement</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>    <span class="c1">// C++14, works, but still requires refinement</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
@@ -265,7 +265,7 @@
 </span><span class='line'><span class="k">auto</span> <span class="n">myWiget1</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>    <span class="c1">// auto type deduction:</span>
 </span><span class='line'>                       <span class="c1">// myWidget1&#39;s type is Widget</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">myWidget2</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>  <span class="c1">// decltype type deduction:</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">myWidget2</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>  <span class="c1">// decltype type deduction:</span>
 </span><span class='line'>                                <span class="c1">// myWidget2&#39;s type is const Widget&amp;</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -277,7 +277,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -303,7 +303,7 @@
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>          <span class="c1">// c is now a </span>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// universal reference</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// universal reference</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -318,7 +318,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>  <span class="c1">// final C++14 version</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span>  <span class="c1">// final C++14 version</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
@@ -335,7 +335,7 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Index</span><span class="o">&gt;</span>    <span class="c1">// final C++11 version</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">decltype</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">authenticateUser</span><span class="p">();</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
@@ -373,14 +373,14 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f1</span><span class="p">()</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f1</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// ...</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">x</span><span class="p">;</span>    <span class="c1">// decltype(x) is int, so f1 returns int</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f2</span><span class="p">()</span>
+</span><span class='line'><span class="n">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f2</span><span class="p">()</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>  <span class="c1">// ...</span>
@@ -488,18 +488,6 @@
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

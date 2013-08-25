@@ -120,7 +120,7 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">long</span> <span class="nf">multiply</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span><span class="p">;</span> <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">long</span> <span class="n">multiply</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span><span class="p">;</span> <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
 </span><span class='line'><span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">multiplication_result</span> <span class="n">multiply</span><span class="p">(</span><span class="n">T</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T</span> <span class="n">t2</span><span class="p">)</span>
@@ -190,7 +190,7 @@
 </span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">U</span><span class="o">&gt;</span>
 </span><span class='line'>  <span class="k">static</span> <span class="kt">char</span> <span class="n">is_ptr</span><span class="p">(</span><span class="n">U</span> <span class="p">(</span><span class="o">*</span><span class="p">)());</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">static</span> <span class="kt">double</span> <span class="nf">is_ptr</span><span class="p">(...);</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">double</span> <span class="n">is_ptr</span><span class="p">(...);</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="k">static</span> <span class="n">T</span> <span class="n">t</span><span class="p">;</span>
 </span><span class='line'>  <span class="k">enum</span> <span class="p">{</span> <span class="n">value</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">is_ptr</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">==</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">)</span> <span class="p">};</span>
@@ -200,7 +200,7 @@
 </span><span class='line'>  <span class="kt">int</span> <span class="n">bar</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">typedef</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">IntPtr</span><span class="p">;</span>
 </span><span class='line'>  <span class="k">typedef</span> <span class="kt">int</span> <span class="n">Foo</span><span class="o">::*</span> <span class="n">FooMemberPtr</span><span class="p">;</span>
@@ -313,18 +313,6 @@
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

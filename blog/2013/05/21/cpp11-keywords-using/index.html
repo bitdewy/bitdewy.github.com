@@ -107,7 +107,7 @@ typedef void (*FunctionPtr)(); 这个声明读起来相当的费劲, C 语言的
 <p>在 c++03 中, 函数指针要这么写:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -170,7 +170,7 @@ typedef void (*FunctionPtr)(); 这个声明读起来相当的费劲, C 语言的
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">PFD</span><span class="p">)(</span><span class="kt">double</span><span class="p">);</span>            <span class="c1">// 传统语法</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">PFD</span><span class="p">)(</span><span class="kt">double</span><span class="p">);</span>            <span class="c1">// 传统语法</span>
 </span><span class='line'><span class="k">using</span> <span class="n">PFD</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">double</span><span class="p">);</span>           <span class="c1">// 新增与否</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -268,18 +268,6 @@ typedef void (*FunctionPtr)(); 这个声明读起来相当的费劲, C 语言的
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

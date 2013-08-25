@@ -404,14 +404,14 @@
 <p>我们使用没有模板的情况先来观察，对，没错，下面的语法是合法的，</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">myFunc</span><span class="p">(</span><span class="kt">int</span> <span class="n">param</span><span class="p">[]);</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">myFunc</span><span class="p">(</span><span class="kt">int</span> <span class="n">param</span><span class="p">[]);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>但是数组参数的声明会被退化成指针，这意味着它和下面的声明是完全一致的：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">myFunc</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">param</span><span class="p">);</span>     <span class="c1">// same function as above</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">myFunc</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">param</span><span class="p">);</span>     <span class="c1">// same function as above</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -456,7 +456,7 @@
 </span><span class='line'><span class="c1">// because we care only about the number of elements it contains.)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>                                <span class="c1">// info</span>
-</span><span class='line'><span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">arraySize</span><span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="o">&amp;</span><span class="p">)[</span><span class="n">N</span><span class="p">])</span> <span class="k">noexcept</span>    <span class="c1">// below on</span>
+</span><span class='line'><span class="n">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">arraySize</span><span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="o">&amp;</span><span class="p">)[</span><span class="n">N</span><span class="p">])</span> <span class="n">noexcept</span>    <span class="c1">// below on</span>
 </span><span class='line'><span class="p">{</span>                                                    <span class="c1">// constexpr</span>
 </span><span class='line'>  <span class="k">return</span> <span class="n">N</span><span class="p">;</span>                                        <span class="c1">// and</span>
 </span><span class='line'><span class="p">}</span>                                                    <span class="c1">// noexcept</span>
@@ -500,7 +500,7 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="nf">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>    <span class="c1">// someFunc is a function;</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>    <span class="c1">// someFunc is a function;</span>
 </span><span class='line'>                               <span class="c1">// type is void(int, double)</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
@@ -614,18 +614,6 @@
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

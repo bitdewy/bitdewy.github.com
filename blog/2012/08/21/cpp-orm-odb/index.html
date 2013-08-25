@@ -205,8 +205,8 @@
 <span class='line-number'>19</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">odb</span><span class="o">::</span><span class="n">sqlite</span><span class="o">::</span><span class="n">database</span> <span class="n">db</span><span class="p">(</span><span class="s">&quot;people.db&quot;</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">person</span> <span class="nf">john</span><span class="p">(</span><span class="s">&quot;john@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;John Doe&quot;</span><span class="p">,</span> <span class="mi">31</span><span class="p">);</span>
-</span><span class='line'><span class="n">person</span> <span class="nf">jane</span><span class="p">(</span><span class="s">&quot;jane@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;Jane Doe&quot;</span><span class="p">,</span> <span class="mi">29</span><span class="p">);</span>
+</span><span class='line'><span class="n">person</span> <span class="n">john</span><span class="p">(</span><span class="s">&quot;john@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;John Doe&quot;</span><span class="p">,</span> <span class="mi">31</span><span class="p">);</span>
+</span><span class='line'><span class="n">person</span> <span class="n">jane</span><span class="p">(</span><span class="s">&quot;jane@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;Jane Doe&quot;</span><span class="p">,</span> <span class="mi">29</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">odb</span><span class="o">::</span><span class="n">transaction</span> <span class="n">t</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">begin</span><span class="p">());</span>
 </span><span class='line'>
@@ -215,7 +215,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">typedef</span> <span class="n">odb</span><span class="o">::</span><span class="n">query</span><span class="o">&lt;</span><span class="n">person</span><span class="o">&gt;</span> <span class="n">person_query</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">p</span><span class="p">:</span> <span class="n">db</span><span class="p">.</span><span class="n">query</span><span class="o">&lt;</span><span class="n">person</span><span class="o">&gt;</span><span class="p">(</span><span class="n">person_query</span><span class="o">::</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">))</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">p:</span> <span class="n">db</span><span class="p">.</span><span class="n">query</span><span class="o">&lt;</span><span class="n">person</span><span class="o">&gt;</span><span class="p">(</span><span class="n">person_query</span><span class="o">::</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">))</span>
 </span><span class='line'>    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">jane</span><span class="p">.</span><span class="n">age</span><span class="p">(</span><span class="n">jane</span><span class="p">.</span><span class="n">age</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
@@ -311,18 +311,6 @@
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 

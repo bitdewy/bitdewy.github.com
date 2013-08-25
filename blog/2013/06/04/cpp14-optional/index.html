@@ -167,7 +167,7 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 </span><span class='line'><span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">str2int</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">i</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">i</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">lexical_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
 </span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">boost</span><span class="o">::</span><span class="n">bad_lexical_cast</span><span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>
@@ -289,18 +289,6 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 </script>
 
 
-
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-57725802-1']);
-		_gaq.push(['_trackPageview']);
-
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 
 
 
