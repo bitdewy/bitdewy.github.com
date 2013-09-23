@@ -3,7 +3,7 @@ layout: post
 title: "C++11 关键字 using"
 date: 2013-05-21 00:45
 comments: true
-categories: C++11 
+categories: [C++, C++11] 
 ---
 
 *这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗*
@@ -36,7 +36,7 @@ using FunctionPtr = std::add_pointer<void()>::type;
 <!-- more -->
 ##模板别名
 
-在进入这个主题之前，应该先弄清楚“模板类”和“类模板”本质上的不同。class template (类模板，是模板)是用来产生 template class (模板类，是类型)的。
+在进入这个主题之前, 应该先弄清楚“模板类”和“类模板”本质上的不同. class template (类模板，是模板)是用来产生 template class (模板类, 是类型)的.
 在标准 C++, typedef 可定义模板类一个新的类型名称, 但是不能够使用 typedef 来定义模板的别名. 举例来说:
 
 ```cpp 
