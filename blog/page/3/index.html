@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="最近整理硬盘，发现角落里4年前写的玩具 blog，虽然现在还偶尔写写 python 处理简单的事情，不过由于工作与 web 没半毛钱关系，很久都没有关注，Django 什么的早就忘得差不多了。 08年9月时候 Django 刚刚发布 1.0，那时候在学校时间充裕，加上关注 Django &hellip;">
+	<meta name="description" content="原文在这里 GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10) JG 问题 1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。 Guru 问题 2. 为什么要使用 make_shared &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -16,9 +16,10 @@
 	<link href="/favicon.png" rel="shortcut icon">
 	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
 </head>
+
 
 <body>
 	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
@@ -70,6 +71,7 @@
 		
 		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
 		
+    
 	</div>
 	<form class="search" action="http://google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
@@ -96,6 +98,348 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/07/14/gotw103/">
+		
+			[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a></p>
+
+<h2>JG 问题</h2>
+
+<p>1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。</p>
+
+<p>3. 如何处理 auto_ptr ？</p>
+
+
+		
+		<a href="/blog/2012/07/14/gotw103/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-14T19:14:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/07/14/gotw103/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/07/07/gotw102/">
+		
+			[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>[这是 <a href="http://www.gotw.ca/gotw/056.htm">GotW #56</a> 的 C++11 更新版]</p>
+
+<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a></p>
+
+<h2>JG问题</h2>
+
+<p>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Example 1(b)</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">g</span><span class="p">(</span> <span class="n">expr1</span> <span class="p">),</span> <span class="n">h</span><span class="p">(</span> <span class="n">expr2</span> <span class="p">)</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Guru问题</h2>
+
+<p>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这段代码包含潜在的异常安全问题吗？请解释。</p>
+
+<p>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</p>
+
+<p>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// In some header file:</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// At some call site:</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2012/07/07/gotw102/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-07T00:06:00+08:00" pubdate data-updated="true">Jul 7<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/07/07/gotw102/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/07/02/gotw101/">
+		
+			[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
+
+<h2>Guru问题</h2>
+
+<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// in implementation file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// :::</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span> <span class="c1">// or =default</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
+
+
+		
+		<a href="/blog/2012/07/02/gotw101/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-02T02:38:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/07/02/gotw101/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/06/30/gotw100/">
+		
+			[译] GotW #100: Compilation Firewalls (Difficulty: 6/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>[这是 <a href="http://www.gotw.ca/gotw/024.htm">GotW #24</a> 的 C++11 更新版]</p>
+
+<p>原文在这里 <a href="http://herbsutter.com/gotw/_100/">GotW #100: Compilation Firewalls (Difficulty: 6/10)</a></p>
+
+<h2>JG 问题</h2>
+
+<p>1. Pimpl 惯用法是什么？为什么要使用它？</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</p>
+
+<p>3. 类中的那些部分应该放到 impl 对象中？一些可能的选择包括：</p>
+
+<ul>
+<li>所有私有数据（非函数）</li>
+<li>所有私有成员</li>
+<li>所有私有和保护成员</li>
+<li>所有私有非虚成员</li>
+<li>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</li>
+</ul>
+
+
+<p>它们的每一个的缺点和优点是什么？你怎么选择？</p>
+
+<p>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</p>
+
+
+		
+		<a href="/blog/2012/06/30/gotw100/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-30T01:20:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/06/30/gotw100/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -138,9 +482,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/06/26/django-toy-blog//blog/page/3/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/06/26/django-toy-blog/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -183,9 +528,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/06/24/effective-c-plus-plus-11//blog/page/3/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/06/24/effective-c-plus-plus-11/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -238,9 +584,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/05/28/threads-events-qobjects//blog/page/3/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/05/28/threads-events-qobjects/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 <nav id="pagenavi">
     
@@ -271,7 +618,7 @@
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      dsq.src = '//go.disqus.com/' + disqus_script;
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     }());
 </script>

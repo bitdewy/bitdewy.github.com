@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.io/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.io/"/>
-  <updated>2013-05-12T23:39:09+08:00</updated>
+  <updated>2013-09-25T01:53:53+08:00</updated>
   <id>http://bitdewy.github.io/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,362 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future/"/>
+    <updated>2013-06-14T22:36:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future</id>
+    <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
+
+<h2>std::packaged_task</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 可以包装任何可调用的对象(函数, lambda 表达式, std::bind, 或其他函数对象), 以便异步调用, 调用结果保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中, 可以通过成员函数 get_future 访问. 需要注意的是, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 是不可拷贝的(move only).</p>
+
+<p>示例代码</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <cmath></h1>
+
+<h1>include <thread></h1>
+
+<h1>include <future></h1>
+
+<h1>include <functional></h1>
+
+<p>void task_lambda()
+{</p>
+
+<pre><code>std::packaged_task&lt;int(int,int)&gt; task([](int a, int b) {
+    return std::pow(a, b); 
+});
+std::future&lt;int&gt; result = task.get_future();
+task(2, 9);
+std::cout &lt;&lt; "task_lambda:\t" &lt;&lt; result.get() &lt;&lt; '\n';
+</code></pre>
+
+<p>}</p>
+
+<p>void task_bind()
+{</p>
+
+<pre><code>std::packaged_task&lt;int()&gt; task(std::bind(std::pow, 2, 11));
+std::future&lt;int&gt; result = task.get_future();
+task();
+std::cout &lt;&lt; "task_bind:\t" &lt;&lt; result.get() &lt;&lt; '\n';
+</code></pre>
+
+<p>}</p>
+
+<p>void task_thread()
+{</p>
+
+<pre><code>std::packaged_task&lt;int(int,int)&gt; task(std::pow);
+std::future&lt;int&gt; result = task.get_future();
+std::thread task_td(std::move(task), 2, 10);
+task_td.join();
+std::cout &lt;&lt; "task_thread:\t" &lt;&lt; result.get() &lt;&lt; '\n';
+</code></pre>
+
+<p>}</p>
+
+<p>int main()
+{</p>
+
+<pre><code>task_lambda();
+task_bind();
+task_thread();
+</code></pre>
+
+<p>}
+```</p>
+
+<!-- more -->
+
+
+<p>仅仅有 packaged_task 还远远不够, 我们还需要更强大的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a>.</p>
+
+<p>基本思路很简单: 当一个任务需要向父线程(启动它的线程)返回值时, 它把这个值放到 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 中. 之后, 这个返回值会出现在和此 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 关联的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 中.于是父线程就能读到返回值. 更简单点的方法, 参看 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a>.</p>
+
+<p>如果我们有一个 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> f, 通过 get() 可以获得它的值:</p>
+
+<p><code>cpp
+X v = f.get();  // if necessary wait for the value to get computed
+</code></p>
+
+<p>如果它的返回值还没有到达, 调用线程会进行阻塞等待. 要是等啊等啊, 等到花儿也谢了的话, get() 会抛出异常的(从标准库或等待的线程那个线程中抛出).</p>
+
+<p>如果我们不需要等待返回值(非阻塞方式), 可以简单询问一下 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a>, 看返回值是否已经到达:</p>
+
+<p>```cpp
+if (f.wait_for(0))  {</p>
+
+<pre><code>// there is a value to get()
+// do something
+</code></pre>
+
+<p>} else {</p>
+
+<pre><code>// do something else
+</code></pre>
+
+<p>}
+```</p>
+
+<p>但是 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 最主要的用途是一个简单的获取返回值的方法: get().</p>
+
+<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 的主要用途是提供一个 &ldquo;put"（或"get"，随你）操作, 以和 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 的 get() 对应.</p>
+
+<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 为 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 传递的结果类型有 2 种: 传一个普通值或者抛出一个异常</p>
+
+<p>```cpp
+try {</p>
+
+<pre><code>X res; 
+// compute a value for res
+p.set_value(res);
+</code></pre>
+
+<p>} catch (&hellip;) {   // oops: couldn&rsquo;t compute res</p>
+
+<pre><code>p.set_exception(std::current_exception()); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>到目前为止还不错, 不过我们如何匹配 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> / <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 对呢? 一个在我的线程, 另一个在别的啥线程中吗? 是这样: 既然 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 可以被到处移动(不是拷贝), 那么可能性就挺多的. 最普遍的情况是父子线程配对形式, 父线程用 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 获取子线程 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 返回的值. 在这种情况下, 使用 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a> 是很优雅的方法.</p>
+
+<h2>std::promise</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 提供一个存储设施, 当一个异步任务通过 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 来获取结果时, <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 可以提供.</p>
+
+<h2>std::future</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 提供了一种机制来访问异步操作的结果:
+由 <a href="http://en.cppreference.com/w/cpp/thread/async">std::async</a>, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a>, 或者 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 创建的异步操作, 可以提供一个 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 对象, 给创建者, 用来访问异步操作的结果.</p>
+
+<p>异步操作的创建者, 可以使用各种不同的操作来查询, 等待, 或者从 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中取到异步操作的结果. 如果异步操作还没有执行完的话, 这些操作有可能会阻塞.
+当一个异步操作完成时可以通过更改(例如使用 <code>std::promise::set_value</code>) 共享状态(该状态保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中) 将结果返回给异步操作的创建者.</p>
+
+<p>示例代码</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <future></h1>
+
+<h1>include <thread></h1>
+
+<p>int main()
+{</p>
+
+<pre><code>// future from a packaged_task
+std::packaged_task&lt;int()&gt; task([](){ return 7; }); // wrap the function
+std::future&lt;int&gt; f1 = task.get_future();  // get a future
+std::thread(std::move(task)).detach(); // launch on a thread
+// future from an async()
+std::future&lt;int&gt; f2 = std::async(std::launch::async, [](){ return 8; });
+// future from a promise
+std::promise&lt;int&gt; p;
+std::future&lt;int&gt; f3 = p.get_future();
+std::thread([](std::promise&lt;int&gt;&amp; p){ p.set_value(9); },
+             std::ref(p)).detach();
+std::cout &lt;&lt; "Waiting..." &lt;&lt; std::flush;
+f1.wait();
+</code></pre>
+
+<p>   f2.wait();</p>
+
+<pre><code>f3.wait();
+std::cout &lt;&lt; "Done!\nResults are: "
+          &lt;&lt; f1.get() &lt;&lt; ' ' &lt;&lt; f2.get() &lt;&lt; ' ' &lt;&lt; f3.get() &lt;&lt; '\n';
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/thread">Cppreference：Thread support library</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Futures_and_promises">wikipedia: futures and promises</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <updated>2013-06-04T01:54:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
+
+<h2>“无意义”的值</h2>
+
+<p>函数并不总能返回有效的返回值, 很多时候函数可能返回"无意义"的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
+表示返回值无意义最常用的做法是增加一个"哨兵"的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的"哨兵".</p>
+
+<h2>std::optional<T></h2>
+
+<p>optional 库使用"容器"语义, 包装了"可能产生无效值"的对象, 实现了"未初始化"的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
+
+<p>optional 使用"容器"语义, 为这种"无效值"的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了"未初始化"的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
+
+<!-- more  -->
+
+
+<h2>操作函数</h2>
+
+<p>optional 的模板类型参数 T 可以使任何类型， 就如同一个标准容器对元素的要求, 并不需要T具有缺省构造函数, 但必须是可拷贝构造的.
+optional 采用了指针语义来访问内部保存的元素, 这使得 optional 未初始化时的行为就像一个空指针. 它重载了 <code>operator*</code> 和 <code>operator-&gt;</code> 以实现与指针相同的操作, <code>get()</code> 和 <code>get_ptr()</code> 可以以函数的操作形式获得元素的引用和指针. 成员函数 <code>get_value_or(default)</code> 是一个特别的访问函数, 可以保证返回一个有效的值, 如果 optional 已初始化, 那么返回内部的元素, 否则返回 default. optional 也可以用隐式类型转换进行 bool 测试(用于条件判断), 就像一个对指针的判断. optional 还全面支持比较运算，包括 <code>==, !=, &lt;, &lt;=, &gt;, &gt;=</code>. (详细接口参考 <a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference: std::optional</a>)</p>
+
+<h2>用法</h2>
+
+<p>optional 的接口简单明了, 把它认为是一个大小为 1 并且行为类似指针的容器就可以了, 或者把它想象成是一个类似 scoped_ptr, shared_ptr 的智能指针(注意, optional 不是智能指针, 用法类似但用途不同).</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <string></h1>
+
+<h1>include &ldquo;boost/optional.hpp&rdquo;</h1>
+
+<h1>include &ldquo;boost/lexical_cast.hpp&rdquo;</h1>
+
+<p>// converts int to string if possible
+boost::optional<int> str2int(const std::string&amp; str)
+{
+  boost::optional<int> i;
+  try {</p>
+
+<pre><code>i = boost::lexical_cast&lt;int&gt;(str);
+</code></pre>
+
+<p>  } catch (boost::bad_lexical_cast&amp;) {</p>
+
+<p>  }
+  return i;
+}</p>
+
+<p>int get_int_form_user()
+{
+  std::string s;
+  for (;;) {</p>
+
+<pre><code>std::cin &gt;&gt; s;
+boost::optional&lt;int&gt; o = str2int(s); // 'o' may or may not contain an int
+if (o) {                                 // does optional contain a value?
+  return *o;                             // use the value
+}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>int main()
+{
+  std::cout &lt;&lt; get_int_form_user();
+  return 0;
+}
+```</p>
+
+<p>如上面的代码所示: 使用 optional, 非法的 int 类型, 就不需要定义一个特别的错误码作为无意义值了.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference.com: optional</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">A proposal to add a utility class to represent optional objects (Revision 4)</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 关键字 using]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using/"/>
+    <updated>2013-05-21T00:45:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using</id>
+    <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
+
+<h2>使用小技巧来声明函数指针</h2>
+
+<p>在 c++03 中, 函数指针要这么写:</p>
+
+<p><code>cpp
+typedef void (*FunctionPtr)();
+</code></p>
+
+<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
+
+<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
+
+<p><code>cpp
+using FunctionPtr = void (*)();
+</code></p>
+
+<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
+
+<p>```cpp</p>
+
+<h1>include &lt;type_traits></h1>
+
+<p>using FunctionPtr = std::add_pointer&lt;void()>::type;
+```</p>
+
+<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
+
+<!-- more -->
+
+
+<h2>模板别名</h2>
+
+<p>在进入这个主题之前, 应该先弄清楚“模板类”和“类模板”本质上的不同. class template (类模板，是模板)是用来产生 template class (模板类, 是类型)的.
+在标准 C++, typedef 可定义模板类一个新的类型名称, 但是不能够使用 typedef 来定义模板的别名. 举例来说:</p>
+
+<p><code>cpp
+template&lt; typename first, typename second, int third&gt;
+class SomeType;
+template&lt; typename second&gt;
+typedef SomeType&lt;OtherType, second, 5&gt; TypedefName; // 在C++03是不合法的
+</code></p>
+
+<p>这不能够通过编译.
+为了定义模板的别名, C++11 增加了以下的语法:</p>
+
+<p><code>cpp
+template&lt; typename first, typename second, int third&gt;
+class SomeType;
+template&lt; typename second&gt;
+using TypedefName = SomeType&lt;OtherType, second, 5&gt;;
+</code></p>
+
+<p>using 紧跟着的标识, 用来表示后面的模板类型. 标准制定时尝试过使用旧的关键字 typedef 来实现该功能, 但是无法得到一个完整连贯的解决方案, 因此引入了新的关键字. (严格说来 using 并不是一个新的关键字, 在使用 namespace 时, 我们就已经见过它了, 但在 C++11 中它又有了新的语义.）</p>
+
+<p>除了模板别名之外, using 关键字还可以用在一般的类型中, 就想文章一开始的地方一样:</p>
+
+<p><code>cpp
+typedef void (*PFD)(double);            // 传统语法
+using PFD = void (*)(double);           // 新增与否
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li>C++ standard  14.6.7 Template aliases;  7.1.3 The typedef specifier</li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1489.pdf">Templates aliases for C++</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf">Templates Aliases (Revision 3)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
@@ -451,257 +807,6 @@ if (a.type() == typeid(int)) {
 <ul>
 <li><a href="http://svn.boost.org/svn/boost/trunk/boost/any.hpp">boost::any</a></li>
 <li><a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[QtScript 与信号槽]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
-    <updated>2013-03-21T14:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
-    <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
-
-<h2>在 QtScript 中使用信号槽</h2>
-
-<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
-
-<ol>
-<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
-<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
-<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
-</ol>
-
-
-<!-- more -->
-
-
-<p>使用 <code>qScriptConnect()</code> 函数连接 C++ 信号到 script 函数上. 下面的例子中, handler 用来处理 <code>QLineEdit::textChanged()</code> 信号:</p>
-
-<p><code>cpp
-QScriptEngine eng;
-QLineEdit *edit = new QLineEdit();
-QScriptValue handler = eng.evaluate(
-"(function(text) { print('text was changed to', text); })");
-qScriptConnect(edit, SIGNAL(textChanged(const QString &amp;)), QScriptValue(), handler);
-</code></p>
-
-<p><code>qScriptConnect()</code> 的前两个参数与 <code>QObject::connect()</code> 的完全一致. 第三个参数是 script 对象, 当 signal handler 被调用时, 它充当 <code>this</code> 的角色. 在上面的代码中, 我们传入了一个不可用的值, 此时 <code>this</code> 是全局对象. 第四个参数是 script 函数, 相当于槽函数.
-下面的代码展示如何使用 <code>this</code> 参数:</p>
-
-<p>```cpp
-QLineEdit <em>edit1 = new QLineEdit();
-QLineEdit </em>edit2 = new QLineEdit();</p>
-
-<p>QScriptValue handler = eng.evaluate(&ldquo;(function() { print(&lsquo;I am&rsquo;, this.name); })&rdquo;);
-QScriptValue obj1 = eng.newObject();
-obj1.setProperty(&ldquo;name&rdquo;, &ldquo;the walrus&rdquo;);
-QScriptValue obj2 = eng.newObject();
-obj2.setProperty(&ldquo;name&rdquo;, &ldquo;Sam&rdquo;);</p>
-
-<p>qScriptConnect(edit1, SIGNAL(returnPressed()), obj1, handler);
-qScriptConnect(edit2, SIGNAL(returnPressed()), obj2, handler);
-```</p>
-
-<p>我们创建了两个 <code>QLineEdit</code> 对象, 然后定义了信号响应函数. 信号槽链接使用了相同的响应函数, 但是使用不同的 <code>this</code> 对象, 具体使用哪个, 取决于哪个对象发出信号, 因此 <code>print()</code> 语句输出的内容将会有所不同.</p>
-
-<p>在某个项目中,设计之初曾经考虑过以下的交互方式: javascript 传入 json 对象, 其中某个 value 是匿名 function, 来实现异步调用. 这种方式看起来很美, 也与第一种方式类似, 但是存在问题. C++ 无法获得当前 webkit 的 javascript 运行环境. QtScript 曾考虑过提供 API 来访问 webkit 的 javascript 运行环境, 详细信息可以参考：<a href="https://bugreports.qt-project.org/browse/QTWEBKIT-2">https://bugreports.qt-project.org/browse/QTWEBKIT-2</a>, 但由于种种原因最终放弃了, 不得不说这是个遗憾.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qt-project.org/doc/qt-4.8/qtscript.html">http://qt-project.org/doc/qt-4.8/qtscript.html</a></li>
-<li><a href="http://qt-project.org/doc/qt-4.8/scripting.html">http://qt-project.org/doc/qt-4.8/scripting.html</a></li>
-<li><a href="http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html">http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[空基类优化]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/"/>
-    <updated>2013-02-25T07:50:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization</id>
-    <content type="html"><![CDATA[<h2>目的</h2>
-
-<p>优化空类数据成员的存储空间</p>
-
-<h2>别名</h2>
-
-<p>EBCO: Empty Base Class Optimization
-Empty Member Optimization</p>
-
-<h2>动机</h2>
-
-<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
-
-<p><code>cpp
-class EmptyClass {};
-EmptyClass arr[10]; // Size of this array can’t be zero.
-</code></p>
-
-<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
-
-<!-- more -->
-
-
-<h2>解决方案&amp;示例代码</h2>
-
-<p>在 C++ 中, 如果一个空类作为基类被继承时, 情况会和上面的有些区别. 编译器允许继承层次结构扁平化, 被继承的空基类不占用空间. 例如下面的代码中 <code>sizeof(AnInt)</code> 在 32 位架构中是 4 字节, <code>sizeof(AnotherEmpty)</code> 是 1 字节, 虽然这两个类都继承自 <code>EmptyClass</code></p>
-
-<p><code>cpp
-class AnInt : public EmptyClass
-{
-   int data;
-};   // size = sizeof(int)
-class AnotherEmpty : public EmptyClass {};  // size =  1
-</code></p>
-
-<p>EBCO 有效的利用了这个特性. 这并不是说简单, 天真的将数据成员的空类变成基类是可取的, 因为这可能会暴露原本需要对用户隐藏的接口. 例如下面的 EBCO 实现方式, 可能会有副作用: 类 <code>Foo</code> 的用户现在可以看到一些方法 (如果在 E1, E2 中存在的话), 虽然他们是私有继承而来的, 不可访问.</p>
-
-<p><code>cpp
-class E1 {};
-class E2 {};
-// **** before EBCO ****
-class Foo {
-  E1 e1;
-  E2 e2;
-  int data;
-}; // sizeof(Foo) = 8
-// **** after EBCO ****
-class Foo : private E1, private E2 {
-  int data;
-}; // sizeof(Foo) = 4
-</code></p>
-
-<p>一种实现 EBCO 的实用方法是: 将空的类成员组合到单一的存储结构扁平的成员中. 下面的模板 <code>BaseOptimization</code> 的前两个模板参数是用来实现 EBCO的. 使用 <code>BaseOptimization</code> 改写类 <code>Foo</code> 如下:</p>
-
-<p>```cpp
-template <class Base1, class Base2, class Member>
-struct BaseOptimization : Base1, Base2
-{
-   Member member;
-   BaseOptimization() {}
-   BaseOptimization(Base1 const&amp; b1, Base2 const &amp; b2, Member const&amp; mem)</p>
-
-<pre><code>   : Base1(b1), Base2(b2), member(mem) { }
-</code></pre>
-
-<p>   Base1 * first()  { return this; }
-   Base2 * second() { return this; }
-};</p>
-
-<p>class Foo {
-  BaseOptimization&lt;E1, E2, int> data;
-}; // sizeof(Foo) = 4
-```</p>
-
-<p>使用 EBCO 并没有改变类 Foo 的继承体系. 保证基类不会互相冲突, 这是至关重要的. 也就是说 Base1 与 Base2 是独立的集成体系中的一部分.</p>
-
-<p><strong>注意</strong>: 对象身份标识的问题, 不同的编译器处理起来是不相同的. 空对象的地址可能是相同的, 也可能是不同的. 例如: BaseOptimization 的成员函数 first 和 second 返回的指针, 在有些编译器上可能是相同的, 而有些编译器上可能是不同的. 更多的讨论请看这里：<a href="http://stackoverflow.com/questions/7694158/boost-compressed-pair-and-addresses-of-empty-objects">stackoverflow</a></p>
-
-<h2>已知的用途</h2>
-
-<p><a href="http://www.boost.org/doc/libs/1_53_0/libs/utility/compressed_pair.htm">boost::compressed_pair</a> 使用了该惯用法, 来优化 pair 的存储空间
-C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.html">unique­_ptr</a> 也使用了该惯用法</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://www.informit.com/articles/article.aspx?p=31473&amp;seqNum=2">The Empty Base Class Optimization (EBCO)</a></li>
-<li><a href="http://www.cantrip.org/emptyopt.html">The &ldquo;Empty Member&rdquo; C++ Optimization</a></li>
-<li><a href="http://www.ibm.com/developerworks/aix/library/au-boostutilities/index.html">Internals of boost::compressed_pair</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在 C++03 中实现强类型安全的枚举类型]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
-    <updated>2013-02-05T21:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
-    <content type="html"><![CDATA[<h2>意图</h2>
-
-<p>改进 C++ 枚举的类型安全性</p>
-
-<h2>动机</h2>
-
-<p>在 C++03 中枚举类型的类型安全性不够强, 有可能导致意想不到的错误. 虽然枚举是语言内置的特性, 但也可能由于编译器的不同, 而存在可移植性的问题. 枚举的问题基本上可以分为3类:</p>
-
-<ul>
-<li>隐式转换</li>
-<li>无法指定类型</li>
-<li>作用域问题</li>
-</ul>
-
-
-<p>C++03 中枚举类型是部分类型安全的, 比如你将一个枚举类型的值直接赋值给另一个枚举类型, 而且无法从整形隐式转换到枚举类型. 但是, 最常见的枚举类型错误是: 它可以自动提升成整形. 例如下面的代码, 只有少数几个的编译器（比如 GNU 的 g++）会发出警告, 而 VC++ 不会有任何的提示.</p>
-
-<p><code>cpp
-enum color { red, green, blue };
-enum shape { circle, square, triangle };
-color c = red;
-bool flag = (c &gt;= triangle); // Unintended!
-</code></p>
-
-<!-- more -->
-
-
-<p>C++03 中枚举类型另外的问题是无法指定枚举存储时的类型. 这可能导致数据大小以及符号问题在各个编译器上表现不同而导致不可移植的问题. 最后, 是作用域问题, 在相同的作用域内不能有两个相同名称的枚举值.</p>
-
-<p>强类型的枚举已经进入 C++11 标准中. 详细内容参考: <a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class</a>
-下面是 C++03 强类型安全的枚举实现。</p>
-
-<h2>解决方案&amp;示例代码</h2>
-
-<p>```cpp
-template<typename def, typename inner = typename def::type>
-class safe_enum : public def
-{
-  typedef typename def::type type;
-  inner val;</p>
-
-<p>public:</p>
-
-<p>  safe_enum(type v) : val(v) {}
-  inner underlying() const { return val; }</p>
-
-<p>  bool operator == (const safe_enum &amp; s) const { return this->val == s.val; }
-  bool operator != (const safe_enum &amp; s) const { return this->val != s.val; }
-  bool operator &lt;  (const safe_enum &amp; s) const { return this->val &lt;  s.val; }
-  bool operator &lt;= (const safe_enum &amp; s) const { return this->val &lt;= s.val; }
-  bool operator >  (const safe_enum &amp; s) const { return this->val >  s.val; }
-  bool operator >= (const safe_enum &amp; s) const { return this->val >= s.val; }
-};</p>
-
-<p>struct color_def {
-  enum type { red, green, blue };
-};
-typedef safe_enum&lt;color_def> color;</p>
-
-<p>struct shape_def {
-  enum type { circle, square, triangle };
-};
-typedef safe_enum&lt;shape_def, unsigned char> shape; // unsigned char representation</p>
-
-<p>int main(void)
-{
-  color c = color::red;
-  bool flag = (c >= shape::triangle); // Compiler error.
-}
-```</p>
-
-<p>在上述解决方案的代码中, 实际的枚举类型包裹在 <code>color_def</code> 和 <code>shape_def</code> 结构体中. <code>safe_enum</code> 模板帮我们实现了一个类型安全的枚举. <code>safe_enum</code> 使用了 <a href="http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Parameterized_Base_Class">Parameterized Base Class</a> 惯用法. 它继承了模板参数 <code>color_def</code> 以及 <code>shape_def</code>, 使得 color 以及 shape 变成了强类型安全的枚举.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf">Strongly Typed Enums (revision 3)</a></li>
-<li><a href="http://scottmeyers.blogspot.hk/2013/01/effective-c11-content-and-status.html">Effective C++11: Content and Status -Prefer enum classes to enums.</a></li>
-<li><a href="http://www.stroustrup.com/C++11FAQ.html#enum">C++11 FAQ: enum class &mdash; scoped and strongly typed enums</a></li>
 </ul>
 
 ]]></content>

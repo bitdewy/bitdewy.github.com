@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="原文在这里 GotW #1 Solution: Variable Initialization – or Is It? 第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化. JG 问题 1. &hellip;">
+	<meta name="description" content="C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 packaged_task 以方便操作. std::packaged_task 模板类 std:: &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -16,9 +16,10 @@
 	<link href="/favicon.png" rel="shortcut icon">
 	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
 </head>
+
 
 <body>
 	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
@@ -70,6 +71,7 @@
 		
 		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
 		
+    
 	</div>
 	<form class="search" action="http://google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
@@ -96,6 +98,325 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/06/14/cpp11-multithread-promise-future/">
+		
+			C++11 多线程, Std::future & Std::promise</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
+
+<h2>std::packaged_task</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 可以包装任何可调用的对象(函数, lambda 表达式, std::bind, 或其他函数对象), 以便异步调用, 调用结果保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中, 可以通过成员函数 get_future 访问. 需要注意的是, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 是不可拷贝的(move only).</p>
+
+<p>示例代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cmath&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;functional&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_lambda</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_lambda:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_bind</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_bind:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_thread</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">task_td</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">task</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">task_td</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_thread:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">task_lambda</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_bind</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_thread</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2013/06/14/cpp11-multithread-promise-future/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-14T22:36:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>, <a class='category' href='/blog/categories/multithread/'>multithread</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/06/14/cpp11-multithread-promise-future/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/06/04/cpp14-optional/">
+		
+			C++14 std::optional<T></a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
+
+<h2>“无意义”的值</h2>
+
+<p>函数并不总能返回有效的返回值, 很多时候函数可能返回&#8221;无意义&#8221;的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
+表示返回值无意义最常用的做法是增加一个&#8221;哨兵&#8221;的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的&#8221;哨兵&#8221;.</p>
+
+<h2>std::optional<T></h2>
+
+<p>optional 库使用&#8221;容器&#8221;语义, 包装了&#8221;可能产生无效值&#8221;的对象, 实现了&#8221;未初始化&#8221;的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
+
+<p>optional 使用&#8221;容器&#8221;语义, 为这种&#8221;无效值&#8221;的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了&#8221;未初始化&#8221;的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
+
+
+		
+		<a href="/blog/2013/06/04/cpp14-optional/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-04T01:54:00+08:00" pubdate data-updated="true">Jun 4<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-14/'>C++14</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/06/04/cpp14-optional/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/28/template-method-pattern/">
+		
+			模板方法模式</a>
+	</h2>
+	<div class="entry-content">
+		<h2>意图</h2>
+
+<ol>
+<li>定义一个操作中的算法骨架, 将一些步骤延迟到子类中定义. 模板方法模式, 可以让子类不改变算法的结构重新定义算法的某些步骤.</li>
+<li>基类声明算法的“占位符”, 子类来实现这个“占位符”.</li>
+</ol>
+
+
+<h2>讨论</h2>
+
+<p>组件设计者决定哪些算法的步骤是不变的? 哪些是会变化的? 不变的步骤在抽象类中直接实现, 可能变化的步骤给出默认的实现, 或者完全不实现. 变化的部分代表“hooks”, 或占位符. 可以在使用组件时, 在派生类中实现.</p>
+
+<p>组件设计者设计算法的步骤, 步骤的顺序, 但同时允许用户来扩展或替换算法中的某些步骤.</p>
+
+<p>模板方法模式在框架中的使用非常广泛. 每个框架都会实现框架的主要结构, 然后定义一系列的“占位符”给用户, 让用户有机会来自定义一些操作.这么做时, 框架就变成了核心部分, 用户自定义的操作就会变得容易. 这使得控制结构发生反转, 这个方式有一个很好的名字, “好莱坞原则”——“不要给我们打电话, 我们会打电话给你.”</p>
+
+
+		
+		<a href="/blog/2013/05/28/template-method-pattern/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-28T01:26:00+08:00" pubdate data-updated="true">May 28<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/oo/'>OO</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/05/28/template-method-pattern/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/21/cpp11-keywords-using/">
+		
+			C++11 关键字 Using</a>
+	</h2>
+	<div class="entry-content">
+		<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
+
+<h2>使用小技巧来声明函数指针</h2>
+
+<p>在 c++03 中, 函数指针要这么写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
+
+<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;type_traits&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">add_pointer</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
+
+
+		
+		<a href="/blog/2013/05/21/cpp11-keywords-using/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-21T00:45:00+08:00" pubdate data-updated="true">May 21<span>st</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/05/21/cpp11-keywords-using/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -188,9 +509,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/05/12/gotw1//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/05/12/gotw1/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -267,9 +589,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -321,9 +644,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/03/21/qtscript//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/03/21/qtscript/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -384,9 +708,10 @@ Empty Member Optimization</p>
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/02/25/empty-base-optimization//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/02/25/empty-base-optimization/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -455,9 +780,10 @@ Empty Member Optimization</p>
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/02/05/strongly-type-safe-enum-in-cpp03//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -564,247 +890,10 @@ Empty Member Optimization</p>
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/01/03/you-dont-know-const-and-mutable//index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2013/01/03/you-dont-know-const-and-mutable/#disqus_thread">Comments</a></div>
 	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/">
-		
-			C++11 Lambda in Qt5</a>
-	</h2>
-	<div class="entry-content">
-		<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
-
-<h2>lambda 函数与表达式</h2>
-
-<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
-
-
-		
-		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-23T22:32:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
-
-
 </div>
-	
-		<div class="comments"><a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5//index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/">
-		
-			[译] Why C++ Is Not Back</a>
-	</h2>
-	<div class="entry-content">
-		<p>前言：这个月初，<a href="http://herbsutter.com/">Herb Sutter</a> 发了一篇名为 <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Perspective: “Why C++ Is Not ‘Back’”</a>，的文章，虽然 <a href="http://herbsutter.com/">Sutter</a> 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如<a href="http://coolshell.cn/articles/7992.html">这里</a>。</p>
-
-<p>本译文中不会发表任何观点，尽量表达原作者的意图，如有翻译不当的地方欢迎大家积极指出，我会做出修改。</p>
-
-<p>原文在这里： <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Why C++ Is Not “Back”</a></p>
-
-<p><strong>下面是译文：</strong></p>
-
-<p>我喜爱 C++。</p>
-
-<p>C++ 真正教会了我如何写代码。</p>
-
-<p>以前，我会学习语言本身的复杂性，<a href="http://www.cplusplus.com/reference/stl/">STL</a>，以及内存管理和指针运算中的所有细节。</p>
-
-<p>这些都是很美好的时光。我还记得一遍又一遍的读 <a href="http://www.aristeia.com/">Scott Meyers</a> 的 <a href="http://www.amazon.com/gp/product/B008E30L9A/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B008E30L9A&amp;linkCode=as2&amp;tag=makithecompsi-20">Effective C++</a> 系列。每一次都能从中学到一些新的东西，或者更理解如何使用 C++。</p>
-
-<p>我说上面这些只是想让你知道，<strong>我不讨厌 C++</strong>。我喜欢 C++。</p>
-
-<p>我知道，有很多优秀现在仍然在使用 C++ 并教别人如何使用，这一点也没有错。</p>
-
-<p>但问题是什么？</p>
-
-
-		
-		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-16T17:42:00+08:00" pubdate data-updated="true">Dec 16<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/12/16/why-c-plus-plus-is-not-back//index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/15/cmake-lua5-dot-2/">
-		
-			CMake Lua 5.2</a>
-	</h2>
-	<div class="entry-content">
-		<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
-
-<h2>什么是 CMake？</h2>
-
-<p><a href="http://www.cmake.org/">CMake</a> 是个开源的跨平台自动化建构系统，它用组态档控制建构过程（build process）的方式和 Unix 的 Make 相似，只是 <a href="http://www.cmake.org/">CMake</a> 的组态档取名为 CMakeLists.txt。<a href="http://www.cmake.org/">CMake</a> 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 <a href="http://www.cmake.org/">CMake</a> 和 SCons 等其他类似系统的区别之处。</p>
-
-<p>有了 <a href="http://www.cmake.org/">CMake</a> 就不用在 vcproj 的各个版本之前来回的切换了，每次用 <a href="http://www.cmake.org/">CMake</a> 生成相应的工程文件就一切 OK 了。</p>
-
-<h2>Windows 下用 CMake 安装 lua 5.2.1</h2>
-
-<h3>安装 CMake</h3>
-
-<p>从<a href="http://cmake.org/cmake/resources/software.html">官方下载</a>相应的安装包，安装完成后，别忘了把 <a href="http://www.cmake.org/">CMake</a> 加入 <code>PATH</code> 中。</p>
-
-<h3>使用 CMake 生成 vcproj</h3>
-
-<p>lua官方不提供带 CMake 的源码，会的朋友可以手工写几个 CMakeList.txt 就 OK，不会的直接下载 bitdewy 写好的 <a href="http://sdrv.ms/TTp5Y6">cmake-lua-5.2.1.tar.gz</a> 吧。解压后用 visual studio 的命令行进入 <code>lua-5.2.1/build</code> 目录，然后输入：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bat'><span class='line'>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="s2">&quot;C:\lua52&quot;</span> ..
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>完成之后就可以打开 build 目录下的 lua.sln 文件直接编译了，编译 INSTALL 工程，会在上面设置的 <code>C:\lua52</code> 目录中安装 lua，luac，静态链接库，动态链接库，头文件、源代码以及文档，如果不想安装，不编译 INSTALL 工程就好。如果不设置安装目录，那么 windows 下默认的安装目录就是 <code>%ProgramFiles%</code> 。</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-15T18:09:00+08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/cmake/'>cmake</a>, <a class='category' href='/blog/categories/lua/'>lua</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/12/15/cmake-lua5-dot-2//index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/09/com-and-reference-counting/">
-		
-			COM、ABI与引用计数</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是 COM ？</h2>
-
-<p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
-
-<h2>什么是 ABI ？</h2>
-
-<p>Application Binary Interface (ABI) 应用二进制接口，描述了应用程序和操作系统之间，一个应用和它的库之间，或者应用的组成部分之间的低层接口。</p>
-
-<p>ABI涵盖了各种细节，例如：</p>
-
-<ul>
-<li>数据类型、大小以及内存布局</li>
-<li>调用约定（控制着函数的参数如何传送以及如何接受返回值）</li>
-<li>系统调用的编码和一个应用如何向操作系统进行系统调用</li>
-<li>在一个完整的操作系统ABI中，目标文件、程序库的二进制格式等等。</li>
-</ul>
-
-
-<p>一个完整的ABI，像Intel二进制兼容标准(<a href="http://www.everything2.com/index.pl?node=iBCS">iBCS</a>)，允许支持它的操作系统上的程序不经修改在其他支持此ABI的操作体统上运行。</p>
-
-<p>其他的ABI标准化细节包括<a href="http://en.wikipedia.org/wiki/Name_mangling#Name_mangling_in_C.2B.2B">C++ name mangling</a>、异常传播，同一个平台上的编译器之间的调用约定，但是不包括跨平台的兼容性。详细内容请看 <a href="http://en.wikipedia.org/wiki/Application_binary_interface">Application binary interface</a></p>
-
-
-		
-		<a href="/blog/2012/12/09/com-and-reference-counting/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-09T18:18:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/com/'>COM</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/12/09/com-and-reference-counting//index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
+</article>
 
 <nav id="pagenavi">
     
@@ -835,7 +924,7 @@ Empty Member Optimization</p>
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      dsq.src = '//go.disqus.com/' + disqus_script;
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     }());
 </script>

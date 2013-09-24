@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: C++14 | Bitdewy]]></title>
+  <link href="http://bitdewy.github.io/blog/categories/c-plus-plus-14/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.io/"/>
+  <updated>2013-09-25T01:53:53+08:00</updated>
+  <id>http://bitdewy.github.io/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <updated>2013-06-04T01:54:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
+
+<h2>“无意义”的值</h2>
+
+<p>函数并不总能返回有效的返回值, 很多时候函数可能返回"无意义"的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
+表示返回值无意义最常用的做法是增加一个"哨兵"的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的"哨兵".</p>
+
+<h2>std::optional<T></h2>
+
+<p>optional 库使用"容器"语义, 包装了"可能产生无效值"的对象, 实现了"未初始化"的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
+
+<p>optional 使用"容器"语义, 为这种"无效值"的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了"未初始化"的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
+
+<!-- more  -->
+
+
+<h2>操作函数</h2>
+
+<p>optional 的模板类型参数 T 可以使任何类型， 就如同一个标准容器对元素的要求, 并不需要T具有缺省构造函数, 但必须是可拷贝构造的.
+optional 采用了指针语义来访问内部保存的元素, 这使得 optional 未初始化时的行为就像一个空指针. 它重载了 <code>operator*</code> 和 <code>operator-&gt;</code> 以实现与指针相同的操作, <code>get()</code> 和 <code>get_ptr()</code> 可以以函数的操作形式获得元素的引用和指针. 成员函数 <code>get_value_or(default)</code> 是一个特别的访问函数, 可以保证返回一个有效的值, 如果 optional 已初始化, 那么返回内部的元素, 否则返回 default. optional 也可以用隐式类型转换进行 bool 测试(用于条件判断), 就像一个对指针的判断. optional 还全面支持比较运算，包括 <code>==, !=, &lt;, &lt;=, &gt;, &gt;=</code>. (详细接口参考 <a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference: std::optional</a>)</p>
+
+<h2>用法</h2>
+
+<p>optional 的接口简单明了, 把它认为是一个大小为 1 并且行为类似指针的容器就可以了, 或者把它想象成是一个类似 scoped_ptr, shared_ptr 的智能指针(注意, optional 不是智能指针, 用法类似但用途不同).</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <string></h1>
+
+<h1>include &ldquo;boost/optional.hpp&rdquo;</h1>
+
+<h1>include &ldquo;boost/lexical_cast.hpp&rdquo;</h1>
+
+<p>// converts int to string if possible
+boost::optional<int> str2int(const std::string&amp; str)
+{
+  boost::optional<int> i;
+  try {</p>
+
+<pre><code>i = boost::lexical_cast&lt;int&gt;(str);
+</code></pre>
+
+<p>  } catch (boost::bad_lexical_cast&amp;) {</p>
+
+<p>  }
+  return i;
+}</p>
+
+<p>int get_int_form_user()
+{
+  std::string s;
+  for (;;) {</p>
+
+<pre><code>std::cin &gt;&gt; s;
+boost::optional&lt;int&gt; o = str2int(s); // 'o' may or may not contain an int
+if (o) {                                 // does optional contain a value?
+  return *o;                             // use the value
+}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>int main()
+{
+  std::cout &lt;&lt; get_int_form_user();
+  return 0;
+}
+```</p>
+
+<p>如上面的代码所示: 使用 optional, 非法的 int 类型, 就不需要定义一个特别的错误码作为无意义值了.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference.com: optional</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">A proposal to add a utility class to represent optional objects (Revision 4)</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。 其次，准备好 Xcode 先。正文开始： 安装Qt library Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点这里 &hellip;">
+	<meta name="description" content="C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。 lambda 函数与表达式 C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -16,9 +16,10 @@
 	<link href="/favicon.png" rel="shortcut icon">
 	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	
 </head>
+
 
 <body>
 	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
@@ -70,6 +71,7 @@
 		
 		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
 		
+    
 	</div>
 	<form class="search" action="http://google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
@@ -96,6 +98,248 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/">
+		
+			C++11 Lambda in Qt5</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
+
+<h2>lambda 函数与表达式</h2>
+
+<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
+
+
+		
+		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-23T22:32:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/">
+		
+			[译] Why C++ Is Not Back</a>
+	</h2>
+	<div class="entry-content">
+		<p>前言：这个月初，<a href="http://herbsutter.com/">Herb Sutter</a> 发了一篇名为 <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Perspective: “Why C++ Is Not ‘Back’”</a>，的文章，虽然 <a href="http://herbsutter.com/">Sutter</a> 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如<a href="http://coolshell.cn/articles/7992.html">这里</a>。</p>
+
+<p>本译文中不会发表任何观点，尽量表达原作者的意图，如有翻译不当的地方欢迎大家积极指出，我会做出修改。</p>
+
+<p>原文在这里： <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Why C++ Is Not “Back”</a></p>
+
+<p><strong>下面是译文：</strong></p>
+
+<p>我喜爱 C++。</p>
+
+<p>C++ 真正教会了我如何写代码。</p>
+
+<p>以前，我会学习语言本身的复杂性，<a href="http://www.cplusplus.com/reference/stl/">STL</a>，以及内存管理和指针运算中的所有细节。</p>
+
+<p>这些都是很美好的时光。我还记得一遍又一遍的读 <a href="http://www.aristeia.com/">Scott Meyers</a> 的 <a href="http://www.amazon.com/gp/product/B008E30L9A/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B008E30L9A&amp;linkCode=as2&amp;tag=makithecompsi-20">Effective C++</a> 系列。每一次都能从中学到一些新的东西，或者更理解如何使用 C++。</p>
+
+<p>我说上面这些只是想让你知道，<strong>我不讨厌 C++</strong>。我喜欢 C++。</p>
+
+<p>我知道，有很多优秀现在仍然在使用 C++ 并教别人如何使用，这一点也没有错。</p>
+
+<p>但问题是什么？</p>
+
+
+		
+		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-16T17:42:00+08:00" pubdate data-updated="true">Dec 16<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/15/cmake-lua5-dot-2/">
+		
+			CMake Lua 5.2</a>
+	</h2>
+	<div class="entry-content">
+		<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
+
+<h2>什么是 CMake？</h2>
+
+<p><a href="http://www.cmake.org/">CMake</a> 是个开源的跨平台自动化建构系统，它用组态档控制建构过程（build process）的方式和 Unix 的 Make 相似，只是 <a href="http://www.cmake.org/">CMake</a> 的组态档取名为 CMakeLists.txt。<a href="http://www.cmake.org/">CMake</a> 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 <a href="http://www.cmake.org/">CMake</a> 和 SCons 等其他类似系统的区别之处。</p>
+
+<p>有了 <a href="http://www.cmake.org/">CMake</a> 就不用在 vcproj 的各个版本之前来回的切换了，每次用 <a href="http://www.cmake.org/">CMake</a> 生成相应的工程文件就一切 OK 了。</p>
+
+<h2>Windows 下用 CMake 安装 lua 5.2.1</h2>
+
+<h3>安装 CMake</h3>
+
+<p>从<a href="http://cmake.org/cmake/resources/software.html">官方下载</a>相应的安装包，安装完成后，别忘了把 <a href="http://www.cmake.org/">CMake</a> 加入 <code>PATH</code> 中。</p>
+
+<h3>使用 CMake 生成 vcproj</h3>
+
+<p>lua官方不提供带 CMake 的源码，会的朋友可以手工写几个 CMakeList.txt 就 OK，不会的直接下载 bitdewy 写好的 <a href="http://sdrv.ms/TTp5Y6">cmake-lua-5.2.1.tar.gz</a> 吧。解压后用 visual studio 的命令行进入 <code>lua-5.2.1/build</code> 目录，然后输入：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bat'><span class='line'>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="s2">&quot;C:\lua52&quot;</span> ..
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完成之后就可以打开 build 目录下的 lua.sln 文件直接编译了，编译 INSTALL 工程，会在上面设置的 <code>C:\lua52</code> 目录中安装 lua，luac，静态链接库，动态链接库，头文件、源代码以及文档，如果不想安装，不编译 INSTALL 工程就好。如果不设置安装目录，那么 windows 下默认的安装目录就是 <code>%ProgramFiles%</code> 。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-15T18:09:00+08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cmake/'>cmake</a>, <a class='category' href='/blog/categories/lua/'>lua</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/15/cmake-lua5-dot-2/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/09/com-and-reference-counting/">
+		
+			COM、ABI与引用计数</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是 COM ？</h2>
+
+<p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
+
+<h2>什么是 ABI ？</h2>
+
+<p>Application Binary Interface (ABI) 应用二进制接口，描述了应用程序和操作系统之间，一个应用和它的库之间，或者应用的组成部分之间的低层接口。</p>
+
+<p>ABI涵盖了各种细节，例如：</p>
+
+<ul>
+<li>数据类型、大小以及内存布局</li>
+<li>调用约定（控制着函数的参数如何传送以及如何接受返回值）</li>
+<li>系统调用的编码和一个应用如何向操作系统进行系统调用</li>
+<li>在一个完整的操作系统ABI中，目标文件、程序库的二进制格式等等。</li>
+</ul>
+
+
+<p>一个完整的ABI，像Intel二进制兼容标准(<a href="http://www.everything2.com/index.pl?node=iBCS">iBCS</a>)，允许支持它的操作系统上的程序不经修改在其他支持此ABI的操作体统上运行。</p>
+
+<p>其他的ABI标准化细节包括<a href="http://en.wikipedia.org/wiki/Name_mangling#Name_mangling_in_C.2B.2B">C++ name mangling</a>、异常传播，同一个平台上的编译器之间的调用约定，但是不包括跨平台的兼容性。详细内容请看 <a href="http://en.wikipedia.org/wiki/Application_binary_interface">Application binary interface</a></p>
+
+
+		
+		<a href="/blog/2012/12/09/com-and-reference-counting/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-09T18:18:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/com/'>COM</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/09/com-and-reference-counting/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -142,9 +386,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/12/09/qt-xcode-hello//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/12/09/qt-xcode-hello/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -235,9 +480,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/11/25/hello-world//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/11/25/hello-world/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -300,9 +546,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/09/14/unix-hidden-file-is-a-bug//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -349,9 +596,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/08/21/cpp-orm-odb//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/08/21/cpp-orm-odb/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -399,9 +647,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/08/21/unordered-map//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/08/21/unordered-map/#disqus_thread">Comments</a></div>
 	
-</div></article>
+</div>
+</article>
 
 
     <article class="post">
@@ -456,347 +705,10 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2012/07/15/gotw104//blog/page/2/index.html#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="/blog/2012/07/15/gotw104/#disqus_thread">Comments</a></div>
 	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/07/14/gotw103/">
-		
-			[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。</p>
-
-<p>3. 如何处理 auto_ptr ？</p>
-
-
-		
-		<a href="/blog/2012/07/14/gotw103/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-14T19:14:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
 </div>
-	
-		<div class="comments"><a href="/blog/2012/07/14/gotw103//blog/page/2/index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/07/07/gotw102/">
-		
-			[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>[这是 <a href="http://www.gotw.ca/gotw/056.htm">GotW #56</a> 的 C++11 更新版]</p>
-
-<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a></p>
-
-<h2>JG问题</h2>
-
-<p>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Example 1(b)</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">g</span><span class="p">(</span> <span class="n">expr1</span> <span class="p">),</span> <span class="n">h</span><span class="p">(</span> <span class="n">expr2</span> <span class="p">)</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Guru问题</h2>
-
-<p>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这段代码包含潜在的异常安全问题吗？请解释。</p>
-
-<p>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</p>
-
-<p>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-
-		
-		<a href="/blog/2012/07/07/gotw102/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-07T00:06:00+08:00" pubdate data-updated="true">Jul 7<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/07/07/gotw102//blog/page/2/index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/07/02/gotw101/">
-		
-			[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
-
-<h2>Guru问题</h2>
-
-<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// in implementation file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// :::</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span> <span class="c1">// or =default</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
-
-
-		
-		<a href="/blog/2012/07/02/gotw101/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-02T02:38:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/07/02/gotw101//blog/page/2/index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/06/30/gotw100/">
-		
-			[译] GotW #100: Compilation Firewalls (Difficulty: 6/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>[这是 <a href="http://www.gotw.ca/gotw/024.htm">GotW #24</a> 的 C++11 更新版]</p>
-
-<p>原文在这里 <a href="http://herbsutter.com/gotw/_100/">GotW #100: Compilation Firewalls (Difficulty: 6/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. Pimpl 惯用法是什么？为什么要使用它？</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</p>
-
-<p>3. 类中的那些部分应该放到 impl 对象中？一些可能的选择包括：</p>
-
-<ul>
-<li>所有私有数据（非函数）</li>
-<li>所有私有成员</li>
-<li>所有私有和保护成员</li>
-<li>所有私有非虚成员</li>
-<li>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</li>
-</ul>
-
-
-<p>它们的每一个的缺点和优点是什么？你怎么选择？</p>
-
-<p>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</p>
-
-
-		
-		<a href="/blog/2012/06/30/gotw100/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-06-30T01:20:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-		<div class="comments"><a href="/blog/2012/06/30/gotw100//blog/page/2/index.html#disqus_thread">Comments</a></div>
-	
-</div></article>
+</article>
 
 <nav id="pagenavi">
     
@@ -829,7 +741,7 @@
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      dsq.src = '//go.disqus.com/' + disqus_script;
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     }());
 </script>

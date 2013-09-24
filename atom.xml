@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.io/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.io/"/>
-  <updated>2013-05-12T23:39:09+08:00</updated>
+  <updated>2013-09-25T01:53:53+08:00</updated>
   <id>http://bitdewy.github.io/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,581 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future/"/>
+    <updated>2013-06-14T22:36:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future</id>
+    <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
+
+<h2>std::packaged_task</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 可以包装任何可调用的对象(函数, lambda 表达式, std::bind, 或其他函数对象), 以便异步调用, 调用结果保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中, 可以通过成员函数 get_future 访问. 需要注意的是, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 是不可拷贝的(move only).</p>
+
+<p>示例代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cmath&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;functional&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_lambda</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_lambda:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_bind</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_bind:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">task_thread</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">task_td</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">task</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">task_td</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;task_thread:</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">task_lambda</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_bind</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">task_thread</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>仅仅有 packaged_task 还远远不够, 我们还需要更强大的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a>.</p>
+
+<p>基本思路很简单: 当一个任务需要向父线程(启动它的线程)返回值时, 它把这个值放到 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 中. 之后, 这个返回值会出现在和此 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 关联的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 中.于是父线程就能读到返回值. 更简单点的方法, 参看 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a>.</p>
+
+<p>如果我们有一个 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> f, 通过 get() 可以获得它的值:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">X</span> <span class="n">v</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>  <span class="c1">// if necessary wait for the value to get computed</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果它的返回值还没有到达, 调用线程会进行阻塞等待. 要是等啊等啊, 等到花儿也谢了的话, get() 会抛出异常的(从标准库或等待的线程那个线程中抛出).</p>
+
+<p>如果我们不需要等待返回值(非阻塞方式), 可以简单询问一下 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a>, 看返回值是否已经到达:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">wait_for</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// there is a value to get()</span>
+</span><span class='line'>    <span class="c1">// do something</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// do something else</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 最主要的用途是一个简单的获取返回值的方法: get().</p>
+
+<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 的主要用途是提供一个 &ldquo;put&#8221;（或&#8221;get&#8221;，随你）操作, 以和 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 的 get() 对应.</p>
+
+<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 为 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 传递的结果类型有 2 种: 传一个普通值或者抛出一个异常</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">X</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1">// compute a value for res</span>
+</span><span class='line'>    <span class="n">p</span><span class="p">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span> <span class="k">catch</span> <span class="p">(...)</span> <span class="p">{</span>   <span class="c1">// oops: couldn&#39;t compute res </span>
+</span><span class='line'>    <span class="n">p</span><span class="p">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到目前为止还不错, 不过我们如何匹配 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> / <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 对呢? 一个在我的线程, 另一个在别的啥线程中吗? 是这样: 既然 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 可以被到处移动(不是拷贝), 那么可能性就挺多的. 最普遍的情况是父子线程配对形式, 父线程用 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 获取子线程 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 返回的值. 在这种情况下, 使用 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a> 是很优雅的方法.</p>
+
+<h2>std::promise</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 提供一个存储设施, 当一个异步任务通过 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 来获取结果时, <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 可以提供.</p>
+
+<h2>std::future</h2>
+
+<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 提供了一种机制来访问异步操作的结果:
+由 <a href="http://en.cppreference.com/w/cpp/thread/async">std::async</a>, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a>, 或者 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 创建的异步操作, 可以提供一个 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 对象, 给创建者, 用来访问异步操作的结果.</p>
+
+<p>异步操作的创建者, 可以使用各种不同的操作来查询, 等待, 或者从 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中取到异步操作的结果. 如果异步操作还没有执行完的话, 这些操作有可能会阻塞.
+当一个异步操作完成时可以通过更改(例如使用 <code>std::promise::set_value</code>) 共享状态(该状态保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中) 将结果返回给异步操作的创建者.</p>
+
+<p>示例代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// future from a packaged_task</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">task</span><span class="p">([](){</span> <span class="k">return</span> <span class="mi">7</span><span class="p">;</span> <span class="p">});</span> <span class="c1">// wrap the function</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>  <span class="c1">// get a future</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">task</span><span class="p">)).</span><span class="n">detach</span><span class="p">();</span> <span class="c1">// launch on a thread</span>
+</span><span class='line'>    <span class="c1">// future from an async()</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[](){</span> <span class="k">return</span> <span class="mi">8</span><span class="p">;</span> <span class="p">});</span>
+</span><span class='line'>    <span class="c1">// future from a promise</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">promise</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">f3</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">promise</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">p</span><span class="p">){</span> <span class="n">p</span><span class="p">.</span><span class="n">set_value</span><span class="p">(</span><span class="mi">9</span><span class="p">);</span> <span class="p">},</span>
+</span><span class='line'>                 <span class="n">std</span><span class="o">::</span><span class="n">ref</span><span class="p">(</span><span class="n">p</span><span class="p">)).</span><span class="n">detach</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Waiting...&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">flush</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">f1</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>   <span class="n">f2</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">f3</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Done!</span><span class="se">\n</span><span class="s">Results are: &quot;</span>
+</span><span class='line'>              <span class="o">&lt;&lt;</span> <span class="n">f1</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39; &#39;</span> <span class="o">&lt;&lt;</span> <span class="n">f2</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39; &#39;</span> <span class="o">&lt;&lt;</span> <span class="n">f3</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/thread">Cppreference：Thread support library</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Futures_and_promises">wikipedia: futures and promises</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <updated>2013-06-04T01:54:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
+
+<h2>“无意义”的值</h2>
+
+<p>函数并不总能返回有效的返回值, 很多时候函数可能返回&#8221;无意义&#8221;的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
+表示返回值无意义最常用的做法是增加一个&#8221;哨兵&#8221;的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的&#8221;哨兵&#8221;.</p>
+
+<h2>std::optional<T></h2>
+
+<p>optional 库使用&#8221;容器&#8221;语义, 包装了&#8221;可能产生无效值&#8221;的对象, 实现了&#8221;未初始化&#8221;的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
+
+<p>optional 使用&#8221;容器&#8221;语义, 为这种&#8221;无效值&#8221;的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了&#8221;未初始化&#8221;的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
+
+<!-- more  -->
+
+
+<h2>操作函数</h2>
+
+<p>optional 的模板类型参数 T 可以使任何类型， 就如同一个标准容器对元素的要求, 并不需要T具有缺省构造函数, 但必须是可拷贝构造的.
+optional 采用了指针语义来访问内部保存的元素, 这使得 optional 未初始化时的行为就像一个空指针. 它重载了 <code>operator*</code> 和 <code>operator-&gt;</code> 以实现与指针相同的操作, <code>get()</code> 和 <code>get_ptr()</code> 可以以函数的操作形式获得元素的引用和指针. 成员函数 <code>get_value_or(default)</code> 是一个特别的访问函数, 可以保证返回一个有效的值, 如果 optional 已初始化, 那么返回内部的元素, 否则返回 default. optional 也可以用隐式类型转换进行 bool 测试(用于条件判断), 就像一个对指针的判断. optional 还全面支持比较运算，包括 <code>==, !=, &lt;, &lt;=, &gt;, &gt;=</code>. (详细接口参考 <a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference: std::optional</a>)</p>
+
+<h2>用法</h2>
+
+<p>optional 的接口简单明了, 把它认为是一个大小为 1 并且行为类似指针的容器就可以了, 或者把它想象成是一个类似 scoped_ptr, shared_ptr 的智能指针(注意, optional 不是智能指针, 用法类似但用途不同).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &quot;boost/optional.hpp&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;boost/lexical_cast.hpp&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// converts int to string if possible</span>
+</span><span class='line'><span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">str2int</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">i</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">lexical_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">boost</span><span class="o">::</span><span class="n">bad_lexical_cast</span><span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">get_int_form_user</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(;;)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">s</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">o</span> <span class="o">=</span> <span class="n">str2int</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="c1">// &#39;o&#39; may or may not contain an int</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="p">{</span>                                 <span class="c1">// does optional contain a value?</span>
+</span><span class='line'>      <span class="k">return</span> <span class="o">*</span><span class="n">o</span><span class="p">;</span>                             <span class="c1">// use the value</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">get_int_form_user</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如上面的代码所示: 使用 optional, 非法的 int 类型, 就不需要定义一个特别的错误码作为无意义值了.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference.com: optional</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">A proposal to add a utility class to represent optional objects (Revision 4)</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[模板方法模式]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/05/28/template-method-pattern/"/>
+    <updated>2013-05-28T01:26:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/05/28/template-method-pattern</id>
+    <content type="html"><![CDATA[<h2>意图</h2>
+
+<ol>
+<li>定义一个操作中的算法骨架, 将一些步骤延迟到子类中定义. 模板方法模式, 可以让子类不改变算法的结构重新定义算法的某些步骤.</li>
+<li>基类声明算法的“占位符”, 子类来实现这个“占位符”.</li>
+</ol>
+
+
+<h2>讨论</h2>
+
+<p>组件设计者决定哪些算法的步骤是不变的? 哪些是会变化的? 不变的步骤在抽象类中直接实现, 可能变化的步骤给出默认的实现, 或者完全不实现. 变化的部分代表“hooks”, 或占位符. 可以在使用组件时, 在派生类中实现.</p>
+
+<p>组件设计者设计算法的步骤, 步骤的顺序, 但同时允许用户来扩展或替换算法中的某些步骤.</p>
+
+<p>模板方法模式在框架中的使用非常广泛. 每个框架都会实现框架的主要结构, 然后定义一系列的“占位符”给用户, 让用户有机会来自定义一些操作.这么做时, 框架就变成了核心部分, 用户自定义的操作就会变得容易. 这使得控制结构发生反转, 这个方式有一个很好的名字, “好莱坞原则”——“不要给我们打电话, 我们会打电话给你.”</p>
+
+<!-- more  -->
+
+
+<h2>结构</h2>
+
+<p><img src="https://qhphgq.bay.livefilestore.com/y2pBx_PXPtSilwtV5sYskGDPJkXjmpbdLnwAeT9H_7drKPs4-4_-pm3OfDw58eFEjaFRaa2LSKhbnJODUkyO8CpuQRq8iF306c3KF6Ix_M1zWA/image002.gif" alt="" /></p>
+
+<p>template_method() 的实现如下: 调用 step_one(), 调用 step_two(), 然后调用 step_three(). step_two() 是一个 “hook” 方法——一个占位符. 它在基类中声明, 然后在派生类中实现. 框架中使用模板方法模式非常的频繁. 所有可重用的代码都定义在框架的基类中, 框架的用户可以通过派生类来定制一些想要的行为.</p>
+
+<p><img src="https://qhphgq.bay.livefilestore.com/y2pMCc56J8x2oBUDmOTnSI3RIm-N5Gtpyj355-us-8Rj6CwVbNzQfiEJyprTSAXmCS8rG0MbCE-qwP-Y65dPUdVWyXU8V2FC4IWhzy_2WBvDZA/image003.gif" alt="" /></p>
+
+<h2>做法</h2>
+
+<ol>
+<li>检测算法, 决定哪些步骤是标准的通用的, 哪些是特有的.</li>
+<li>定义一个抽象类, 用来实现依赖的反转.</li>
+<li>将算法的壳以及所有的标准（公共）的步骤移到基类中.</li>
+<li>在基类中给那些需要不同实现的步骤定义一个占位符或者“hook”方法, 这些方法可以有默认实现, 也可以完全没有. (C++中的纯虚函数, Java中的抽象方法）</li>
+<li>在模板方法中调用这些“占位符”.</li>
+<li>所有现有的类都继承于现在的抽象类.</li>
+<li>将基类中已经实现的现有的类中的细节全部移除.</li>
+<li>那些不同的部分仍然留在这些派生类中，用来实现每个派生类中不同的操作.</li>
+</ol>
+
+
+<h2>经验</h2>
+
+<p>除了粒度的区别之外, 策略模式与模板方法模式非常类似.
+模板方法使用继承来改变算法的某个部分, 而策略模式改变整个算法.
+策略模式改变单个对象的逻辑. 模板方法修改了整个类的逻辑.
+工厂方法模式是一个特化的模板方法模式.</p>
+
+<h2>例子</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Base</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">a</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;a  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">c</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;c  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">e</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;e  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// 2. Steps requiring peculiar implementations are &quot;placeholders&quot; in base class</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="c1">// 1. Standardize the skeleton of an algorithm in a base class &quot;template method&quot;</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">a</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">ph1</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">c</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">ph2</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">e</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">One</span><span class="o">:</span> <span class="k">public</span> <span class="n">Base</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// 3. Derived classes implement placeholder methods</span>
+</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;b  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;d  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Two</span><span class="o">:</span> <span class="k">public</span> <span class="n">Base</span> <span class="p">{</span>
+</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;2  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;4  &quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">Base</span><span class="o">*</span> <span class="n">array</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">One</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">Two</span><span class="p">()</span> <span class="p">};</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 关键字 using]]></title>
+    <link href="http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using/"/>
+    <updated>2013-05-21T00:45:00+08:00</updated>
+    <id>http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using</id>
+    <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
+
+<h2>使用小技巧来声明函数指针</h2>
+
+<p>在 c++03 中, 函数指针要这么写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
+
+<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;type_traits&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">add_pointer</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
+
+<!-- more -->
+
+
+<h2>模板别名</h2>
+
+<p>在进入这个主题之前, 应该先弄清楚“模板类”和“类模板”本质上的不同. class template (类模板，是模板)是用来产生 template class (模板类, 是类型)的.
+在标准 C++, typedef 可定义模板类一个新的类型名称, 但是不能够使用 typedef 来定义模板的别名. 举例来说:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="n">first</span><span class="p">,</span> <span class="k">typename</span> <span class="n">second</span><span class="p">,</span> <span class="kt">int</span> <span class="n">third</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">SomeType</span><span class="p">;</span>
+</span><span class='line'><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="n">second</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">SomeType</span><span class="o">&lt;</span><span class="n">OtherType</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="n">TypedefName</span><span class="p">;</span> <span class="c1">// 在C++03是不合法的</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这不能够通过编译.
+为了定义模板的别名, C++11 增加了以下的语法:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="n">first</span><span class="p">,</span> <span class="k">typename</span> <span class="n">second</span><span class="p">,</span> <span class="kt">int</span> <span class="n">third</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">SomeType</span><span class="p">;</span>
+</span><span class='line'><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="n">second</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="n">TypedefName</span> <span class="o">=</span> <span class="n">SomeType</span><span class="o">&lt;</span><span class="n">OtherType</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>using 紧跟着的标识, 用来表示后面的模板类型. 标准制定时尝试过使用旧的关键字 typedef 来实现该功能, 但是无法得到一个完整连贯的解决方案, 因此引入了新的关键字. (严格说来 using 并不是一个新的关键字, 在使用 namespace 时, 我们就已经见过它了, 但在 C++11 中它又有了新的语义.）</p>
+
+<p>除了模板别名之外, using 关键字还可以用在一般的类型中, 就想文章一开始的地方一样:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">PFD</span><span class="p">)(</span><span class="kt">double</span><span class="p">);</span>            <span class="c1">// 传统语法</span>
+</span><span class='line'><span class="k">using</span> <span class="n">PFD</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">double</span><span class="p">);</span>           <span class="c1">// 新增与否</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li>C++ standard  14.6.7 Template aliases;  7.1.3 The typedef specifier</li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1489.pdf">Templates aliases for C++</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf">Templates Aliases (Revision 3)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
@@ -2247,914 +2822,6 @@ while b &lt; 10:
 <p><em>准则：优先考虑使用 auto 声明变量，除非需要显式的类型转换。它更短，而且可以避免类型轻微更改时引起的不必要的波澜。</em></p>
 
 <p>否则：如果调用者没有使用 auto ，那么它应该已经使用返回结果初始化了 unique_ptr 或 shared_ptr， 因为现代 C++ 代码不使用非参数的原始指针变量（下次详细讨论）。每种情况下，返回一个 unique_ptr 可以工作：一个 unique_ptr 可以无缝的转换成这些类型，如果语义上需要返回共享的所有权，那么调用者应该已经使用了 shared_ptr，这样的话，再次工作还会是正常的。（可能比之前的更好，因为为了让原本的返回原始指针的版本正常工作，返回类型大概会被 enable_shared_from_this 所胁迫，但如果我们显示的返回一个 shared_ptr 的话，这些就是不需要的了。）</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/14/gotw103/"/>
-    <updated>2012-07-14T19:14:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/14/gotw103</id>
-    <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。</p>
-
-<p>3. 如何处理 auto_ptr ？</p>
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<p><strong>1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。</strong></p>
-
-<p>当不确定时，优先考虑使用 unique_ptr，你可以在之后有需要的时候转换成 shared_ptr。如果你一开始就可以确定需要共享所有权，那么你可以直接使用 make_shared（看下面的 #2）来构造 shared_ptr 对象。</p>
-
-<p>“当不确定时，优先考虑使用 unique_ptr” 的主要原因包括一下几点：</p>
-
-<p><strong>语义</strong>：选择正确的智能指针，尽可能的直接表达你的意图，和（当前）你所需要的。如果你正在创建一个对象并且不需要共享所有权（当时看来），使用表达唯一所有权的 unique_ptr，你仍然可以把它放到容器中，（例如：<code>vector&lt;unique_ptr&lt;widget&gt; &gt;</code>），同时也可以做大部分原始指针能做的事情，而且更安全。如果之后你又需要共享所有全，那么你通常都可以直接把 unique_ptr 转换为 shared_ptr。</p>
-
-<p><strong>效率</strong>：unique_ptr 比 shared_ptr 有更好的性能，因为它不需要维护一个引用计数和控制块；unique_ptr 的转移几乎和原始指针一样廉价。如果你没有比你需要的要求更多，那么就不会招致额外的开销。</p>
-
-<p><strong>适应性</strong>：如果你一开始就使用 unique_ptr，你通常稍后可以把它转换成 shared_ptr，或者甚至一个原始指针。（通过 get 或者 release）。</p>
-
-<p><strong>2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。</strong></p>
-
-<p>shared_ptr 的实现需要维护被 shared_ptrs 和 weak_ptrs 引用的对象的内部信息控制块。特别的，内部信息包含的不是一个引用计数，而是两个：</p>
-
-<ul>
-<li>一个“强引用”计数，用来记录当前有多少个存活的 shared_ptrs 正持有该对象。共享的对象会在最后一个强引用离开的时候销毁（也可能是释放）。</li>
-<li>一个“弱引用”计数，用来记录当前有多少个正在观察该对象的 weak_ptrs。当最后一个弱引用离开的时候，共享的内部信息控制块会被销毁和释放（共享的对象也会被释放，如果还没有释放的话）。</li>
-</ul>
-
-
-<p>如果你通过使用原始的 new 表达式分配对象，然后传递给 shared_ptr，shared_ptr 的实现没有办法选择，而只能单独的分配控制块，看下面的 Example 2(a) 和 Fugure 2(a)。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2(a): Separate allocation</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="n">shared_ptr</span> <span class="n">sp1</span><span class="p">{</span> <span class="n">p</span> <span class="p">},</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
-
-<p>我们应该在此避免两次单独的分配，如果你使用 make_shared 来分配对象，那么shared_ptr 的构造就仅需要一步，他的实现可以把两次分配合并成一次分配，看下面的 Example 2(b) 和 Figure 2(b)。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2(b): Single allocation</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">sp1</span> <span class="o">=</span> <span class="n">make_shared</span><span class="p">(),</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://y6yska.bay.livefilestore.com/y1p-Y0XAkcMZMrSdxkTa85nShcDkVKvqhMTFVGSDc0jURLybPXTGHPdWv9CZGgcGmvZwQQvd6Y1Qdg/sharedptr2.png" alt="" /></p>
-
-<p>通常情况下，一个单独的函数调用可以表达的比你想要的东西更多，你给了系统一个更好的机会去以更好的效率完成这项工作。这是毫无疑问的，使用单独的函数调用 make_shared 代替 new widget() 和 shared_ptr(widget *)，就好像当你插入 100 个元素到 vector 中时，使用单独的一个指定插入区间的函数调用 v.insert(first, last) 来代替调用 100 次 v.insert(value) 一样。</p>
-
-<p><strong>3. 如何处理 auto_ptr ？</strong></p>
-
-<p>auto_ptr 是最……的特性，它在 C++ 还没有转移语义的时候，勇敢的尝试创建一个 unique_ptr。</p>
-
-<p>现在 auto_ptr 是被反对的，并且不应该在新的代码中使用它。如果你有机会，应该试着在你的代码中全局替换，把 auto_ptr 都替换成 unique_ptr；大部分使用的地方会像之前一样工作，而且它可能暴露出问题（比如编译期错误）或者修复（悄悄地）一个或两个你自己都不知道的 bug。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/07/gotw102/"/>
-    <updated>2012-07-07T00:06:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/07/gotw102</id>
-    <content type="html"><![CDATA[<p>[这是 <a href="http://www.gotw.ca/gotw/056.htm">GotW #56</a> 的 C++11 更新版]</p>
-
-<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a></p>
-
-<h2>JG问题</h2>
-
-<p>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Example 1(b)</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">g</span><span class="p">(</span> <span class="n">expr1</span> <span class="p">),</span> <span class="n">h</span><span class="p">(</span> <span class="n">expr2</span> <span class="p">)</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Guru问题</h2>
-
-<p>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这段代码包含潜在的异常安全问题吗？请解释。</p>
-
-<p>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</p>
-
-<p>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<p><strong>1. 考虑下面的语句，函数 f，g，h 和表达式 expr1 还有 expr2，它们的执行顺序是什么？假设 expr1 和 expr2 不包含函数调用。</strong></p>
-
-<p>答案遵循下面的基本规则：</p>
-
-<ul>
-<li>函数调用之前，所有的参数必须都已经求值。这也包括任何有副作用的作为函数参数的表达式。</li>
-<li>当函数开始执行的时候，在调用该函数的代码中不会有任何表达式开始或继续求值，直到函数调用结束。函数调用永远都不会交叉执行。</li>
-<li>用作函数参数的表达式可能以任意的顺序求值，包括交叉执行，除非另有其他规则限制。</li>
-</ul>
-
-
-<p>在标准 C++11 中，这些线程内的顺序约束由“sequenced before” 关系决定，它约束了编译器和硬件在单线程执行中的行为。取代了旧的 C/C++ “sequence point”（序列点） ，但它们的目的是相同的。</p>
-
-<p>给出了这些规则，让给我看看在我们的例子中发生了什么：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1(a)</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">expr1</span><span class="p">,</span> <span class="n">expr2</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在例子 1(b) 中，函数和表达式可能以任何的顺序来计算，考虑下面的规则：</p>
-
-<ul>
-<li>epxr1 必须在 g 调用之前计算。</li>
-<li>expr2 必须在 h 调用之前计算。</li>
-<li>g 和 h 必须在 f 调用之前完成。</li>
-</ul>
-
-
-<p>表达式 expr1 和 expr2 的求值有可能交错，但不可能与函数调用交错。举个例子，无论是表达式 expr2 的一部分，还是函数 h 的执行，都不可能发生在 g 的执行过程中；但是，h 的调用有可能发生在 g 调用之前，也可能是 g 调用之后。</p>
-
-<h2>一些函数调用的异常安全问题</h2>
-
-<p><strong>2. 当你翻看公司的陈年老代码的时候，你发现了如下的代码片段：</strong></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">T1</span><span class="o">*</span><span class="p">,</span> <span class="n">T2</span><span class="o">*</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="k">new</span> <span class="n">T1</span><span class="p">,</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>这段代码包含潜在的异常安全问题吗？请解释。</strong></p>
-
-<p>是的，这有一些潜在的异常安全问题。</p>
-
-<p>简要归纳：像 new T1 这样的调用，很简单，一个 new 表达式。回忆一下 new 表达式所做的事情（简单起见，忽略定位new 和数组形式的 new，因为这个我们讨论的没有太大关系。）</p>
-
-<ul>
-<li>分配内存</li>
-<li>在分配的内存中构造一个新的对象；然后</li>
-<li>如果由于异常而构造失败，分配的内存将被释放</li>
-</ul>
-
-
-<p>所以每个 new 表达式本质上是两个函数调用：一个是 operator new（可能是全局的，或者这个类型所提供的），另一个是构造函数。</p>
-
-<p>在 Example 2 中，考虑如果编译器生成的代码将按照下面的步骤执行时，将会发生什么：</p>
-
-<ol>
-<li>给 T1 分配内存</li>
-<li>构造 T1</li>
-<li>给 T2 分配内存</li>
-<li>构造 T2</li>
-<li>调用函数 f</li>
-</ol>
-
-
-<p>它存在的问题是：如果第 3 步或第 4 步由于异常而失败了，C++ 标准没有要求 T1 对象必须销毁和释放内存，这是典型的内存泄漏，很明显这不是件好事。</p>
-
-<p>另一个可能的执行顺序：</p>
-
-<ol>
-<li>给 T1 分配内存</li>
-<li>给 T2 分配内存</li>
-<li>构造 T1</li>
-<li>构造 T2</li>
-<li>调用函数 f</li>
-</ol>
-
-
-<p>这个执行顺序不仅仅含有一个，而是两个异常安全的问题并且他们会产生不同的结果：</p>
-
-<ul>
-<li>如果第 3 步由于异常而失败，那么给 T1 分配的内存将自动释放（第 1 步会回滚），但是标准没有要求释放给 T2 分配的内存，内存泄漏了。</li>
-<li>如果第 4 步由于异常而失败，T1 的内存已分配且构造完成，但是标准没有要求销毁和释放它的内存，T1 泄漏了。</li>
-</ul>
-
-
-<p>“呃”，你可能想知道，“为什么这个异常安全漏洞会存在？为什么标准不要求清理时编译器做正确的事来防止这个问题？”</p>
-
-<p>C++ 拥有 C 语言的灵魂——效率，因此 C++ 标准允许编译器某些情形下自行决定表达式的求值顺序，因为这可以允许编译器进行可能的性能优化。为了保证这一点，一些表达式求值规则不是异常安全的，所以如果你想要写异常安全的代码，那么你就需要知道它，并且避免它。</p>
-
-<p>幸运的是，你可以做一些简单的工作来避免这个问题。也许像 unique_ptr 这样的智能指针会有帮助？</p>
-
-<p><strong>3. 当你继续查看的时候，你发现了有人不喜欢 Example 2 的代码，因为上面那个问题提到的文件的后续版本已经被改成了下面这个样子：</strong></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 3</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T1</span> <span class="p">},</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">{</span> <span class="k">new</span> <span class="n">T2</span> <span class="p">}</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>这比之前的 Example 2 的版本有哪些改进，如果有的话？ 异常安全问题是否仍然存在？请解释。</strong></p>
-
-<p>这个代码试图把问题直接丢给 unique_ptr。很多人相信智能指针是异常安全的万能药，是试金石和护身符，只要有它的出席，就能解决编译器的消化不良。</p>
-
-<p>不是的。没有任何改变。Example 3 仍然不是异常安全的，和之前的原因一模一样。</p>
-
-<p>特别的，只有当资源真的由 unique_ptr 接管时，这些资源才是安全的，但是当还没有到达 unique_ptr 的构造函数时，同样的问题还会存在。因为上面提到的两种执行顺序还是有可能的，只是在调用函数 f 之前需要调用 unique_ptr 的构造函数而已。一个例子：</p>
-
-<ol>
-<li>给 T1 分配内存</li>
-<li>构造 T1</li>
-<li>给 T2 分配内存</li>
-<li>构造 T2</li>
-<li>构造 unique_ptr<T1></li>
-<li>构造 unique_ptr<T2></li>
-<li>调用函数 f</li>
-</ol>
-
-
-<p>在上面的情况下，如果第 3 步或第 4 步异常了，相同的问题仍会存在，下面的也是一样：</p>
-
-<ol>
-<li>给 T1 分配内存</li>
-<li>给 T2 分配内存</li>
-<li>构造 T1</li>
-<li>构造 T2</li>
-<li>构造 unique_ptr<T1></li>
-<li>构造 unique_ptr<T2></li>
-<li>调用函数 f</li>
-</ol>
-
-
-<p>还是一样，如果第 3 步或第 4 步抛出异常，还是会存在异常安全问题。</p>
-
-<p>幸运的是，这不是 unique_ptr 的问题，只是 unique_ptr 的误用而已。让我们看看如果更好的使用它。</p>
-
-<h2>make_unique</h2>
-
-<p><strong>4. 如何写出一个 make_unique 使它能够解决 Example 3 中的问题，并能以如下方式使用：</strong></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 4</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// In some header file:</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// At some call site:</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">make_unique</span><span class="o">&lt;</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>基本思路：</p>
-
-<ul>
-<li>我们需要同一个线程中的函数调用不要产生交错，所以我们使用函数来完成分配、构造和构造 unique_ptr 对象的的工作。</li>
-<li>因为我们需要函数可以配合任何类型工作，所以我们需要使用函数模板。</li>
-<li>由于需要通过 make_unique 传递构造参数给需要构造的对象，我们要使用 C++11 的完美转发，把参数传递给 make_unique 函数中的 new 表达式。</li>
-<li>shared_ptr 已经有一个类似的设施 std::make_shared，为了一致性我们把这个函数叫做 make_unique。（C++ 11 中没有 make_unique 是某种程度上的疏忽，几乎可以确定，不就的将来它会被添加到标准中，在这段时间内，我们使用下面的实现。）</li>
-</ul>
-
-
-<p>把上面的要素组装到一起，我们可以得到：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">make_unique</span><span class="p">(</span> <span class="n">Args</span><span class="o">&amp;&amp;</span> <span class="p">...</span><span class="n">args</span> <span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span> <span class="k">new</span> <span class="n">T</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...</span> <span class="p">)</span> <span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这解决了异常安全问题，任何的执行顺序都不会造成资源泄露，因为现在我们只有两个函数，并且我们知道他们必须一个一个的执行。考虑下面的求值顺序：</p>
-
-<ol>
-<li>调用函数 make_unique<T1></li>
-<li>调用函数 make_unique<T2></li>
-<li>调用函数 f</li>
-</ol>
-
-
-<p>如果第 1 步异常了，不会产生泄露因为 make_unique 是异常安全的。</p>
-
-<p>如果第 2 步异常了，那么第一步构造出来的 unique_ptr<T1> 临时对象会被清理掉吗？</p>
-
-<p>是的，它会被清理。可能有人会认为：这难道和 Example 2 是不一样的吗？而 Example 2 是不能正确清理的。不，这和 Example 2 是不同的。因为在这里，unique_ptr<T1> 事实上是一个临时对象，而临时对象的销毁在标准中是明确说明的。在标准 12.2/3 节中（从 C++98 之后没有更改过）：<em>在表达式求值完成之后临时对象将被销毁，包括他们的创建点。即使表达式求值以异常而终止时，也是一样。</em></p>
-
-<p><strong>准则：</strong></p>
-
-<ul>
-<li>优先考虑使用 make_shared 来构造 shared_ptr 对象来管理内存，用 make_unique 来构造 unique_ptr 对象。</li>
-<li>虽然现在标准 C++ 中还没有 make_unique，这是一个疏忽，几乎可以确定它最终会加入到标准中。在这期间，使用上面的版本，你的代码会向前兼容 C++ 标准的。</li>
-<li>避免直接使用 new 或其他的原始的分配内存的方法。取而代之的是，使用类似于 make_unique 的工厂方法，它会包装原始的内存分配然后直接传给需要接管资源的对象，通常是智能指针，它会自动清理资源，或者其他析构函数负责安全的删除资源的对象。</li>
-</ul>
-
-
-<h2>感谢</h2>
-
-<p>这个问题是在 comp.lang.c++.moderated 的讨论中提出的。解决方案中的观点是由 James Kanze, Steve Clamage, 和 Dave Abrahams 在该讨论以及其他讨论和私人邮件中提出的。同时也感谢 Clark Nelson，他起草了 C++11 中的“sequenced before” 的概念，并阐明了其中的疑问。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/02/gotw101/"/>
-    <updated>2012-07-02T02:38:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/02/gotw101</id>
-    <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
-
-<h2>Guru问题</h2>
-
-<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// in implementation file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// :::</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span> <span class="c1">// or =default</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<p>是的，我们有一些办法。可能最简单的办法之一是使用一个类似 unique_ptr 的 helper 类，但是我还是会把它叫做 pimpl 而不是 pimpl_ptr 因为他还要负责分配和释放 impl 对象。</p>
-
-<p>让我们朝着我们的目标前进，即简化 widget 的代码。由于 Pimpl 惯用法同时影响可见类的定义的头文件和隐藏私有部分的实现的头文件，我们把 Pimpl 也放到两个文件中。</p>
-
-<p>首先，我们引入一个 pimpl_h.h 然后添加 <code>pimpl&lt;myclass::impl&gt;</code> 类型的数据成员。然后在我们的实现文件中引入 pimpl_impl.h 然后定义我们的 impl 类。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
-</span><span class='line'><span class="cp">#include &quot;pimpl_h.h&quot;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">pimpl</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
-</span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// in implementation file</span>
-</span><span class='line'><span class="cp">#include &quot;pimpl_impl.h&quot;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>为什么这比手工实现的 Pimpl 惯用法更好？</p>
-
-<ul>
-<li>首先，代码变得简单了，因为我们头文件中减少了代码：在手工实现的版本中，你还需要声明构造函数，然后在实现文件中显式的分配 impl 对象。你应该还记得需要声明析构函数，然后在实现文件中显式的实现，<a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 中已经解释过这个晦涩的问题。</li>
-<li>第二，代码更健壮了：在手工实现的版本中，如果你忘了实现非内联的析构函数，Pimpl 类将能够独立的编译，但是如果调用者试图销毁这个对象时，将会的到一个有用的编译错误“无法生成析构函数，由于 impl 呃，你知道的，不是完整类型”，这可能会使代码调用者挠着头离开，然后找你检查一下这到底是什么问题。</li>
-</ul>
-
-
-<p>pimpl<T> 模板会完成这些工作，不过，我们还要再加点料：它在可见类和实现类之间而不知道任何一个的定义，并且它把所有东西都连接到一起，完成了那些可见类和实现类可能去要做的事。幸运的是，没有什么是 pimpl<T> 不能控制的。</p>
-
-<p>现在，我们来看看 pimpl_h.h 和 pimpl_impl.h 把我们的思绪连接起来。</p>
-
-<h4>pimpl_h.h : 可见类需要的东西</h4>
-
-<p>pimpl_h.h 提供不透明的 impl 和它的指针（在这里，我们使用 m 代替 pimpl）。它同时也声明两个构造函数和一个析构函数，这些将在 pimpl_impl.h 中以非内联的方式实现，并掌管 impl 对象的生命周期。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// pimpl_h.h</span>
-</span><span class='line'><span class="cp">#ifndef PIMPL_H_H</span>
-</span><span class='line'><span class="cp">#define PIMPL_H_H</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#include &lt;memory&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">pimpl</span> <span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">pimpl</span><span class="p">();</span>
-</span><span class='line'>    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">(</span> <span class="n">Args</span><span class="o">&amp;&amp;</span> <span class="p">...</span> <span class="p">);</span>
-</span><span class='line'>    <span class="o">~</span><span class="n">pimpl</span><span class="p">();</span>
-</span><span class='line'>    <span class="n">T</span><span class="o">*</span> <span class="k">operator</span><span class="o">-&gt;</span><span class="p">();</span>
-</span><span class='line'>    <span class="n">T</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">*</span><span class="p">();</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#endif</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>第二个构造函数提供了一种给 impl 对象传递初始化参数的方式。由于 pimpl 对 impl 一无所知，这时候完美转发立功了！这是一个有意思的惯用法，它会逐渐的被人所熟知：所有的参数用使用 (&amp;&amp;) 右值引用，然后传递参数时使用 std::forward，这些会在 pimpl_impl.h 中实现。</p>
-
-<h4>pimpl_impl.h:提供内部实现</h4>
-
-<p>pimpl_impl.h 提供创建和销毁 impl 对象的其他内部实现，就像上面说的，下面我们将看到完美转发的实现部分。</p>
-
-<p>首先，如果你知道非内联的完美转发模板声明语法，给你发一朵小红花。注意构造函数需要的模板不是一个，而是两个，一个是 pimpl 模板参数，另一个是构造函数的参数的模板参数。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// file pimpl_impl.h</span>
-</span><span class='line'><span class="cp">#ifndef PIMPL_IMPL_H</span>
-</span><span class='line'><span class="cp">#define PIMPL_IMPL_H</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#include &lt;utility&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">pimpl</span><span class="p">()</span> <span class="o">:</span> <span class="n">m</span><span class="p">{</span> <span class="k">new</span> <span class="n">T</span><span class="p">{}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">pimpl</span><span class="p">(</span> <span class="n">Args</span><span class="o">&amp;&amp;</span> <span class="p">...</span><span class="n">args</span> <span class="p">)</span>
-</span><span class='line'>    <span class="o">:</span> <span class="n">m</span><span class="p">{</span> <span class="k">new</span> <span class="n">T</span><span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::~</span><span class="n">pimpl</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">T</span><span class="o">*</span> <span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="k">operator</span><span class="o">-&gt;</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">m</span><span class="p">.</span><span class="n">get</span><span class="p">();</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">T</span><span class="o">&amp;</span> <span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">m</span><span class="p">.</span><span class="n">get</span><span class="p">();</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#endif</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>每个构造函数都可以在不知道 impl 类型细节的时候创建出一个新的 impl 对象。类型只要调用者在其他地方定义就可以了。</p>
-
-<p>转发构造函数可以简单的转发参数，<code>pimpl&lt;widget&gt;::impl</code> 类型可以幸福的提供带着任何参数的构造函数，可见类 widget 的构造函数可以接受这些参数然后安全的正确的转发给 impl，而不需要 pimpl&lt;>。所有需要的“智慧”的东西都由标准中的&amp;&amp;右值引用和 <code>std::forward</code> 提供——这是避免左值需要了解太多右值业务的漂亮的标准实现，而且它能很好地工作。</p>
-
-<h2>注解</h2>
-
-<p>变长模板参数使得转发构造函数写起来比固定模板参数更容易。如果你使用的编译器支持右值语法但是还不支持变长模板参数，有仍然可以实现相同的效果，只是需要一些重复——决定你准备支持的参数个数，然后写一组模板构造函数的重载，来代替单个变长模板构造函数。前三个看起来可能是这个样子：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Arg1</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">pimpl</span><span class="p">(</span> <span class="n">Arg1</span><span class="o">&amp;&amp;</span> <span class="n">arg1</span> <span class="p">)</span>
-</span><span class='line'>    <span class="o">:</span> <span class="n">m</span><span class="p">(</span> <span class="k">new</span> <span class="n">T</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg1</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Arg1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg2</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">pimpl</span><span class="p">(</span> <span class="n">Arg1</span><span class="o">&amp;&amp;</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="o">&amp;&amp;</span> <span class="n">arg2</span> <span class="p">)</span>
-</span><span class='line'>    <span class="o">:</span> <span class="n">m</span><span class="p">(</span> <span class="k">new</span> <span class="n">T</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg1</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg2</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Arg1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg2</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg3</span><span class="o">&gt;</span>
-</span><span class='line'><span class="n">pimpl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">pimpl</span><span class="p">(</span> <span class="n">Arg1</span><span class="o">&amp;&amp;</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="o">&amp;&amp;</span> <span class="n">arg2</span><span class="p">,</span> <span class="n">Arg3</span><span class="o">&amp;&amp;</span> <span class="n">arg3</span> <span class="p">)</span>
-</span><span class='line'>    <span class="o">:</span> <span class="n">m</span><span class="p">(</span> <span class="k">new</span> <span class="n">T</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg1</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg2</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg3</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>更改记录</h2>
-
-<p>2011-12-06: 把 pimpl&lt;> 从一个基类更改为成员——我真的讨厌不必要的继承，你也应该是的。</p>
-
-<p>2011-12-13: 增加解释，为什么这比手工实现的 Pimpl 惯用法更好。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #100: Compilation Firewalls (Difficulty: 6/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/06/30/gotw100/"/>
-    <updated>2012-06-30T01:20:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/06/30/gotw100</id>
-    <content type="html"><![CDATA[<p>[这是 <a href="http://www.gotw.ca/gotw/024.htm">GotW #24</a> 的 C++11 更新版]</p>
-
-<p>原文在这里 <a href="http://herbsutter.com/gotw/_100/">GotW #100: Compilation Firewalls (Difficulty: 6/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. Pimpl 惯用法是什么？为什么要使用它？</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</p>
-
-<p>3. 类中的那些部分应该放到 impl 对象中？一些可能的选择包括：</p>
-
-<ul>
-<li>所有私有数据（非函数）</li>
-<li>所有私有成员</li>
-<li>所有私有和保护成员</li>
-<li>所有私有非虚成员</li>
-<li>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</li>
-</ul>
-
-
-<p>它们的每一个的缺点和优点是什么？你怎么选择？</p>
-
-<p>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</p>
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<h3>1. Pimpl 惯用法是什么？为什么要使用它？</h3>
-
-<p>在 C++ 中，当头文件中的类定义改变时，所有使用了这个类的用户都必须重新编译，甚至仅仅更改了那些用户无法访问的类的私有成员，也是如此。这是因为 C++ 的构建模型是基于文本包含的，并且 C++ 假定调用者知道以下两件事，而这些是会受到私有成员影响的：</p>
-
-<ul>
-<li><strong>大小和布局</strong>：调用的代码必须知道一个类的大小和布局，包括私有数据成员。调用者总是知道被调用者的实现，这个约束导致了调用者和被调用者之间更紧密的耦合，但这是 C++ 对象模型的核心和哲学，因为保证编译器默认情况下可以直接访问对象，是允许编译器进行深度性能优化的重要组成部分。</li>
-<li><strong>函数</strong>：调用的代码必须决定调用类的哪个成员，包括那些不可访问的，重载了非私有函数的私有函数——如果私有函数时更好的匹配，那么调用代码将编译失败。（C++ 经过深思熟虑的设计决定，由于安全问题，重载决议将在访问控制权限之前进行。举个例子，这可以保证当改变访问权限，把私有函数改为公有时，它不会改变合法的已有的代码的行为。）</li>
-</ul>
-
-
-<p>为了减小编译依赖，最通常的技术是使用一个不透明的指针，隐藏实现的细节，下面是基本思路：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Pimpl idiom - basic idea</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// :::</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">struct</span> <span class="n">impl</span><span class="p">;</span>        <span class="c1">// things to be hidden go here</span>
-</span><span class='line'>    <span class="n">impl</span><span class="o">*</span> <span class="n">pimpl_</span><span class="p">;</span>       <span class="c1">// opaque pointer to forward-declared class</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>类 widget 使用了 handle/body 惯用法的变体，参见 Coplien 的文章[1]，handle/body 过去主要用途是引用计数共享的实体，但是它还有更通用的隐藏实现的功能。为了方便，下面我会把类 widget 叫做可见类，impl 叫做 &ldquo;Pimpl class” [2]</p>
-
-<p>这个惯用法最大的好处是打破了编译时的依赖。首先，由于使用 Pimpl 可以消除多余的 #include，这使得编译过程更快了。我曾经在一个项目中仅仅把一些使用广泛的可见类转换为使用 Pimpls 就使得编译生成时间减少了一半。第二，它使得代码更改对编译的影响减小了，因为在类的 Pimpl 中的这一部分可以自由更改了——成员可以自由的添加或者删除，而不用重新编译客户端的代码。因为它可以在仅仅更改隐藏的成员时避免重新编译客户代码，所以它又被称为“编译防火墙”。</p>
-
-<p><img src="http://y6b2pg.bay.livefilestore.com/y1pI_P3uHZCpkMFb96zRCFLihUxgDDQB7L3qbpfLfmSTYl74ZUZlc5KuGqow_81iGfYsiKOU_Ap1G4/firewalls.png" alt="" /></p>
-
-<p>但是这还留下了一些问题：pimpl 应当是裸指针吗？哪些东西应该放到 Pimpl class 中？让我们看看这些和其他重要的细节吧。</p>
-
-<h3>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</h3>
-
-<p>避免使用裸指针和显式的 delete。仅仅使用标准 C++ 设施，最适当的选择是使用只能指针 unique_ptr 持有这个 Pimpl 对象，因为可见类是 Pimpl 对象的唯一所有者。使用 unique_ptr 也可以是代码变得简单。[3]</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// in implementation file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// :::</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>                   <span class="c1">// or =default</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注意这个模式的关键部分：</p>
-
-<ul>
-<li>使用 unique_ptr 来持有 Pimpl 对象是更好的选择。它比使用 shared_ptr 更高效，而且更能正确表达意图，Pimpl 对象是不应该共享的。</li>
-<li>在你自己的实现文件中定义和使用 Pimpl 对象。隐藏细节。</li>
-<li>在可见类的非内联构造函数中分配 Pimpl 对象。</li>
-<li>你仍然需要自己在可见类的实现文件中定义和实习它的析构函数，即使它和编译器生成的版本一模一样。这是因为虽然 unique_ptr 和 shared_ptr 可以实例化不完整的类型，但是 unique_ptr 的析构函数需要完整的类型，以便调用 delete（与 shared_ptr 不同，shared_ptr 可以在构造时获得更多的信息）。在实现 impl 的同时，自己实现它的析构函数，这可以有效的防止编译器自动生成析构函数。</li>
-<li>上面的模式没有生成默认的拷贝和转移语义，因为 C++11 编译器没有那么热心为你生成拷贝和转移操作。由于我们已经自己定义了析构函数，这使得编译器不再为我们生成转移构造和转移赋值。如果你想要支持拷贝和/或转移语义，和析构函数一样，你需要在实现中定义拷贝和转移操作。</li>
-</ul>
-
-
-<p>C++11 中 Pimpl 另一个优势是，它是转移友好的，因为它仅仅需要拷贝单个指针就可以了。so cool。</p>
-
-<p>让我们考虑一下上面提出的选择，哪些东西应该放到隐藏的 Pimpl 中。</p>
-
-<h2>什么是 Pimpl ？[4]</h2>
-
-<h3>3. 类中的那些部分应该放到 impl 对象中？</h3>
-
-<p>一些可能的选择包括：</p>
-
-<ul>
-<li><strong>所有私有数据（非函数）</strong></li>
-</ul>
-
-
-<p>选择1（得分：6/10）：这是一个好的开始，因为我们可以前向声明任何数据类，这比 #include 类的实际声明要好，它会造成代码依赖。</p>
-
-<p>但是它也存在缺点：一个小问题，我们需要在可见类的实现中不停的写 pimpl-> 。还有个大问题，当增加和删除私有成员函数时，我们还是需要重新编译，而且在极少数情况下，如果重载了非私有函数的话，它会干扰重载决议。</p>
-
-<p>有更好的选择吗？</p>
-
-<ul>
-<li><strong>所有私有成员</strong></li>
-</ul>
-
-
-<p>选择2（得分：9/10）：这（几乎）是我最近的一贯做法。毕竟，在 C++中，我们说的“外部代码不应该也不能关心的部分”就是私有 private。</p>
-
-<p>下面是三条注意事项，第一个就是我上面所说的“几乎”的原因：</p>
-
-<ul>
-<li> 你不能隐藏虚函数到 Pimpl 中，即使虚函数是私有的。如果重写了继承来的虚函数，它必须出现在派生中，即使这个类是 final 类。如果虚函数是 new 函数，那么它必须出现在可见类中，这样才能让派生类重写。</li>
-<li> 如果你需要使用可见类中的函数，那么 Pimpl 类的函数就需要一个指向可见类对象的反向指针，这增加了间接层。</li>
-<li><p> 一个好的折中办法是，使用“选择2”的同时，把那些私有成员需要调用的非私有成员函数一起放到 Pimpl 中（参考下面的“反向指针”）。</p></li>
-<li><p><strong>所有私有和保护成员</strong></p></li>
-</ul>
-
-
-<p>选择3（得分：0/10）：多余的把保护成员移动到 Pimpl 中式绝对错误的。虚成员和保护成员不应该移动到 Pimpl 中，因为这会让他们变得没有价值。毕竟，保护成员仅仅可以让派生类访问，如果让他们不可见或不可用那就没有任何价值了。派生类只能强制了解 Pimpl 的细节，然后再继承 Pimlp，然后维护一个并行的两个对象的继承体系。</p>
-
-<p>但是，仍然有合理的原因把虚函数放到 Pimpl-like（body/implementation） 类中。但是它的动机和 Pimpl 惯用法是不同的，这是桥接模式[5]，它把一个类分成两部分，这两部分都可以包含实现以及独立的可扩展的虚函数。但是这是和 Pimpl 动机不同的另外的模式。</p>
-
-<ul>
-<li><strong>所有私有非虚成员</strong></li>
-</ul>
-
-
-<p>选择4（得分：10/10）：这是理想的情况。为了避免保存或者传递一个反向指针，你可能需要把那些私有函数调用的公有函数也放到 Pimpl 中，然后在可见类中提供一个接口转发。但是你不应该移动保护成员和虚函数到 Pimpl 中，就像上面提到的。</p>
-
-<ul>
-<li><strong>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</strong></li>
-</ul>
-
-
-<p>选择5（得分：8/10某种情况下）：这在某种情况下是有用的，并且它可以有效避免反向指针，因为所有东西都在 Pimpl 类中了。主要的缺点是多了一层封装，并且它使得可见类无法通过继承来扩展了。</p>
-
-<p><strong>它们的每一个的缺点和优点是什么？你怎么选择？</strong></p>
-
-<p>完整的答案事实上比上面我们讨论的要简单的多。抛开经验和具体的分析，我们需要回顾，然后从第一条原则开始回答。</p>
-
-<p>深呼吸，放松，好的。</p>
-
-<p>主要考察的是面向对象语言[6]中的三个部分。它们是：</p>
-
-<ol>
-<li>调用者的接口=公有成员。挺合适所有外部调用者可见和可用的部分。</li>
-<li>派生类的接口=保护和虚成员，这些是仅派生类可见和可用的。</li>
-<li>其他=私有和非虚成员，根据定义，这些是属于实现的细节。</li>
-</ol>
-
-
-<p><img src="http://y6argw.bay.livefilestore.com/y1pw2uUN6-6uSwVzVAKo9bJMQozoiWhrAoEreB-STKa-ZYSV3d-ma_-tB_ex-iUTRD1Br7A5NGdbrQ/impl.png" alt="" /></p>
-
-<p>仅仅第3条，所有第3条涵盖的内容，可以隐藏也应该隐藏到 Pimpl 中。这样我们就能继承所有上面提到的其他东西；举个例子，我们不能把虚成员放到 Pimpl 中，因为我们在第2条中提到的，派生类需要它可见。</p>
-
-<p>上面的表格描述了不同设计的选择。包括 Pimpl，以及引出的其他设计，Coplien 提出的 Handle/Body ，还有桥接模式，虽然某些地方和 Pimpl 类似，但是它的动机和结构是非常不同的。</p>
-
-<h3>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</h3>
-
-<p>答案是：有时候，很不幸，是的。毕竟，我们所做的就是（人为地，不自然的）把对象分为两部分，来隐藏其中一部分。</p>
-
-<p>考虑下面的情况：当可见类的一个函数被调用的时候，通常隐藏部分的函数或者数据是需要协助完成请求的。这没问题也很合理。但是上面已经讨论过，有时候 Pimpl 中的函数必须调用可见类中的非私有或者虚函数。这时候，需要一个指向可见类的指针。</p>
-
-<p>有两个选择：</p>
-
-<ul>
-<li>在 Pimpl 中保存一个反向指针。这会带来轻微的开销，而且会一直保存着这个指针无论你用还是不用。此外，when you repeat yourself you can lie——如果你不小心维护指针的正确性让它指向正确的可见对象，反向指针会存在同步问题，举个例子，默认情况下转移操作之后，它就不再正确了。</li>
-<li>（推荐）通过参数传递 this 指针给 Pimpl 中的函数（例如：pimpl->func(this, params)）。这仅仅会在函数调用(简单)时，带来栈上(廉价的)很小的空间开销，而且也不可能存在同步问题。但是，这意味着给每一个需要的隐藏函数增加个多余的参数。</li>
-</ul>
-
-
-<h2>感谢</h2>
-
-<p>感谢 Edd, pizer, and Howard Hinnant 阐明为什么 ~unique_ptr<T> 需要 T 是完整类型, 并需要用户自己在外部实现类的析构函数；感谢 Stephan Lavavej and Alisdair Meredith 提醒我在转移构造和转移赋值时使用 =default；感谢 Howard Hinnant 指出即使使用了 =default，转移赋值函数仍然需要在实现文件中以非内联函数形式实现，因为它需要类型完整（确保能够 delete）。</p>
-
-<h2>注解</h2>
-
-<p>[1] James O. Coplien. “<a href="http://users.rcn.com/jcoplien/Patterns/C++Idioms/EuroPLoP98.html">C++ Idioms</a>” (EuroPLoP98).</p>
-
-<p>[2] 一开始我使用 impl_ 作为指针的变量名。pimpl 是从 1996 年开始使用的，分享给我这个名字的是同学兼好友 Jeff Sumner，使用字母 “p” 作为指针变量的前缀，同时我也发现了之前变量名的可怕的双关。</p>
-
-<p>[3] 这是 C++ 11 中最简单的模型。最主要的替代方案是使用 shared_ptr 或者裸指针来代替 unique_ptr，这两个的正确实现都比它复杂，存在潜在的错误，编译器生成的函数会产生不正确的行为：如果你使用 shared_ptr，你可以默认得到正确的析构函数，转移构造函数转移赋值函数，但是编译器生成的拷贝操作将是错误的，所以你需要手工明确的实现，或者使用 =delete 禁止它们（如果你忘记了，那你就默默得到了错误的语义），一个无用但是却存在的引用计数。如果你使用裸指针，你需要手动实现5个操作，析构函数，拷贝构造函数，拷贝赋值函数，转移构造函数，还有转移赋值函数。</p>
-
-<p>[4] 不要发关于这个标题的笑话给我，大部分答案我都能想到。</p>
-
-<p>[5] Gamma et al. <a href="http://en.wikipedia.org/wiki/Design_Patterns">Design Patterns: Elements of Reusable Object-Oriented Software</a> (Addison-Wesley, 1994).</p>
-
-<p>[6] 一个类中不需要包含全部特性，举个例子，#2 不适用于那些不存在继承的值语义类。</p>
 ]]></content>
   </entry>
   
