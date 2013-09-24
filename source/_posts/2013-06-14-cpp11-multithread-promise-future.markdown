@@ -144,7 +144,7 @@ int main()
 ##参考
 
 - [Cppreference：Thread support library](http://en.cppreference.com/w/cpp/thread)
-- [wikipedia: future and promises](http://en.wikipedia.org/wiki/Futures_and_promises)
+- [wikipedia: futures and promises](http://en.wikipedia.org/wiki/Futures_and_promises)
 
   [packaged_task]: http://en.cppreference.com/w/cpp/thread/packaged_task
   [future]: http://en.cppreference.com/w/cpp/thread/future
