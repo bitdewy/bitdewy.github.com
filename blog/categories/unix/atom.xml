@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: unix | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/unix/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/unix/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Unix 的隐藏文件是个 Bug]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug/"/>
+    <link href="http://bitdewy.github.com/blog/2012/09/14/unix-hidden-file-is-a-bug/"/>
     <updated>2012-09-14T01:05:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug</id>
+    <id>http://bitdewy.github.com/blog/2012/09/14/unix-hidden-file-is-a-bug</id>
     <content type="html"><![CDATA[<p>玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以<code>.</code>开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。</p>
 
 <p>8月份的时候，<a href="http://en.wikipedia.org/wiki/Rob_Pike">Rob Pike</a> 在 Google+ 上发了一篇名为 &ldquo;<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a>&rdquo; 的短文，介绍了 Unix 文件系统中隐藏文件这个设计上的 bug (feature)。</p>

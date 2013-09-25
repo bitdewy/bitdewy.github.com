@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Qt | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/qt/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/qt/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[QtScript 与信号槽]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
+    <link href="http://bitdewy.github.com/blog/2013/03/21/qtscript/"/>
     <updated>2013-03-21T14:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
+    <id>http://bitdewy.github.com/blog/2013/03/21/qtscript</id>
     <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
 
 <h2>在 QtScript 中使用信号槽</h2>
@@ -78,9 +78,9 @@ qScriptConnect(edit2, SIGNAL(returnPressed()), obj2, handler);
   
   <entry>
     <title type="html"><![CDATA[C++11 lambda in Qt5]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
     <updated>2012-12-23T22:32:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
+    <id>http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
     <content type="html"><![CDATA[<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
 
 <h2>lambda 函数与表达式</h2>
@@ -232,9 +232,9 @@ QObject::connect(dlg, &amp;QDialog::finished, [dlg, this](int result) {
   
   <entry>
     <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/"/>
     <updated>2012-12-09T13:10:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello</id>
+    <id>http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello</id>
     <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
 
 <p>其次，准备好 Xcode 先。正文开始：</p>
@@ -289,9 +289,9 @@ localhost:qt_xcode_hello bitdewy$ qmake
   
   <entry>
     <title type="html"><![CDATA[[译]Threads, Events and QObjects]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/05/28/threads-events-qobjects/"/>
+    <link href="http://bitdewy.github.com/blog/2012/05/28/threads-events-qobjects/"/>
     <updated>2012-05-28T23:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/05/28/threads-events-qobjects</id>
+    <id>http://bitdewy.github.com/blog/2012/05/28/threads-events-qobjects</id>
     <content type="html"><![CDATA[<p>前言: <a href="http://qt-project.org/wiki/">Qt wiki</a> 中这篇文章3月份再次更新，文章对 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 的用法，使用场景，有很好的论述，可以作为 Qt 多线程编程的使用指南，原文在<a href="http://qt-project.org/wiki/Threads_Events_QObjects">这里</a>，原作者 <a href="http://qt-project.org/member/5319">peppe</a> 开的讨论贴在<a href="http://developer.qt.nokia.com/forums/viewthread/2423/">这里</a>。</p>
 
 <p>原文以姓名标识-相同方式分享 2.5 通用版发布</p>

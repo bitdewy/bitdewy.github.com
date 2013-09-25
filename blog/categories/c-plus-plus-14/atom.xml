@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: C++14 | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/c-plus-plus-14/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/c-plus-plus-14/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/04/cpp14-optional/"/>
     <updated>2013-06-04T01:54:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <id>http://bitdewy.github.com/blog/2013/06/04/cpp14-optional</id>
     <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
 
 <h2>“无意义”的值</h2>

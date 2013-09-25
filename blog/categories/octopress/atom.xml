@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: octopress | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/octopress/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Hello All]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/11/25/hello-world/"/>
+    <link href="http://bitdewy.github.com/blog/2012/11/25/hello-world/"/>
     <updated>2012-11-25T22:18:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/11/25/hello-world</id>
+    <id>http://bitdewy.github.com/blog/2012/11/25/hello-world</id>
     <content type="html"><![CDATA[<p>Hello world, new github blog;</p>
 
 <h1>一级标题</h1>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Xcode | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/xcode/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/xcode/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/"/>
     <updated>2012-12-09T13:10:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello</id>
+    <id>http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello</id>
     <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
 
 <p>其次，准备好 Xcode 先。正文开始：</p>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: OO | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/oo/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/oo/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[模板方法模式]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/28/template-method-pattern/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/28/template-method-pattern/"/>
     <updated>2013-05-28T01:26:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/28/template-method-pattern</id>
+    <id>http://bitdewy.github.com/blog/2013/05/28/template-method-pattern</id>
     <content type="html"><![CDATA[<h2>意图</h2>
 
 <ol>

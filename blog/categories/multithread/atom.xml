@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: multithread | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/multithread/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/multithread/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future/"/>
     <updated>2013-06-14T22:36:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future</id>
+    <id>http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future</id>
     <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
 
 <h2>std::packaged_task</h2>

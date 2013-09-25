@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: idiom | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/idiom/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/idiom/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[空基类优化]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/"/>
+    <link href="http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization/"/>
     <updated>2013-02-25T07:50:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization</id>
+    <id>http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization</id>
     <content type="html"><![CDATA[<h2>目的</h2>
 
 <p>优化空类数据成员的存储空间</p>

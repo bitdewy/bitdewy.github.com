@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: type safe | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/type-safe/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/type-safe/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[在 C++03 中实现强类型安全的枚举类型]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
+    <link href="http://bitdewy.github.com/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
     <updated>2013-02-05T21:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
+    <id>http://bitdewy.github.com/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
     <content type="html"><![CDATA[<h2>意图</h2>
 
 <p>改进 C++ 枚举的类型安全性</p>

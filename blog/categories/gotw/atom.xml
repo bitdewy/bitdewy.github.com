@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: GotW | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/gotw/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/gotw/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/12/gotw1/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/12/gotw1/"/>
     <updated>2013-05-12T02:55:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/12/gotw1</id>
+    <id>http://bitdewy.github.com/blog/2013/05/12/gotw1</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
 
 <p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
@@ -296,9 +296,9 @@ draw_rect({ origin, selection });                  // C++11</p>
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/15/gotw104/"/>
+    <link href="http://bitdewy.github.com/blog/2012/07/15/gotw104/"/>
     <updated>2012-07-15T16:28:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/15/gotw104</id>
+    <id>http://bitdewy.github.com/blog/2012/07/15/gotw104</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_104/">GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</a></p>
 
 <p>当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明：</p>
@@ -415,9 +415,9 @@ delete p;
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/14/gotw103/"/>
+    <link href="http://bitdewy.github.com/blog/2012/07/14/gotw103/"/>
     <updated>2012-07-14T19:14:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/14/gotw103</id>
+    <id>http://bitdewy.github.com/blog/2012/07/14/gotw103</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a></p>
 
 <h2>JG 问题</h2>
@@ -488,9 +488,9 @@ auto sp1 = make_shared(), sp2{ sp1 };
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/07/gotw102/"/>
+    <link href="http://bitdewy.github.com/blog/2012/07/07/gotw102/"/>
     <updated>2012-07-07T00:06:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/07/gotw102</id>
+    <id>http://bitdewy.github.com/blog/2012/07/07/gotw102</id>
     <content type="html"><![CDATA[<p>[这是 <a href="http://www.gotw.ca/gotw/056.htm">GotW #56</a> 的 C++11 更新版]</p>
 
 <p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #102: Exception-Safe Function Calls (Difficulty: 7/10)</a></p>
@@ -772,9 +772,9 @@ std::unique_ptr<T> make_unique( Args&amp;&amp; &hellip;args )
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/02/gotw101/"/>
+    <link href="http://bitdewy.github.com/blog/2012/07/02/gotw101/"/>
     <updated>2012-07-02T02:38:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/02/gotw101</id>
+    <id>http://bitdewy.github.com/blog/2012/07/02/gotw101</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
 
 <h2>Guru问题</h2>

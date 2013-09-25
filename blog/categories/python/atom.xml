@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: python | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/python/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/python/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[4年前的用 Django 实现的玩具 blog]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/06/26/django-toy-blog/"/>
+    <link href="http://bitdewy.github.com/blog/2012/06/26/django-toy-blog/"/>
     <updated>2012-06-26T19:28:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/06/26/django-toy-blog</id>
+    <id>http://bitdewy.github.com/blog/2012/06/26/django-toy-blog</id>
     <content type="html"><![CDATA[<p>最近整理硬盘，发现角落里4年前写的玩具 blog，虽然现在还偶尔写写 <a href="http://python.org/">python</a> 处理简单的事情，不过由于工作与 web 没半毛钱关系，很久都没有关注，<a href="https://www.djangoproject.com/">Django</a> 什么的早就忘得差不多了。</p>
 
 <p>08年9月时候 <a href="https://www.djangoproject.com/">Django</a> 刚刚发布 1.0，那时候在学校时间充裕，加上关注 <a href="https://www.djangoproject.com/">Django</a> 也有一段时间了，<a href="https://www.djangoproject.com/">Django</a> 从 0.96 停滞这么长时间才发布 1.0，而且变化不小，于是下决心用 <a href="https://www.djangoproject.com/">Django</a> 完成个小玩意儿，自己也没什么主意，不知道做什么，想来想去还是做个 blog 比较简单，到时候自己也可以用，即练手又能用自己，还能激励自己不断更新，于是花了2周多时间用 <a href="https://www.djangoproject.com/">Django</a> 1.0 实现了这个玩具 blog。（当时的想法挺好，不过由于一些原因，形成雏形之后就没再更新过，所以用过一段时间就没再用了…，然后，就没有然后了…）</p>

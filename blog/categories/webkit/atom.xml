@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: webkit | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/webkit/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/webkit/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[QtScript 与信号槽]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
+    <link href="http://bitdewy.github.com/blog/2013/03/21/qtscript/"/>
     <updated>2013-03-21T14:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
+    <id>http://bitdewy.github.com/blog/2013/03/21/qtscript</id>
     <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
 
 <h2>在 QtScript 中使用信号槽</h2>

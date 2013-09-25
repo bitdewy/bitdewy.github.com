@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -14,10 +14,147 @@
 
   
   <entry>
+    <title type="html"><![CDATA[C++ 泛型编程之 SFINAE]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae/"/>
+    <updated>2013-06-25T23:01:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae</id>
+    <content type="html"><![CDATA[<h2>什么是 SFINAE?</h2>
+
+<p>(Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例.</p>
+
+<p>SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中, C++ 编译器会试图实例化一些候选的函数签名, 以确保函数调用时模板的精确匹配, 当找到一个不合适的匹配时(例如无效的参数或范围值), 则会将这个不合适的匹配从重载决议中删除, 而不是产生一个编译错误. 如果有且只有一个函数的话, 才会产生一个编译错误.</p>
+
+<p>考虑下面的简单的乘法计数器</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">long</span> <span class="n">multiply</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">multiplication_result</span> <span class="n">multiply</span><span class="p">(</span><span class="n">T</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T</span> <span class="n">t2</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">t1</span> <span class="o">*</span> <span class="n">t2</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">multiply</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 main 函数中的函数调用 multiply, 会导致编译器对模板参数的实例化, 虽然第一个非模板函数 multiply 明显是一个更佳的匹配. 在实例化的过程中, 会产生一个非法的类型 int::multiplication_result. 根据 SFINAE, 这个非法的实例化会被自动丢弃. 最终, 非模板的 multiply 会被调用. 编译通过.</p>
+
+<!-- more -->
+
+
+<h2>SFINAE 的应用</h2>
+
+<p>SFINAE 通常被用作编译时期的类型属性检查. 比如下面的 is_pointer 元函数, 它可以在编译期检查参数类型是否是一个指针.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">is_pointer</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">char</span> <span class="n">is_ptr</span><span class="p">(</span><span class="n">U</span> <span class="o">*</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">X</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Y</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">char</span> <span class="n">is_ptr</span><span class="p">(</span><span class="n">Y</span> <span class="n">X</span><span class="o">::*</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">U</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">char</span> <span class="n">is_ptr</span><span class="p">(</span><span class="n">U</span> <span class="p">(</span><span class="o">*</span><span class="p">)());</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">double</span> <span class="n">is_ptr</span><span class="p">(...);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">static</span> <span class="n">T</span> <span class="n">t</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">enum</span> <span class="p">{</span> <span class="n">value</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">is_ptr</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">==</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">)</span> <span class="p">};</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">bar</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">IntPtr</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="kt">int</span> <span class="n">Foo</span><span class="o">::*</span> <span class="n">FooMemberPtr</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">FuncPtr</span><span class="p">)();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">is_pointer</span><span class="o">&lt;</span><span class="n">IntPtr</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">);</span>         <span class="c1">// prints 1</span>
+</span><span class='line'>  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">is_pointer</span><span class="o">&lt;</span><span class="n">FooMemberPtr</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">);</span>  <span class="c1">// prints 1</span>
+</span><span class='line'>  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">is_pointer</span><span class="o">&lt;</span><span class="n">FuncPtr</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">);</span>        <span class="c1">// prints 1</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果没有 SFINAE 的话, 元函数 is_pointer 是无法正常工作的. 在 is_pointer 中, 有四个模板函数 is_ptr, 其中三个都会返回一个 char, 这是经过精心设计的. 这三个分别接收不同的参数类型, 一个接受指针变量, 一个接受一个成员指针, 以及一个简单的函数指针类型. 最后一个 is_ptr 是接收任意类型的(使用了省略号), 它的返回值类型是 double, 它的大小始终会大于 char 类型.</p>
+
+<p>当传递一个指针类型(例如上面的 IntPtr)给 is_pointer 时, value 的值将会初始化为 true (因为 sizeof 两边是相等的). 第一个 sizeof 表达式调用 is_ptr, 如果它是一个指针类型, 那么只有一个模板的重载版本会匹配. 根据 SFINAE, 编译不会报错，因为至少有一个函数被匹配上了.  如果没有合适的实例化版本, 那么会选择那个省略号的版本. 不过那个版本会返回 double 类型, 会导致 value 值被初始化为 false (因为 sizeof(double) != sizeof(char)).</p>
+
+<p>需要注意的是, is_ptr 只有声明, 没有定义. 因为声明足以引发 SFINAE 规则, 但是这些必须都是模板函数。一个模板类的非模板函数是不会参与 SFINAE 的, 只有模板函数才会遵循 SFINAE 规则.</p>
+
+<p>在标准库中, 有大量的 SFINAE 应用, 比如 type traits. 有了 SFINAE 我们就可以根据自己的需求, 为我们所关心的特定类型, 写相应的函数重载函数版本, 也可以在编译期判断类型是否符合我们的需求.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>Wikipedia：<a href="http://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">Substitution failure is not an error</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future/"/>
     <updated>2013-06-14T22:36:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future</id>
+    <id>http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future</id>
     <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
 
 <h2>std::packaged_task</h2>
@@ -244,9 +381,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/04/cpp14-optional/"/>
     <updated>2013-06-04T01:54:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <id>http://bitdewy.github.com/blog/2013/06/04/cpp14-optional</id>
     <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
 
 <h2>“无意义”的值</h2>
@@ -357,9 +494,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[模板方法模式]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/28/template-method-pattern/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/28/template-method-pattern/"/>
     <updated>2013-05-28T01:26:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/28/template-method-pattern</id>
+    <id>http://bitdewy.github.com/blog/2013/05/28/template-method-pattern</id>
     <content type="html"><![CDATA[<h2>意图</h2>
 
 <ol>
@@ -499,9 +636,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[C++11 关键字 using]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using/"/>
     <updated>2013-05-21T00:45:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using</id>
+    <id>http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using</id>
     <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
 
 <h2>使用小技巧来声明函数指针</h2>
@@ -590,9 +727,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/12/gotw1/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/12/gotw1/"/>
     <updated>2013-05-12T02:55:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/12/gotw1</id>
+    <id>http://bitdewy.github.com/blog/2013/05/12/gotw1</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
 
 <p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
@@ -946,9 +1083,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[使用静态多态辅助动态多态]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism/"/>
+    <link href="http://bitdewy.github.com/blog/2013/04/09/staitc-and-dynamic-polymorphism/"/>
     <updated>2013-04-09T23:13:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism</id>
+    <id>http://bitdewy.github.com/blog/2013/04/09/staitc-and-dynamic-polymorphism</id>
     <content type="html"><![CDATA[<h2>静态多态 (编译期多态) 与动态多态 (运行期多态)</h2>
 
 <p>关键字: 重载/模版和虚函数</p>
@@ -1176,9 +1313,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[QtScript 与信号槽]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/03/21/qtscript/"/>
+    <link href="http://bitdewy.github.com/blog/2013/03/21/qtscript/"/>
     <updated>2013-03-21T14:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/03/21/qtscript</id>
+    <id>http://bitdewy.github.com/blog/2013/03/21/qtscript</id>
     <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
 
 <h2>在 QtScript 中使用信号槽</h2>
@@ -1255,9 +1392,9 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
   
   <entry>
     <title type="html"><![CDATA[空基类优化]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization/"/>
+    <link href="http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization/"/>
     <updated>2013-02-25T07:50:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/25/empty-base-optimization</id>
+    <id>http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization</id>
     <content type="html"><![CDATA[<h2>目的</h2>
 
 <p>优化空类数据成员的存储空间</p>
@@ -1384,9 +1521,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[在 C++03 中实现强类型安全的枚举类型]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
+    <link href="http://bitdewy.github.com/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/"/>
     <updated>2013-02-05T21:53:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
+    <id>http://bitdewy.github.com/blog/2013/02/05/strongly-type-safe-enum-in-cpp03</id>
     <content type="html"><![CDATA[<h2>意图</h2>
 
 <p>改进 C++ 枚举的类型安全性</p>
@@ -1513,9 +1650,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[你确定你懂 const 和 mutable ?]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/01/03/you-dont-know-const-and-mutable/"/>
+    <link href="http://bitdewy.github.com/blog/2013/01/03/you-dont-know-const-and-mutable/"/>
     <updated>2013-01-03T14:38:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/01/03/you-dont-know-const-and-mutable</id>
+    <id>http://bitdewy.github.com/blog/2013/01/03/you-dont-know-const-and-mutable</id>
     <content type="html"><![CDATA[<p>const 和 mutable 是 C++ 中两个关键字，你确定你懂 const 和 mutable 吗？</p>
 
 <p>下面是一段完整的 C++11 代码;</p>
@@ -1810,9 +1947,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[C++11 lambda in Qt5]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
     <updated>2012-12-23T22:32:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
+    <id>http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
     <content type="html"><![CDATA[<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
 
 <h2>lambda 函数与表达式</h2>
@@ -1987,9 +2124,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[[译] why c++ is not back]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/16/why-c-plus-plus-is-not-back/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/16/why-c-plus-plus-is-not-back/"/>
     <updated>2012-12-16T17:42:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/16/why-c-plus-plus-is-not-back</id>
+    <id>http://bitdewy.github.com/blog/2012/12/16/why-c-plus-plus-is-not-back</id>
     <content type="html"><![CDATA[<p>前言：这个月初，<a href="http://herbsutter.com/">Herb Sutter</a> 发了一篇名为 <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Perspective: “Why C++ Is Not ‘Back’”</a>，的文章，虽然 <a href="http://herbsutter.com/">Sutter</a> 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如<a href="http://coolshell.cn/articles/7992.html">这里</a>。</p>
 
 <p>本译文中不会发表任何观点，尽量表达原作者的意图，如有翻译不当的地方欢迎大家积极指出，我会做出修改。</p>
@@ -2171,9 +2308,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[CMake lua 5.2]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2/"/>
     <updated>2012-12-15T18:09:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2</id>
+    <id>http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2</id>
     <content type="html"><![CDATA[<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
 
 <h2>什么是 CMake？</h2>
@@ -2203,9 +2340,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[COM、ABI与引用计数]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/09/com-and-reference-counting/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/09/com-and-reference-counting/"/>
     <updated>2012-12-09T18:18:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/09/com-and-reference-counting</id>
+    <id>http://bitdewy.github.com/blog/2012/12/09/com-and-reference-counting</id>
     <content type="html"><![CDATA[<h2>什么是 COM ？</h2>
 
 <p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
@@ -2294,9 +2431,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/"/>
     <updated>2012-12-09T13:10:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/09/qt-xcode-hello</id>
+    <id>http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello</id>
     <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
 
 <p>其次，准备好 Xcode 先。正文开始：</p>
@@ -2363,9 +2500,9 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
   
   <entry>
     <title type="html"><![CDATA[Hello All]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/11/25/hello-world/"/>
+    <link href="http://bitdewy.github.com/blog/2012/11/25/hello-world/"/>
     <updated>2012-11-25T22:18:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/11/25/hello-world</id>
+    <id>http://bitdewy.github.com/blog/2012/11/25/hello-world</id>
     <content type="html"><![CDATA[<p>Hello world, new github blog;</p>
 
 <h1>一级标题</h1>
@@ -2470,9 +2607,9 @@ while b &lt; 10:
   
   <entry>
     <title type="html"><![CDATA[Unix 的隐藏文件是个 Bug]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug/"/>
+    <link href="http://bitdewy.github.com/blog/2012/09/14/unix-hidden-file-is-a-bug/"/>
     <updated>2012-09-14T01:05:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/09/14/unix-hidden-file-is-a-bug</id>
+    <id>http://bitdewy.github.com/blog/2012/09/14/unix-hidden-file-is-a-bug</id>
     <content type="html"><![CDATA[<p>玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以<code>.</code>开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。</p>
 
 <p>8月份的时候，<a href="http://en.wikipedia.org/wiki/Rob_Pike">Rob Pike</a> 在 Google+ 上发了一篇名为 &ldquo;<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a>&rdquo; 的短文，介绍了 Unix 文件系统中隐藏文件这个设计上的 bug (feature)。</p>
@@ -2516,9 +2653,9 @@ while b &lt; 10:
   
   <entry>
     <title type="html"><![CDATA[C++ ORM 框架 ODB]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb/"/>
+    <link href="http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb/"/>
     <updated>2012-08-21T22:03:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb</id>
+    <id>http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb</id>
     <content type="html"><![CDATA[<h2>什么是 ORM？</h2>
 
 <p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
@@ -2651,9 +2788,9 @@ while b &lt; 10:
   
   <entry>
     <title type="html"><![CDATA[C++11 std::unordered_map]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/08/21/unordered-map/"/>
+    <link href="http://bitdewy.github.com/blog/2012/08/21/unordered-map/"/>
     <updated>2012-08-21T17:54:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/08/21/unordered-map</id>
+    <id>http://bitdewy.github.com/blog/2012/08/21/unordered-map</id>
     <content type="html"><![CDATA[<h2>历史</h2>
 
 <p>在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
@@ -2680,148 +2817,6 @@ while b &lt; 10:
 <p>选择时,请基于时间和空间的综合考虑, <em>当不关心空间, 也不需要结果排好序时, 可以选择 <code>unordered_map</code> 获得更好的时间效率。</em></p>
 
 <p><code>std::map</code> 对应与 java 中的 <code>TreeMap</code>, 而 <code>std::unordered_map</code> 对应于 java 中的 <code>HashMap</code>. 对于标准库中的散列表无法取名为 <code>hash_*</code>, 只能叫 <code>unordered_*</code>, 我只能说… 标准库进展太慢，结果好白菜都让猪给拱了……遗憾啊……</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/07/15/gotw104/"/>
-    <updated>2012-07-15T16:28:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/07/15/gotw104</id>
-    <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_104/">GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</a></p>
-
-<p>当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明：</p>
-
-<p><code>widget* load_widget( widget::id desired );</code></p>
-
-<h2>JG 问题</h2>
-
-<p>1. 返回值的类型有什么问题？</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 返回值的推荐类型是是什么？ 解释你的答案，包括任何的权衡。</p>
-
-<p>3. 你希望更改返回值的类型为问题 #2 中推荐的类型，但是你担心破坏了原有代码的函数调用的兼容性；重新编译现有的函数调用是可行的，但修改所有的函数调用就……。然后你灵光一闪，意识到这是一个相当新的项目，所有的代码都使用现代 C++ 惯用法，然后你继续修改返回值类型，而没有一点担心，知道重构仅仅需要一点点或者更不不需要更改调用函数的代码。是什么让你如此自信？</p>
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<p><strong>1. 返回值的类型有什么问题？</strong></p>
-
-<p>第一，我们能够从两行的问题描述中知道些什么？</p>
-
-<ul>
-<li>我们说过，load_widget 是一个工厂方法。它通过“loading” 生产出一个对象，然后把它返回给调用者。由于返回值类型是指针类型，所以结果可能是 null。</li>
-<li>调用者会适当的使用该对象，可能是调用它的成员函数，或者把它传给其他的函数，等等。这是不安全的，除非调用者确保该对象存活——调用者管理对象的生命周期；或者共享所有权，如果工厂方法负责维护内部的强引用和弱引用的话。</li>
-<li>因为调用者持有或共享所有权，它必须在对象不再需要时做一些工作。如果是直接持有，掌管生命周期的话，它应该销毁该对象，通常是一个 delete 或者也可能是类似于 unload_widget 的一个函数调用。不然的话，如果是共享所有权，它应该减少共享的引用计数。</li>
-</ul>
-
-
-<p>不幸的是，返回一个 widget* 有两个主要的问题。第一，默认情况下它是不安全的，因为默认的操作模式（比如不保存返回值）会造成 widget 泄露：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 1: Leak by default. Really, this is just so 20th-century...</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span><span class="o">*</span> <span class="n">load_widget</span><span class="p">(</span> <span class="n">widget</span><span class="o">::</span><span class="n">id</span> <span class="n">desired</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">:::</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">load_widget</span><span class="p">(</span> <span class="n">some_id</span> <span class="p">);</span> <span class="c1">// oops</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Example 1 的代码可以干净的编译，运行，（不）开心的泄露 widget。</p>
-
-<p>第二，函数签名传达出来的信息太少了，“一个 widget ？是的，开始吧！享受它。”文档中会指出调用者应该持有该对象，掌管对象的生命周期（或者其它），但是函数声明没有给出这些信息——它掌管对象的生命周期，还是共享所有权，到底是哪个？阅读文档然后记下它吧，因为函数声明没办法告诉我们到底是哪种情况。</p>
-
-<p><strong>2. 返回值的推荐类型是是什么？ 解释你的答案，包括任何的权衡。</strong></p>
-
-<p>推荐的返回值类型是 unique_ptr 或者也可能是 shared_ptr。注意现在 C++ 中返回值类型是很平常的了，但是还有一点不太合适，它改变了语义，因为返回指针类型允许返回 null （无对象），而返回一个值得话不能轻易地处理这个语义，除非加个类似于 optional&lt;> 的东西。</p>
-
-<p><em>准则：工厂方法应该默认返回 unique_ptr 类型，或当需要共享所有权时使用 shared_ptr 类型。</em></p>
-
-<p>这同时解决了上面两个问题：安全，自描述。</p>
-
-<p>第一，考虑如何立即解决 Example 1 中的安全问题：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2: Clean up by default. Much better...</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">load_widget</span><span class="p">(</span> <span class="n">widget</span><span class="o">::</span><span class="n">id</span> <span class="n">desired</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">:::</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">load_widget</span><span class="p">(</span> <span class="n">some_id</span> <span class="p">);</span> <span class="c1">// cleans up</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Example 2 的代码可以干净的编译，运行，开心的清理 widget。但它不仅仅在这种情况下正确——构造也是正确的，因为现在没有办法去制造出一个导致泄露的错误。</p>
-
-<p>画外音：可能会有人说，“难道不会有人一直写 load_widget(some_id).release()？”如果这些人发神经的话，当然可以；正确的答案是，“不要这么做。” 记住我们关心的是什么——bug 和错误，而不是精心设计的犯罪——显然病态的滥用属于后一类。这与在 C# 的 using 块中显式的调用 Dispose，或在 Java 的 try-with-resources 块中调用 close，没什么区别，不会比它们存在更多的类型安全问题。</p>
-
-<p>如果清理工作不是一个单独的 delete 语句，那么该怎么做？简单：使用自定义的 deleter。锦上添花的是例子中的工厂方法知道使用哪个 deleter，并且能够在构造返回值的时候确定；调用者不需要关心这些，尤其是，当调用者使用 auto 关键字作为返回值类型的时候。</p>
-
-<p>第二，这是自描述的：一个返回值类型是 unique_ptr 的函数，清楚的说明这是一个纯“source” 函数，如果一个函数的返回值是 shared_ptr，那么清楚的说明它返回的是一个共享的所有权和/或一个观察者。</p>
-
-<p>最后，为什么默认情况下，如果你不需要表达共享所有权的语义时，优先考虑使用unique_ptr？因为不管对于性能还是正确性来说，这都是对的事情，并且也给调用者留下了一些余地：</p>
-
-<ul>
-<li>返回值类型为 unique_ptr 表示返回唯一所有权，这是纯“source” 工厂方法的标准形式。</li>
-<li>unique_ptr 的性能不会被打败——转移一个 unique_ptr 和转移/复制一个原始指针一样的廉价。</li>
-<li>如果调用者想要通过 shared_ptr 来管理对象的声明周期，可以通过隐式的转移操作来转换为 shared_ptr 类型——不需要显式的 std::move 因为编译器知道返回值是一个临时对象。</li>
-<li>如果调用者想要用其他的办法来维护对象的生命周期，可以通过调用 .release() 来得到原始指针。这是有用的，但是 shared_ptr 没有。</li>
-</ul>
-
-
-<p>看下面的实现：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Example 2, continued</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">up</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>                              <span class="c1">// unique_ptr (by default)</span>
-</span><span class='line'><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">sp</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>                <span class="c1">// shared_ptr (if desired)</span>
-</span><span class='line'><span class="n">my</span><span class="o">::</span><span class="n">smart_ptr</span><span class="o">&lt;</span><span class="n">widget</span><span class="o">&gt;</span> <span class="n">msp</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">3</span><span class="p">).</span><span class="n">release</span><span class="p">();</span>  <span class="c1">// your own smart pointer (if desired)</span>
-</span><span class='line'><span class="n">widget</span><span class="o">*</span> <span class="n">p</span> <span class="o">=</span> <span class="n">load_widget</span><span class="p">(</span><span class="mi">4</span><span class="p">).</span><span class="n">release</span><span class="p">();</span>                  <span class="c1">// or even old-school manual management (not recommended)</span>
-</span><span class='line'><span class="k">delete</span> <span class="n">p</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然，如果工厂方法持有一些共享所有权的对象，不论是通过内部的 shared_ptr 还是 weak_ptr，返回 shared_ptr。这时调用者只能被迫使用 shared_ptr，但在这种情形下，这样是合适的。</p>
-
-<p><strong>3. 你希望更改返回值的类型为问题 #2 中推荐的类型，但是你担心破坏了原有代码的函数调用的兼容性；重新编译现有的函数调用是可行的，但修改所有的函数调用就……。然后你灵光一闪，意识到这是一个相当新的项目，所有的代码都使用现代 C++ 惯用法，然后你继续修改返回值类型，而没有一点担心，知道重构仅仅需要一点点或者更不不需要更改调用函数的代码。是什么让你如此自信？</strong></p>
-
-<p>现代可移植的 C++ 代码使用 unique_ptr，shared_ptr，和 auto。返回 unique_ptr 类型可以和这三个协同工作，返回 shared_ptr 只能与后两个协同工作。</p>
-
-<p>如果调用者接受返回值时使用了 auto，例如 <code>auto w = load_widget(whatever)</code>；那么类型自然会是正确的，正常的解引用也可以工作，只有在调用者试图把它存储到一个其他类型的非局部变量中时代码才会出问题。</p>
-
-<p><em>准则：优先考虑使用 auto 声明变量，除非需要显式的类型转换。它更短，而且可以避免类型轻微更改时引起的不必要的波澜。</em></p>
-
-<p>否则：如果调用者没有使用 auto ，那么它应该已经使用返回结果初始化了 unique_ptr 或 shared_ptr， 因为现代 C++ 代码不使用非参数的原始指针变量（下次详细讨论）。每种情况下，返回一个 unique_ptr 可以工作：一个 unique_ptr 可以无缝的转换成这些类型，如果语义上需要返回共享的所有权，那么调用者应该已经使用了 shared_ptr，这样的话，再次工作还会是正常的。（可能比之前的更好，因为为了让原本的返回原始指针的版本正常工作，返回类型大概会被 enable_shared_from_this 所胁迫，但如果我们显示的返回一个 shared_ptr 的话，这些就是不需要的了。）</p>
 ]]></content>
   </entry>
   

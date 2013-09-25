@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ORM | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/orm/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/orm/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++ ORM 框架 ODB]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb/"/>
+    <link href="http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb/"/>
     <updated>2012-08-21T22:03:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/08/21/cpp-orm-odb</id>
+    <id>http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb</id>
     <content type="html"><![CDATA[<h2>什么是 ORM？</h2>
 
 <p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
@@ -97,8 +97,8 @@ unsigned short age_;
 <p>```cpp
 odb::sqlite::database db(&ldquo;people.db&rdquo;);</p>
 
-<p>person john(&ldquo;<a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#58;&#x6a;&#x6f;&#104;&#110;&#x40;&#100;&#111;&#x65;&#x2e;&#x6f;&#x72;&#103;">&#x6a;&#111;&#x68;&#x6e;&#x40;&#x64;&#111;&#101;&#46;&#111;&#x72;&#x67;</a>&rdquo;, &ldquo;John Doe&rdquo;, 31);
-person jane(&ldquo;<a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#58;&#106;&#x61;&#110;&#101;&#64;&#100;&#x6f;&#101;&#x2e;&#111;&#x72;&#x67;">&#106;&#97;&#x6e;&#x65;&#x40;&#100;&#x6f;&#x65;&#46;&#x6f;&#x72;&#103;</a>&rdquo;, &ldquo;Jane Doe&rdquo;, 29);</p>
+<p>person john(&ldquo;<a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#106;&#111;&#104;&#x6e;&#x40;&#100;&#x6f;&#x65;&#x2e;&#x6f;&#114;&#103;">&#x6a;&#x6f;&#104;&#110;&#x40;&#x64;&#x6f;&#101;&#x2e;&#111;&#x72;&#x67;</a>&rdquo;, &ldquo;John Doe&rdquo;, 31);
+person jane(&ldquo;<a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#x6a;&#x61;&#x6e;&#101;&#64;&#x64;&#111;&#101;&#46;&#x6f;&#114;&#x67;">&#106;&#x61;&#x6e;&#101;&#64;&#100;&#111;&#x65;&#46;&#111;&#114;&#x67;</a>&rdquo;, &ldquo;Jane Doe&rdquo;, 29);</p>
 
 <p>odb::transaction t(db.begin());</p>
 

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: cmake | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/cmake/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/cmake/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[CMake lua 5.2]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2/"/>
     <updated>2012-12-15T18:09:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/15/cmake-lua5-dot-2</id>
+    <id>http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2</id>
     <content type="html"><![CDATA[<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
 
 <h2>什么是 CMake？</h2>

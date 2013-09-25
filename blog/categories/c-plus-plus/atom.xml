@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/c-plus-plus/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -14,10 +14,101 @@
 
   
   <entry>
+    <title type="html"><![CDATA[C++ 泛型编程之 SFINAE]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae/"/>
+    <updated>2013-06-25T23:01:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae</id>
+    <content type="html"><![CDATA[<h2>什么是 SFINAE?</h2>
+
+<p>(Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例.</p>
+
+<p>SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中, C++ 编译器会试图实例化一些候选的函数签名, 以确保函数调用时模板的精确匹配, 当找到一个不合适的匹配时(例如无效的参数或范围值), 则会将这个不合适的匹配从重载决议中删除, 而不是产生一个编译错误. 如果有且只有一个函数的话, 才会产生一个编译错误.</p>
+
+<p>考虑下面的简单的乘法计数器</p>
+
+<p>```cpp
+long multiply(int i, int j) { return i * j; }</p>
+
+<p>template <class T>
+typename T::multiplication_result multiply(T t1, T t2)
+{
+  return t1 * t2;
+}</p>
+
+<p>int main(void)
+{
+  multiply(4,5);
+  return 0;
+}
+```</p>
+
+<p>在 main 函数中的函数调用 multiply, 会导致编译器对模板参数的实例化, 虽然第一个非模板函数 multiply 明显是一个更佳的匹配. 在实例化的过程中, 会产生一个非法的类型 int::multiplication_result. 根据 SFINAE, 这个非法的实例化会被自动丢弃. 最终, 非模板的 multiply 会被调用. 编译通过.</p>
+
+<!-- more -->
+
+
+<h2>SFINAE 的应用</h2>
+
+<p>SFINAE 通常被用作编译时期的类型属性检查. 比如下面的 is_pointer 元函数, 它可以在编译期检查参数类型是否是一个指针.</p>
+
+<p>```cpp
+template <typename T>
+struct is_pointer
+{
+  template <typename U>
+  static char is_ptr(U *);</p>
+
+<p>  template <typename X, typename Y>
+  static char is_ptr(Y X::*);</p>
+
+<p>  template <class U>
+  static char is_ptr(U (*)());</p>
+
+<p>  static double is_ptr(&hellip;);</p>
+
+<p>  static T t;
+  enum { value = sizeof(is_ptr(t)) == sizeof(char) };
+};</p>
+
+<p>struct Foo {
+  int bar;
+};</p>
+
+<p>int main(void)
+{
+  typedef int * IntPtr;
+  typedef int Foo::<em> FooMemberPtr;
+  typedef int (</em>FuncPtr)();</p>
+
+<p>  printf(&ldquo;%d\n&rdquo;,is_pointer<IntPtr>::value);         // prints 1
+  printf(&ldquo;%d\n&rdquo;,is_pointer<FooMemberPtr>::value);  // prints 1
+  printf(&ldquo;%d\n&rdquo;,is_pointer<FuncPtr>::value);        // prints 1
+  return 0;
+}
+```</p>
+
+<p>如果没有 SFINAE 的话, 元函数 is_pointer 是无法正常工作的. 在 is_pointer 中, 有四个模板函数 is_ptr, 其中三个都会返回一个 char, 这是经过精心设计的. 这三个分别接收不同的参数类型, 一个接受指针变量, 一个接受一个成员指针, 以及一个简单的函数指针类型. 最后一个 is_ptr 是接收任意类型的(使用了省略号), 它的返回值类型是 double, 它的大小始终会大于 char 类型.</p>
+
+<p>当传递一个指针类型(例如上面的 IntPtr)给 is_pointer 时, value 的值将会初始化为 true (因为 sizeof 两边是相等的). 第一个 sizeof 表达式调用 is_ptr, 如果它是一个指针类型, 那么只有一个模板的重载版本会匹配. 根据 SFINAE, 编译不会报错，因为至少有一个函数被匹配上了.  如果没有合适的实例化版本, 那么会选择那个省略号的版本. 不过那个版本会返回 double 类型, 会导致 value 值被初始化为 false (因为 sizeof(double) != sizeof(char)).</p>
+
+<p>需要注意的是, is_ptr 只有声明, 没有定义. 因为声明足以引发 SFINAE 规则, 但是这些必须都是模板函数。一个模板类的非模板函数是不会参与 SFINAE 的, 只有模板函数才会遵循 SFINAE 规则.</p>
+
+<p>在标准库中, 有大量的 SFINAE 应用, 比如 type traits. 有了 SFINAE 我们就可以根据自己的需求, 为我们所关心的特定类型, 写相应的函数重载函数版本, 也可以在编译期判断类型是否符合我们的需求.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>Wikipedia：<a href="http://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">Substitution failure is not an error</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future/"/>
     <updated>2013-06-14T22:36:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/14/cpp11-multithread-promise-future</id>
+    <id>http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future</id>
     <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
 
 <h2>std::packaged_task</h2>
@@ -203,9 +294,9 @@ std::cout &lt;&lt; "Done!\nResults are: "
   
   <entry>
     <title type="html"><![CDATA[C++14 std::optional<T>]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/06/04/cpp14-optional/"/>
+    <link href="http://bitdewy.github.com/blog/2013/06/04/cpp14-optional/"/>
     <updated>2013-06-04T01:54:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/06/04/cpp14-optional</id>
+    <id>http://bitdewy.github.com/blog/2013/06/04/cpp14-optional</id>
     <content type="html"><![CDATA[<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
 
 <h2>“无意义”的值</h2>
@@ -292,9 +383,9 @@ if (o) {                                 // does optional contain a value?
   
   <entry>
     <title type="html"><![CDATA[C++11 关键字 using]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using/"/>
     <updated>2013-05-21T00:45:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/21/cpp11-keywords-using</id>
+    <id>http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using</id>
     <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
 
 <h2>使用小技巧来声明函数指针</h2>
@@ -371,9 +462,9 @@ using PFD = void (*)(double);           // 新增与否
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/05/12/gotw1/"/>
+    <link href="http://bitdewy.github.com/blog/2013/05/12/gotw1/"/>
     <updated>2013-05-12T02:55:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/05/12/gotw1</id>
+    <id>http://bitdewy.github.com/blog/2013/05/12/gotw1</id>
     <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
 
 <p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
@@ -647,168 +738,6 @@ draw_rect({ origin, selection });                  // C++11</p>
 <p>但是, 这个仅仅是在极端情况下, 因为默认构造函数以及拷贝构造函数已经很特别, 并且能与括号 <code>{ }</code> 很好的工作, 现在一个好的类的设计会避免用到 <code>()</code> 来提供用户定义的构造函数, 因为下面的设计准则:</p>
 
 <blockquote><p><strong>准则</strong>: 当你设计一个类时, 避免提供一个与 <code>initializer_list</code> 构造函数会产生二义性的构造函数, 这样用户就不需要使用 <code>()</code> 来访问会被隐藏掉的构造函数.</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用静态多态辅助动态多态]]></title>
-    <link href="http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism/"/>
-    <updated>2013-04-09T23:13:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2013/04/09/staitc-and-dynamic-polymorphism</id>
-    <content type="html"><![CDATA[<h2>静态多态 (编译期多态) 与动态多态 (运行期多态)</h2>
-
-<p>关键字: 重载/模版和虚函数</p>
-
-<p>类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
-编译期多态 (重载/模版), 运行期多态 (虚函数)</p>
-
-<p>应用形式上:
-静多态是发散式的, 让相同的实现代码应用于不同的场合.
-动多态是收敛式的, 让不同的实现代码应用于相同的场合.</p>
-
-<p>思维方式上:
-静多态是泛型式编程风格, 它看重的是算法的普适性.
-动多态是对象式编程风格, 它看重的是接口和实现的分离度.</p>
-
-<h2>std::shared_ptr 中的 deleter 是如何工作的?</h2>
-
-<p>标准库中的引用计数智能指针 shared_ptr 很有趣——你可以向其构造器传递一个函数或者仿函数 (function object, 或 functor), 当引用计数归零的时候, 它将在被引用对象上调用删除器 (deleter). 乍一看, 似乎没啥了不起啊, 但请看代码:</p>
-
-<p>```cpp
-template<typename T>
-class shared_ptr {
-public:
-  template<typename U, typename D>
-  explicit shared_ptr(U* ptr, D deleter);
-  //&hellip;</p>
-
-<p>};
-```</p>
-
-<!-- more -->
-
-
-<p>注意 <code>shared_ptr&lt;T&gt;</code> 必然在析构时调用类型为 D 的删除器, 然而它根本不知道 D 为何物. 这个对象不能包含类型为 D 的数据成员, 也不能指向类型为 D 的对象, 因为声明其数据成员时, D 对它而言还是未知的. 那么, shared_ptr 对象如何跟踪删除器 (它在构造阶段传入: 当 T 对象将被销毁时, 还得使用它) 呢? 更通俗地说, 构造器如何将未知类型的信息传递给它正在构造的对象, 而这个对象本身对信息类型完全无知? 答案很简单: 让此对象包含一个指向已知类型基类的指针 (标准库中叫它 sp_counted_base), 然后让构造器以 D 为参数实例化一个派生于上述基类的模板 (标准库中叫 sp_counted_impl_p 和 sp_counted_impl_pd), 最后用声明于基类, 实现于派生类的虚函数 (标准库中使用 dispose) 去调用删除器. 关于这个问题, Scott Meyers 在 06 年 9 月份的一篇文章中已经有阐述, 详见: <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a>.</p>
-
-<h2>结合静态多态和动态多态实现类型无关的容器</h2>
-
-<p>使用 std::shared_ptr 中 deleter 的实现方式, 可以实现类型无关的容器. 代码主干如下:</p>
-
-<p>```cpp
-class any
-{
-public:
-  any() : content(nullptr) {}
-  template<typename ValueType>
-  any(const ValueType&amp; value) : content(new holder<ValueType>(value)) {}
-  any(const any&amp; other) : content(other.content ? other.content->clone() : 0) {}
-  ~any() { delete content; }
-  any&amp; swap(any&amp; rhs)
-  {</p>
-
-<pre><code>std::swap(content, rhs.content);
-return *this;
-</code></pre>
-
-<p>  }
-  template<typename ValueType>
-  any&amp; operator=(const ValueType&amp; rhs)
-  {</p>
-
-<pre><code>any(rhs).swap(*this);
-return *this;
-</code></pre>
-
-<p>  }
-  any&amp; operator=(any rhs)
-  {</p>
-
-<pre><code>rhs.swap(*this);
-return *this;
-</code></pre>
-
-<p>  }
-  bool empty() const { return !content; }</p>
-
-<p>  const std::type_info&amp; type() const { return content ? content->type() : typeid(void); }</p>
-
-<p>private:
-  class placeholder
-  {
-  public:</p>
-
-<pre><code>virtual ~placeholder() {}
-virtual const std::type_info&amp; type() const = 0;
-virtual placeholder* clone() const = 0;
-</code></pre>
-
-<p>  };</p>
-
-<p>  template<typename ValueType>
-  class holder : public placeholder
-  {
-  public:</p>
-
-<pre><code>holder(const ValueType&amp; value) : held(value) {}
-virtual const std::type_info&amp; type() const { return typeid(ValueType); }
-virtual placeholder* clone() const { return new holder(held); }
-ValueType held;
-</code></pre>
-
-<p>  private:</p>
-
-<pre><code>holder&amp; operator=(const holder&amp;);
-</code></pre>
-
-<p>  };</p>
-
-<p>private:
-  placeholder* content;
-};
-```</p>
-
-<p>在上面的代码中, any 类持有一个 placeholder 的基类指针, 在构造 any 对象时, 通过 any 的模板构造函数, 根据具体类型创建具体的 placeholder 子类类型, any 类提供 type() 接口, 用于查询 any 类中存储的实际类型.boost::any 中有类似的实现.</p>
-
-<p>使用方式如下：</p>
-
-<p>```cpp
-int main()
-{
-  std::array&lt;bitdewy::any, 3> any_array;
-  any_array[0] = 1;
-  any_array[1] = std::string(&ldquo;hello&rdquo;);
-  any_array[2] = .1;</p>
-
-<p>  std::for_each(std::begin(any_array),</p>
-
-<pre><code>            std::end(any_array),
-            [](const bitdewy::any&amp; a) {
-if (a.type() == typeid(int)) {
-  std::cout &lt;&lt; bitdewy::any_cast&lt;int&gt;(a) &lt;&lt; std::endl;
-
-} else if (a.type() == typeid(std::string)) {
-  std::cout &lt;&lt; bitdewy::any_cast&lt;std::string&gt;(a) &lt;&lt; std::endl;
-
-} else if (a.type() == typeid(double)) {
-  std::cout &lt;&lt; bitdewy::any_cast&lt;double&gt;(a) &lt;&lt; std::endl;
-
-} else {
-  //LOG ...
-}
-</code></pre>
-
-<p>  });
-  return 0;
-}
-```</p>
-
-<h3>参考</h3>
-
-<ul>
-<li><a href="http://svn.boost.org/svn/boost/trunk/boost/any.hpp">boost::any</a></li>
-<li><a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

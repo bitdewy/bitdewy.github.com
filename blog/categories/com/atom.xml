@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: COM | Bitdewy]]></title>
-  <link href="http://bitdewy.github.io/blog/categories/com/atom.xml" rel="self"/>
-  <link href="http://bitdewy.github.io/"/>
-  <updated>2013-09-25T01:53:53+08:00</updated>
-  <id>http://bitdewy.github.io/</id>
+  <link href="http://bitdewy.github.com/blog/categories/com/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-25T23:21:56+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
     <email><![CDATA[bitdewy@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[COM、ABI与引用计数]]></title>
-    <link href="http://bitdewy.github.io/blog/2012/12/09/com-and-reference-counting/"/>
+    <link href="http://bitdewy.github.com/blog/2012/12/09/com-and-reference-counting/"/>
     <updated>2012-12-09T18:18:00+08:00</updated>
-    <id>http://bitdewy.github.io/blog/2012/12/09/com-and-reference-counting</id>
+    <id>http://bitdewy.github.com/blog/2012/12/09/com-and-reference-counting</id>
     <content type="html"><![CDATA[<h2>什么是 COM ？</h2>
 
 <p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
