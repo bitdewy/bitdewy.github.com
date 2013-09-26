@@ -7,7 +7,10 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="什么是 SFINAE? (Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例. SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中 &hellip;">
+	<meta name="description" content="什么是右值引用? 在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明: 1
+int n; 那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码: 1
+2
+int& &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +101,75 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/07/02/cpp11-rvalue-ref/">
+		
+			C++11 右值引用</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是右值引用?</h2>
+
+<p>在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>  <span class="c1">// OK</span>
+</span><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// Error</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是因为标准中规定, 当定义一个引用时, 我们必须使用一个左值来初始化它. 在上面的代码中, n 是一个左值, 而 3 不是. 所以我们不能用 3 来初始化 s. 这个规定可以帮助编译器来捕捉错误, 比如下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// equals std::cin.operator&gt;&gt;(3);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>简单的说, 上面的代码调用了 std::cin 的名为 operator>> 的成员函数, 并使用 3 作为参数. operator>> 是重载函数, 虽然它有接受一个 int&amp; 参数的重载版本, 但是没有能接受一个简单的 int 常量, 或者 int 右值作为参数的重载. 因此, 编译器会检查出我们无法使用 int 的右值作为参数来调用 operator>>.</p>
+
+
+		
+		<a href="/blog/2013/07/02/cpp11-rvalue-ref/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-02T22:49:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/07/02/cpp11-rvalue-ref/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -790,78 +862,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2013/02/25/empty-base-optimization/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/">
-		
-			在 C++03 中实现强类型安全的枚举类型</a>
-	</h2>
-	<div class="entry-content">
-		<h2>意图</h2>
-
-<p>改进 C++ 枚举的类型安全性</p>
-
-<h2>动机</h2>
-
-<p>在 C++03 中枚举类型的类型安全性不够强, 有可能导致意想不到的错误. 虽然枚举是语言内置的特性, 但也可能由于编译器的不同, 而存在可移植性的问题. 枚举的问题基本上可以分为3类:</p>
-
-<ul>
-<li>隐式转换</li>
-<li>无法指定类型</li>
-<li>作用域问题</li>
-</ul>
-
-
-<p>C++03 中枚举类型是部分类型安全的, 比如你将一个枚举类型的值直接赋值给另一个枚举类型, 而且无法从整形隐式转换到枚举类型. 但是, 最常见的枚举类型错误是: 它可以自动提升成整形. 例如下面的代码, 只有少数几个的编译器（比如 GNU 的 g++）会发出警告, 而 VC++ 不会有任何的提示.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">enum</span> <span class="n">color</span> <span class="p">{</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">blue</span> <span class="p">};</span>
-</span><span class='line'><span class="k">enum</span> <span class="n">shape</span> <span class="p">{</span> <span class="n">circle</span><span class="p">,</span> <span class="n">square</span><span class="p">,</span> <span class="n">triangle</span> <span class="p">};</span>
-</span><span class='line'><span class="n">color</span> <span class="n">c</span> <span class="o">=</span> <span class="n">red</span><span class="p">;</span>
-</span><span class='line'><span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">&gt;=</span> <span class="n">triangle</span><span class="p">);</span> <span class="c1">// Unintended!</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-
-		
-		<a href="/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-05T21:53:00+08:00" pubdate data-updated="true">Feb 5<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/type-safe/'>type safe</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

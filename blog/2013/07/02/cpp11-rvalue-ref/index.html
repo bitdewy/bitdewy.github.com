@@ -1,0 +1,325 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>C++11 右值引用 - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="什么是右值引用? 在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明: 1
+int n; 那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码: 1
+2
+int& &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">C++11 右值引用</h2>
+	<div class="entry-content"><h2>什么是右值引用?</h2>
+
+<p>在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>  <span class="c1">// OK</span>
+</span><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// Error</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是因为标准中规定, 当定义一个引用时, 我们必须使用一个左值来初始化它. 在上面的代码中, n 是一个左值, 而 3 不是. 所以我们不能用 3 来初始化 s. 这个规定可以帮助编译器来捕捉错误, 比如下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// equals std::cin.operator&gt;&gt;(3);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>简单的说, 上面的代码调用了 std::cin 的名为 operator>> 的成员函数, 并使用 3 作为参数. operator>> 是重载函数, 虽然它有接受一个 int&amp; 参数的重载版本, 但是没有能接受一个简单的 int 常量, 或者 int 右值作为参数的重载. 因此, 编译器会检查出我们无法使用 int 的右值作为参数来调用 operator>>.</p>
+
+<!-- more -->
+
+
+<p>C++11 扩展了引用的概念, 增加了右值引用. 右值引用也是一个引用, 但与普通的引用不同, 它只能绑定到右值上. 下面是一个右值引用的声明:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一个普通的引用只能绑定左值, 一个右值引用只能绑定到右值, 也就是说如果我们写了下面的代码, 编译器会报一个错误.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>    <span class="c1">// Error: n is an lvalue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>右值引用是一个有趣的组合, 虽然你只能绑定右值到右值引用, 但是你使用时它却是一个左值.</p>
+
+<p>例如下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span><span class='line'><span class="o">++</span><span class="n">t</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通常情况下, 程序员不能修改右值. 但是通过右值引用, 获得了左值, 这样我们就能修改它的值了. 另外, 右值在通过右值引用绑定之后, 这个右值就不在可访问, 它使用了转移语义来代替拷贝操作.</p>
+
+<p>定义一个接收右值引用参数的函数, 那么函数就会使用转移语义来替代拷贝操作. 但是这样会禁止接收左值参数.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
+</span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>        <span class="c1">// OK;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>         <span class="c1">// Error: n is an lvalue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们当然可以定义一个左值的版本来解决上面的问题:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
+</span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>             <span class="c1">// calls bar(int&amp;&amp;)</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>               <span class="c1">// calls bar(const int&amp;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个技术有个值得记住的地方是, 通过 const 引用和右值引用的两个重载版本, 你告诉了编译器哪个修改参数是安全的, 哪个不是. 此外, 编译器在编译期就决定了使用哪个, 从而避免了运行时的开销.</p>
+
+<h2>Move 语义</h2>
+
+<p>右值引用的引入, 从语言层面提升了性能, 提高了内存与时间上的效率.</p>
+
+<p>在 C++03 及之前的标准中, 临时对象 (称为右值 &ldquo;R-values&rdquo;, 位于赋值运算符之右) 无法被改变, 在 C 中亦同 (且被视为无法和 const T&amp; 做出区分). 虽然在某些情况下临时对象的确会被改变, 甚至也被视为是一个有用的漏洞.</p>
+
+<p>C++11 增加一个新的非常数引用 (reference) 类型, 称作右值引用 (R-value reference), 标记为 <code>T&amp;&amp;</code>. 右值引用所引用的临时对象可以在该临时对象被初始化之后做修改, 这是为了允许 move 语义.</p>
+
+<p>C++03 性能上被长期被诟病的其中之一, 就是其耗时且不必要的深度拷贝. 深度拷贝会发生在当对象是以传值的方式传递. 举例而言, <code>std::vector&lt;T&gt;</code> 是内部保存了 C-style 数组的一个包装, 如果一个 <code>std::vector&lt;T&gt;</code> 的临时对象被建构或是从函数返回, 要将其存储只能通过生成新的 <code>std::vector&lt;T&gt;</code>并且把该临时对象所有的数据复制进去. 该临时对象和其拥有的內存会被摧毁. (为了讨论上的方便，这里忽略返回值优化)</p>
+
+<p>在 C++11 中, 一个 <code>std::vector</code> 的 &ldquo;move 构造函数&rdquo; 对某个 vector 的右值引用可以单纯地从右值复制其内部 C-style 数组的指针到新的 vector, 然后留下空的右值. 这个操作不需要数组的复制, 而且空的临时对象的析构也不会摧毁内存. 传回 vector 临时对象的函数不需要显式地传回 <code>std::vector&lt;T&gt;&amp;&amp;</code>. 如果 vector 没有 move 构造函数, 那么复制构造函数将被调用, 以 <code>const std::vector&lt;T&gt; &amp;</code> 的正常形式. 如果它确实有 move 构造函数, 那么就会调用 move 构造函数, 这能够免除大幅的内存配置.</p>
+
+<p>基于安全的理由, 具名的参数将永远不被认定为右值, 即使它是被如此声明的; 为了获得右值必须使用 <code>std::move&lt;T&gt;()</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">test</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> <span class="c1">// i 为具名变量，即使被声明成右值也不會被认为是右值。</span>
+</span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">i</span><span class="p">));</span> <span class="c1">// 使用 std::move&lt;T&gt;() 取得右值。</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于右值引用的用语特性以及对于左值引用 (L-value references;regular references) 的某些用语修正, 右值引用允许开发者提供完美转发 (perfect function forwarding). 当与变长参数模板结合, 这项能力允许函数模板能够完美地转送引数给其他接受这些特定引数的函数. 最大的用处在于转发构造函数参数, 创造出能够自动为这些特定引数调用正确建构式的工厂函数 (factory function).</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://blog.csdn.net/pongba/article/details/1684519">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(上)</a></li>
+<li><a href="https://zh.wikipedia.org/zh-cn/C%2B%2B11#.E5.8F.B3.E5.80.BC.E5.BC.95.E7.94.A8.E5.92.8C_move_.E8.AA.9E.E6.84.8F">维基百科C++11: 右值引用和 move 语义</a></li>
+<li><a href="http://stackoverflow.com/questions/3106110/what-are-move-semantics/3109981">Stackoverflow：What are move semantics？</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2027.html#Move_Semantics">标准文档提案：Move Semantics</a></li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-02T22:49:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+	</div>
+	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref/';
+        var disqus_url = 'http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>
