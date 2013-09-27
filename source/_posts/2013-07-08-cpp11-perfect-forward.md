@@ -34,6 +34,7 @@ void f(const A& a, const B& b, const C& c) {
 }
 ```
 
+<!-- more -->
 这解决了上面的问题, 但是又引入了新的问题, 现在我们无法让 E 接收 non-const 参数了, 下面的代码也会产生一个编译失败.
 
 ```cpp
