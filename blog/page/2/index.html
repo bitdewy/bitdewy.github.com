@@ -7,9 +7,8 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="意图 改进 C++ 枚举的类型安全性 动机 在 C++03 中枚举类型的类型安全性不够强, 有可能导致意想不到的错误. 虽然枚举是语言内置的特性, 但也可能由于编译器的不同, 而存在可移植性的问题. 枚举的问题基本上可以分为3类: 隐式转换
-无法指定类型
-作用域问题 C++03 &hellip;">
+	<meta name="description" content="目的 优化空类数据成员的存储空间 别名 EBCO: Empty Base Class Optimization
+Empty Member Optimization 动机 大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 EmptyClass &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -100,6 +99,70 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/02/25/empty-base-optimization/">
+		
+			空基类优化</a>
+	</h2>
+	<div class="entry-content">
+		<h2>目的</h2>
+
+<p>优化空类数据成员的存储空间</p>
+
+<h2>别名</h2>
+
+<p>EBCO: Empty Base Class Optimization
+Empty Member Optimization</p>
+
+<h2>动机</h2>
+
+<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">EmptyClass</span> <span class="p">{};</span>
+</span><span class='line'><span class="n">EmptyClass</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span> <span class="c1">// Size of this array can’t be zero.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
+
+
+		
+		<a href="/blog/2013/02/25/empty-base-optimization/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-25T07:50:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/idiom/'>idiom</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/02/25/empty-base-optimization/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -731,56 +794,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/08/21/cpp-orm-odb/">
-		
-			C++ ORM 框架 ODB</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是 ORM？</h2>
-
-<p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
-
-<p>面向对象是从软件工程基本原则（如耦合、聚合、封装）的基础上发展起来的，而关系数据库则是从数学理论发展而来的，两套理论存在显著的区别。为了解决这个不匹配的现象，对象关系映射技术应运而生。</p>
-
-<p>简单的说：ORM相当于中继数据。通俗的说，ORM就是将对象和它们之间的关系映射成关系数据库的表，以及在数据库中它们的关系。目标就是确定一种持久化对象数据的有效策略，在考虑类之间继承结构的同时，存储各个对象的数据属性和对象间的关系。</p>
-
-
-		
-		<a href="/blog/2012/08/21/cpp-orm-odb/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-21T22:03:00+08:00" pubdate data-updated="true">Aug 21<span>st</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/orm/'>ORM</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/08/21/cpp-orm-odb/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

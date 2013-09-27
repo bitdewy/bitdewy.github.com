@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-26T23:18:31+08:00</updated>
+  <updated>2013-09-27T22:35:38+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,183 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 完美转发]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward/"/>
+    <updated>2013-07-08T22:09:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward</id>
+    <content type="html"><![CDATA[<h2>动机</h2>
+
+<p>在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变.</p>
+
+<h2>C++03 中参数转发存在的问题</h2>
+
+<p>下面来看一个例子, 对于表达式 <code>E(a, b, …, c)</code> 我们希望它与 <code>f(a, b, …, c)</code> 完全等价. 在 C++03 中这是不可能的. 下面是几种设计方案, 但所有的都会在某些条件下失效.</p>
+
+<p>最简单的, 使用引用参数:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, C&amp; c) {</p>
+
+<pre><code>E(a, b, c);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>很遗憾, 函数 f 无法处理临时变量, 例如 <code>f(1, 2, 3)</code>; 会编译失败. 这三个参数都无法绑定到引用.</p>
+
+<p>再来看看 const 引用:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c) {</p>
+
+<pre><code>E(a, b, c);
+</code></pre>
+
+<p>}
+```</p>
+
+<!-- more -->
+
+
+<p>这解决了上面的问题, 但是又引入了新的问题, 现在我们无法让 E 接收 non-const 参数了, 下面的代码也会产生一个编译失败.</p>
+
+<p><code>cpp
+int i = 1, j = 2, k = 3;
+void E(int&amp;, int&amp;, int&amp;);
+f(i, j, k); // oops! E cannot modify these
+</code></p>
+
+<p>嗯, 再来个尝试, 解决上面的问题, 我们接收 const 引用, 然后使用 const_cast 来去掉 const 属性.</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c) {</p>
+
+<pre><code>E(const_cast&lt;A&amp;&gt;(a), const_cast&lt;B&amp;&gt;(b), const_cast&lt;C&amp;&gt;(c));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>最后来终极解决方案吧, 利用重载, 根据重载决议, 我们可以使用 const 引用和 non-const 引用来进行参数重载, 对于上面的例子, 我们的实现如下:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, const B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, const B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c);
+```</p>
+
+<p>n 个参数的函数, 就需要 2<sup>n</sup> 个重载版本, 这太恐怖了, 我们非常需要自动完成这些工作. 这个问题在 C++11 中的到了完美的解决.</p>
+
+<h2>完美转发</h2>
+
+<p>C++11 新标准给了我们修复这个问题的机会 (这里有一个破坏性的解决方案, 虽然解决了完美转发的问题, 但是破坏了现有的类型推导规则<a href="http://stackoverflow.com/questions/3591832/perfect-forwarding-in-c03/3591909#3591909">《Perfect Forwarding in C++03》</a>).</p>
+
+<p>C++11 中引入了新的概念, 右值引用. 我们可以在不破坏现有代码的情况下, 定义右值引用的推导规则, 来解决完美转发的问题.</p>
+
+<p>看下面的表格, (TR 表示 T 引用类型)</p>
+
+<p>```cpp
+TR   R</p>
+
+<p>T&amp;   &amp;  &ndash;> T&amp;  // lvalue reference to cv TR &ndash;> lvalue reference to T
+T&amp;   &amp;&amp; &ndash;> T&amp;  // rvalue reference to cv TR &ndash;> TR (lvalue reference to T)
+T&amp;&amp;  &amp;  &ndash;> T&amp;  // lvalue reference to cv TR &ndash;> lvalue reference to T
+T&amp;&amp;  &amp;&amp; &ndash;> T&amp;&amp; // rvalue reference to cv TR &ndash;> TR (rvalue reference to T)
+```</p>
+
+<p>然后, 模板参数推导时, 如果参数是左值, 那么就推导为左值引用. 否则使用正常的类型推导. 这里又引入了一个新的概念, “全局引用” (universal references), 具体细节详见: <a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Scott-Meyers-Universal-References-in-Cpp11">C++ and Beyond 2012: Scott Meyers &ndash; Universal References in C++11</a></p>
+
+<p>为什么这样就能解决问题? 因为我们保持了参数的类型: 如果参数是一个左值, 我们得到的是左值引用的参数, 否则我们得到的是右值引用类型的参数, 看下面的代码:</p>
+
+<p>```cpp
+template <typename T>void deduce(T&amp;&amp; x);</p>
+
+<p>int i;
+deduce(i); // deduce&lt;int&amp;>(int&amp; &amp;&amp;) &ndash;> deduce&lt;int&amp;>(int&amp;)
+deduce(1); // deduce<int>(int&amp;&amp;)
+```</p>
+
+<p>最后就是要做“转发”了. 需要注意的是, 在函数内参数类型是一个左值类型.</p>
+
+<p>```cpp
+void foo(int&amp;);</p>
+
+<p>template <typename T>
+void deduce(T&amp;&amp; x){</p>
+
+<pre><code>foo(x); // fine, foo can refer to x
+</code></pre>
+
+<p>}</p>
+
+<p>deduce(1); // okay, foo operates on x which has a value of 1
+```</p>
+
+<p>这还不足够. foo 需要拿到和 deduce 一样的参数类型, 解决方案如下.</p>
+
+<p><code>cpp
+static_cast&lt;T&amp;&amp;&gt;(x);
+</code></p>
+
+<p>上面这行代码做了什么呢? 我们在 deduce 函数中, 且我们接收了一个左值类型的参数, 这意味着 T 是 A&amp; 类型, 经过静态类型转换 A&amp; &amp;&amp; 仍然是 A&amp; 类型. 因此, 加入 x 以及是一个 A&amp; 类型, 那么我们什么也没有做, 它仍然是一个左值引用类型.</p>
+
+<p>当我们接收的是一个右值, T 就是 A 类型, 因此我们转换后的类型为 A&amp;&amp;. 转换后的类型是一个右值表达式, 这样就不会再作为左值参数了. 我们保持住了参数的类型. 将上面的组合到一起, 我们就得到了“完美转发”:</p>
+
+<p>```cpp
+template <typename A>
+void f(A&amp;&amp; a) {</p>
+
+<pre><code>E(static_cast&lt;A&amp;&amp;&gt;(a));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>当 f 接收到一个左值, 那么 E 也接收一个左值, 当 f 接收的是一个右值, 那么 E 接受到的也是一个右值, 完美了.</p>
+
+<p>当然, 上面的代码是有一点丑陋. <code>static_cast&lt;T&amp;&amp;&gt;</code> 古怪而且不容易记住. 标准库中提供了一个工具函数, 叫做 forward, 它所做的事情与类型转换完全一致.</p>
+
+<p><code>cpp
+std::forward&lt;A&gt;(a);
+// is the same as
+static_cast&lt;A&amp;&amp;&gt;(a);
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
+<li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11 右值引用]]></title>
@@ -493,85 +670,6 @@ if (o) {                                 // does optional contain a value?
 <ul>
 <li><a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference.com: optional</a></li>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">A proposal to add a utility class to represent optional objects (Revision 4)</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 关键字 using]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using/"/>
-    <updated>2013-05-21T00:45:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using</id>
-    <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
-
-<h2>使用小技巧来声明函数指针</h2>
-
-<p>在 c++03 中, 函数指针要这么写:</p>
-
-<p><code>cpp
-typedef void (*FunctionPtr)();
-</code></p>
-
-<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
-
-<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
-
-<p><code>cpp
-using FunctionPtr = void (*)();
-</code></p>
-
-<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
-
-<p>```cpp</p>
-
-<h1>include &lt;type_traits></h1>
-
-<p>using FunctionPtr = std::add_pointer&lt;void()>::type;
-```</p>
-
-<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
-
-<!-- more -->
-
-
-<h2>模板别名</h2>
-
-<p>在进入这个主题之前, 应该先弄清楚“模板类”和“类模板”本质上的不同. class template (类模板，是模板)是用来产生 template class (模板类, 是类型)的.
-在标准 C++, typedef 可定义模板类一个新的类型名称, 但是不能够使用 typedef 来定义模板的别名. 举例来说:</p>
-
-<p><code>cpp
-template&lt; typename first, typename second, int third&gt;
-class SomeType;
-template&lt; typename second&gt;
-typedef SomeType&lt;OtherType, second, 5&gt; TypedefName; // 在C++03是不合法的
-</code></p>
-
-<p>这不能够通过编译.
-为了定义模板的别名, C++11 增加了以下的语法:</p>
-
-<p><code>cpp
-template&lt; typename first, typename second, int third&gt;
-class SomeType;
-template&lt; typename second&gt;
-using TypedefName = SomeType&lt;OtherType, second, 5&gt;;
-</code></p>
-
-<p>using 紧跟着的标识, 用来表示后面的模板类型. 标准制定时尝试过使用旧的关键字 typedef 来实现该功能, 但是无法得到一个完整连贯的解决方案, 因此引入了新的关键字. (严格说来 using 并不是一个新的关键字, 在使用 namespace 时, 我们就已经见过它了, 但在 C++11 中它又有了新的语义.）</p>
-
-<p>除了模板别名之外, using 关键字还可以用在一般的类型中, 就想文章一开始的地方一样:</p>
-
-<p><code>cpp
-typedef void (*PFD)(double);            // 传统语法
-using PFD = void (*)(double);           // 新增与否
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li>C++ standard  14.6.7 Template aliases;  7.1.3 The typedef specifier</li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1489.pdf">Templates aliases for C++</a></li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf">Templates Aliases (Revision 3)</a></li>
 </ul>
 
 ]]></content>

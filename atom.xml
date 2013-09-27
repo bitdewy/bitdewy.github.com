@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-26T23:18:31+08:00</updated>
+  <updated>2013-09-27T22:35:38+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,235 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 完美转发]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward/"/>
+    <updated>2013-07-08T22:09:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward</id>
+    <content type="html"><![CDATA[<h2>动机</h2>
+
+<p>在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变.</p>
+
+<h2>C++03 中参数转发存在的问题</h2>
+
+<p>下面来看一个例子, 对于表达式 <code>E(a, b, …, c)</code> 我们希望它与 <code>f(a, b, …, c)</code> 完全等价. 在 C++03 中这是不可能的. 下面是几种设计方案, 但所有的都会在某些条件下失效.</p>
+
+<p>最简单的, 使用引用参数:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>很遗憾, 函数 f 无法处理临时变量, 例如 <code>f(1, 2, 3)</code>; 会编译失败. 这三个参数都无法绑定到引用.</p>
+
+<p>再来看看 const 引用:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>这解决了上面的问题, 但是又引入了新的问题, 现在我们无法让 E 接收 non-const 参数了, 下面的代码也会产生一个编译失败.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">E</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
+</span><span class='line'><span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span> <span class="c1">// oops! E cannot modify these</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>嗯, 再来个尝试, 解决上面的问题, 我们接收 const 引用, 然后使用 const_cast 来去掉 const 属性.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="k">const_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">C</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">));</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后来终极解决方案吧, 利用重载, 根据重载决议, 我们可以使用 const 引用和 non-const 引用来进行参数重载, 对于上面的例子, 我们的实现如下:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>n 个参数的函数, 就需要 2<sup>n</sup> 个重载版本, 这太恐怖了, 我们非常需要自动完成这些工作. 这个问题在 C++11 中的到了完美的解决.</p>
+
+<h2>完美转发</h2>
+
+<p>C++11 新标准给了我们修复这个问题的机会 (这里有一个破坏性的解决方案, 虽然解决了完美转发的问题, 但是破坏了现有的类型推导规则<a href="http://stackoverflow.com/questions/3591832/perfect-forwarding-in-c03/3591909#3591909">《Perfect Forwarding in C++03》</a>).</p>
+
+<p>C++11 中引入了新的概念, 右值引用. 我们可以在不破坏现有代码的情况下, 定义右值引用的推导规则, 来解决完美转发的问题.</p>
+
+<p>看下面的表格, (TR 表示 T 引用类型)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TR</span>   <span class="n">R</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">T</span><span class="o">&amp;</span>   <span class="o">&amp;</span>  <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// lvalue reference to cv TR -&gt; lvalue reference to T</span>
+</span><span class='line'><span class="n">T</span><span class="o">&amp;</span>   <span class="o">&amp;&amp;</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// rvalue reference to cv TR -&gt; TR (lvalue reference to T)</span>
+</span><span class='line'><span class="n">T</span><span class="o">&amp;&amp;</span>  <span class="o">&amp;</span>  <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// lvalue reference to cv TR -&gt; lvalue reference to T</span>
+</span><span class='line'><span class="n">T</span><span class="o">&amp;&amp;</span>  <span class="o">&amp;&amp;</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;&amp;</span> <span class="c1">// rvalue reference to cv TR -&gt; TR (rvalue reference to T)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后, 模板参数推导时, 如果参数是左值, 那么就推导为左值引用. 否则使用正常的类型推导. 这里又引入了一个新的概念, “全局引用” (universal references), 具体细节详见: <a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Scott-Meyers-Universal-References-in-Cpp11">C++ and Beyond 2012: Scott Meyers &ndash; Universal References in C++11</a></p>
+
+<p>为什么这样就能解决问题? 因为我们保持了参数的类型: 如果参数是一个左值, 我们得到的是左值引用的参数, 否则我们得到的是右值引用类型的参数, 看下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span><span class="kt">void</span> <span class="n">deduce</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> <span class="c1">// deduce&lt;int&amp;&gt;(int&amp; &amp;&amp;) -&gt; deduce&lt;int&amp;&gt;(int&amp;)</span>
+</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// deduce&lt;int&gt;(int&amp;&amp;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后就是要做“转发”了. 需要注意的是, 在函数内参数类型是一个左值类型.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">deduce</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">){</span>
+</span><span class='line'>    <span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="c1">// fine, foo can refer to x</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// okay, foo operates on x which has a value of 1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这还不足够. foo 需要拿到和 deduce 一样的参数类型, 解决方案如下.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面这行代码做了什么呢? 我们在 deduce 函数中, 且我们接收了一个左值类型的参数, 这意味着 T 是 A&amp; 类型, 经过静态类型转换 A&amp; &amp;&amp; 仍然是 A&amp; 类型. 因此, 加入 x 以及是一个 A&amp; 类型, 那么我们什么也没有做, 它仍然是一个左值引用类型.</p>
+
+<p>当我们接收的是一个右值, T 就是 A 类型, 因此我们转换后的类型为 A&amp;&amp;. 转换后的类型是一个右值表达式, 这样就不会再作为左值参数了. 我们保持住了参数的类型. 将上面的组合到一起, 我们就得到了“完美转发”:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">));</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当 f 接收到一个左值, 那么 E 也接收一个左值, 当 f 接收的是一个右值, 那么 E 接受到的也是一个右值, 完美了.</p>
+
+<p>当然, 上面的代码是有一点丑陋. <code>static_cast&lt;T&amp;&amp;&gt;</code> 古怪而且不容易记住. 标准库中提供了一个工具函数, 叫做 forward, 它所做的事情与类型转换完全一致.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// is the same as</span>
+</span><span class='line'><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
+<li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11 右值引用]]></title>
@@ -2787,141 +3016,6 @@ while b &lt; 10:
 <p>原文地址：<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a></p>
 
 <p>PS： 上面一共出现了三个人，这三位都是神级的人物，网络上有一篇流传了很多年的文章叫做 “我心目中的编程高手” 里面介绍了 9 位神级人物，这三位大神都榜上有名。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++ ORM 框架 ODB]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb/"/>
-    <updated>2012-08-21T22:03:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb</id>
-    <content type="html"><![CDATA[<h2>什么是 ORM？</h2>
-
-<p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
-
-<p>面向对象是从软件工程基本原则（如耦合、聚合、封装）的基础上发展起来的，而关系数据库则是从数学理论发展而来的，两套理论存在显著的区别。为了解决这个不匹配的现象，对象关系映射技术应运而生。</p>
-
-<p>简单的说：ORM相当于中继数据。通俗的说，ORM就是将对象和它们之间的关系映射成关系数据库的表，以及在数据库中它们的关系。目标就是确定一种持久化对象数据的有效策略，在考虑类之间继承结构的同时，存储各个对象的数据属性和对象间的关系。</p>
-
-<!-- more -->
-
-
-<h2>成熟的 ORM 产品</h2>
-
-<ul>
-<li>Java: 广泛使用的 ORM 框架Hibernate</li>
-<li>Python: web框架 Django 中包含了 ORM</li>
-<li>C++: ODB，QxOrm，LiteSQL 等</li>
-</ul>
-
-
-<p>这里有一个 ORM 产品的列表：<a href="http://en.wikipedia.org/wiki/List_of_object-relational_mapping_software">List of object-relational mapping software</a></p>
-
-<h2>ODB</h2>
-
-<p>ODB 是一个开源的，支持多平台，支持多数据库的 C++ 的 ORM 框架，可将 C++ 对象数据库表映射，进行轻松的数据库查询和操作。
-下面是常规的 C++ 代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">person</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="c1">//...</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">email_</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name_</span><span class="p">;</span>
-</span><span class='line'>    <span class="kt">unsigned</span> <span class="kt">short</span> <span class="n">age_</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下面是ODB所需的持久化之后的 C++ 代码， ODB可以根据下面的代码自动生成数据库：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#pragma db object</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">person</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="c1">//...</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">friend</span> <span class="k">class</span> <span class="nc">odb</span><span class="o">::</span><span class="n">access</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">person</span><span class="p">()</span> <span class="p">{}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#pragma db id</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">email_</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name_</span><span class="p">;</span>
-</span><span class='line'>    <span class="kt">unsigned</span> <span class="kt">short</span> <span class="n">age_</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有了上面的声明，我们就可以对 person 对象进行一系列的数据库操作了，下面是一个 SQLite 的例子：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">odb</span><span class="o">::</span><span class="n">sqlite</span><span class="o">::</span><span class="n">database</span> <span class="n">db</span><span class="p">(</span><span class="s">&quot;people.db&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">person</span> <span class="n">john</span><span class="p">(</span><span class="s">&quot;john@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;John Doe&quot;</span><span class="p">,</span> <span class="mi">31</span><span class="p">);</span>
-</span><span class='line'><span class="n">person</span> <span class="n">jane</span><span class="p">(</span><span class="s">&quot;jane@doe.org&quot;</span><span class="p">,</span> <span class="s">&quot;Jane Doe&quot;</span><span class="p">,</span> <span class="mi">29</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">odb</span><span class="o">::</span><span class="n">transaction</span> <span class="n">t</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">begin</span><span class="p">());</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">db</span><span class="p">.</span><span class="n">persist</span><span class="p">(</span><span class="n">john</span><span class="p">);</span>
-</span><span class='line'><span class="n">db</span><span class="p">.</span><span class="n">persist</span><span class="p">(</span><span class="n">jane</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">typedef</span> <span class="n">odb</span><span class="o">::</span><span class="n">query</span><span class="o">&lt;</span><span class="n">person</span><span class="o">&gt;</span> <span class="n">person_query</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">p:</span> <span class="n">db</span><span class="p">.</span><span class="n">query</span><span class="o">&lt;</span><span class="n">person</span><span class="o">&gt;</span><span class="p">(</span><span class="n">person_query</span><span class="o">::</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">))</span>
-</span><span class='line'>    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">jane</span><span class="p">.</span><span class="n">age</span><span class="p">(</span><span class="n">jane</span><span class="p">.</span><span class="n">age</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="n">db</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">jane</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">t</span><span class="p">.</span><span class="n">commit</span><span class="p">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有了 ORM 所有的数据库的操作也变得面向对象了，代码中不会夹杂着 SQL语句，写起代码来应该会更顺手了。</p>
 ]]></content>
   </entry>
   

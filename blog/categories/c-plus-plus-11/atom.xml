@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++11 | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus-11/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-26T23:18:31+08:00</updated>
+  <updated>2013-09-27T22:35:38+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,183 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 完美转发]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward/"/>
+    <updated>2013-07-08T22:09:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward</id>
+    <content type="html"><![CDATA[<h2>动机</h2>
+
+<p>在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变.</p>
+
+<h2>C++03 中参数转发存在的问题</h2>
+
+<p>下面来看一个例子, 对于表达式 <code>E(a, b, …, c)</code> 我们希望它与 <code>f(a, b, …, c)</code> 完全等价. 在 C++03 中这是不可能的. 下面是几种设计方案, 但所有的都会在某些条件下失效.</p>
+
+<p>最简单的, 使用引用参数:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, C&amp; c) {</p>
+
+<pre><code>E(a, b, c);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>很遗憾, 函数 f 无法处理临时变量, 例如 <code>f(1, 2, 3)</code>; 会编译失败. 这三个参数都无法绑定到引用.</p>
+
+<p>再来看看 const 引用:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c) {</p>
+
+<pre><code>E(a, b, c);
+</code></pre>
+
+<p>}
+```</p>
+
+<!-- more -->
+
+
+<p>这解决了上面的问题, 但是又引入了新的问题, 现在我们无法让 E 接收 non-const 参数了, 下面的代码也会产生一个编译失败.</p>
+
+<p><code>cpp
+int i = 1, j = 2, k = 3;
+void E(int&amp;, int&amp;, int&amp;);
+f(i, j, k); // oops! E cannot modify these
+</code></p>
+
+<p>嗯, 再来个尝试, 解决上面的问题, 我们接收 const 引用, 然后使用 const_cast 来去掉 const 属性.</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c) {</p>
+
+<pre><code>E(const_cast&lt;A&amp;&gt;(a), const_cast&lt;B&amp;&gt;(b), const_cast&lt;C&amp;&gt;(c));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>最后来终极解决方案吧, 利用重载, 根据重载决议, 我们可以使用 const 引用和 non-const 引用来进行参数重载, 对于上面的例子, 我们的实现如下:</p>
+
+<p>```cpp
+template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, const B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(A&amp; a, const B&amp; b, const C&amp; c);</p>
+
+<p>template <typename A, typename B, typename C>
+void f(const A&amp; a, const B&amp; b, const C&amp; c);
+```</p>
+
+<p>n 个参数的函数, 就需要 2<sup>n</sup> 个重载版本, 这太恐怖了, 我们非常需要自动完成这些工作. 这个问题在 C++11 中的到了完美的解决.</p>
+
+<h2>完美转发</h2>
+
+<p>C++11 新标准给了我们修复这个问题的机会 (这里有一个破坏性的解决方案, 虽然解决了完美转发的问题, 但是破坏了现有的类型推导规则<a href="http://stackoverflow.com/questions/3591832/perfect-forwarding-in-c03/3591909#3591909">《Perfect Forwarding in C++03》</a>).</p>
+
+<p>C++11 中引入了新的概念, 右值引用. 我们可以在不破坏现有代码的情况下, 定义右值引用的推导规则, 来解决完美转发的问题.</p>
+
+<p>看下面的表格, (TR 表示 T 引用类型)</p>
+
+<p>```cpp
+TR   R</p>
+
+<p>T&amp;   &amp;  &ndash;> T&amp;  // lvalue reference to cv TR &ndash;> lvalue reference to T
+T&amp;   &amp;&amp; &ndash;> T&amp;  // rvalue reference to cv TR &ndash;> TR (lvalue reference to T)
+T&amp;&amp;  &amp;  &ndash;> T&amp;  // lvalue reference to cv TR &ndash;> lvalue reference to T
+T&amp;&amp;  &amp;&amp; &ndash;> T&amp;&amp; // rvalue reference to cv TR &ndash;> TR (rvalue reference to T)
+```</p>
+
+<p>然后, 模板参数推导时, 如果参数是左值, 那么就推导为左值引用. 否则使用正常的类型推导. 这里又引入了一个新的概念, “全局引用” (universal references), 具体细节详见: <a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Scott-Meyers-Universal-References-in-Cpp11">C++ and Beyond 2012: Scott Meyers &ndash; Universal References in C++11</a></p>
+
+<p>为什么这样就能解决问题? 因为我们保持了参数的类型: 如果参数是一个左值, 我们得到的是左值引用的参数, 否则我们得到的是右值引用类型的参数, 看下面的代码:</p>
+
+<p>```cpp
+template <typename T>void deduce(T&amp;&amp; x);</p>
+
+<p>int i;
+deduce(i); // deduce&lt;int&amp;>(int&amp; &amp;&amp;) &ndash;> deduce&lt;int&amp;>(int&amp;)
+deduce(1); // deduce<int>(int&amp;&amp;)
+```</p>
+
+<p>最后就是要做“转发”了. 需要注意的是, 在函数内参数类型是一个左值类型.</p>
+
+<p>```cpp
+void foo(int&amp;);</p>
+
+<p>template <typename T>
+void deduce(T&amp;&amp; x){</p>
+
+<pre><code>foo(x); // fine, foo can refer to x
+</code></pre>
+
+<p>}</p>
+
+<p>deduce(1); // okay, foo operates on x which has a value of 1
+```</p>
+
+<p>这还不足够. foo 需要拿到和 deduce 一样的参数类型, 解决方案如下.</p>
+
+<p><code>cpp
+static_cast&lt;T&amp;&amp;&gt;(x);
+</code></p>
+
+<p>上面这行代码做了什么呢? 我们在 deduce 函数中, 且我们接收了一个左值类型的参数, 这意味着 T 是 A&amp; 类型, 经过静态类型转换 A&amp; &amp;&amp; 仍然是 A&amp; 类型. 因此, 加入 x 以及是一个 A&amp; 类型, 那么我们什么也没有做, 它仍然是一个左值引用类型.</p>
+
+<p>当我们接收的是一个右值, T 就是 A 类型, 因此我们转换后的类型为 A&amp;&amp;. 转换后的类型是一个右值表达式, 这样就不会再作为左值参数了. 我们保持住了参数的类型. 将上面的组合到一起, 我们就得到了“完美转发”:</p>
+
+<p>```cpp
+template <typename A>
+void f(A&amp;&amp; a) {</p>
+
+<pre><code>E(static_cast&lt;A&amp;&amp;&gt;(a));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>当 f 接收到一个左值, 那么 E 也接收一个左值, 当 f 接收的是一个右值, 那么 E 接受到的也是一个右值, 完美了.</p>
+
+<p>当然, 上面的代码是有一点丑陋. <code>static_cast&lt;T&amp;&amp;&gt;</code> 古怪而且不容易记住. 标准库中提供了一个工具函数, 叫做 forward, 它所做的事情与类型转换完全一致.</p>
+
+<p><code>cpp
+std::forward&lt;A&gt;(a);
+// is the same as
+static_cast&lt;A&amp;&amp;&gt;(a);
+</code></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
+<li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11 右值引用]]></title>
