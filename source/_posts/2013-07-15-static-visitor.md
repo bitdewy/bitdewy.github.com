@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Visitor 模式 & boost.variant.static_visitor"
+title: "Visitor 模式与 boost.variant.static_visitor"
 date: 2013-07-15 00:36
 comments: true
 categories: [design pattern, boost]
