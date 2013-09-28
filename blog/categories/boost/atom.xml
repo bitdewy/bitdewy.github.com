@@ -4,7 +4,7 @@
   <title><![CDATA[Category: boost | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/boost/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-29T00:47:38+08:00</updated>
+  <updated>2013-09-29T01:21:38+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Visitor 模式 & boost.variant.static_visitor]]></title>
+    <title type="html"><![CDATA[Visitor 模式与 boost.variant.static_visitor]]></title>
     <link href="http://bitdewy.github.com/blog/2013/07/15/static-visitor/"/>
     <updated>2013-07-15T00:36:00+08:00</updated>
     <id>http://bitdewy.github.com/blog/2013/07/15/static-visitor</id>
