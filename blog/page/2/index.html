@@ -7,8 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="目的 优化空类数据成员的存储空间 别名 EBCO: Empty Base Class Optimization
-Empty Member Optimization 动机 大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 EmptyClass &hellip;">
+	<meta name="description" content="Qt从4.3开始, 提供了 ECMAScript 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8） 在 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -99,6 +98,61 @@ Empty Member Optimization 动机 大小为 0 的类在 C++ 中是不存在的. C
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/03/21/qtscript/">
+		
+			QtScript 与信号槽</a>
+	</h2>
+	<div class="entry-content">
+		<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
+
+<h2>在 QtScript 中使用信号槽</h2>
+
+<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
+
+<ol>
+<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
+<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
+<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
+</ol>
+
+
+
+		
+		<a href="/blog/2013/03/21/qtscript/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-21T14:53:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>, <a class='category' href='/blog/categories/webkit/'>webkit</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/03/21/qtscript/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -728,72 +782,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2012/11/25/hello-world/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/">
-		
-			Unix 的隐藏文件是个 Bug</a>
-	</h2>
-	<div class="entry-content">
-		<p>玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以<code>.</code>开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。</p>
-
-<p>8月份的时候，<a href="http://en.wikipedia.org/wiki/Rob_Pike">Rob Pike</a> 在 Google+ 上发了一篇名为 &ldquo;<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a>&rdquo; 的短文，介绍了 Unix 文件系统中隐藏文件这个设计上的 bug (feature)。</p>
-
-<p>在 Unix 文件系统设计的早期，为了导航更方便而引入了 <code>.</code> 和 <code>..</code>。当用户输入 <code>ls</code> 时会列出文件清单，所以 <a href="http://en.wikipedia.org/wiki/Ken_Thompson">Ken</a> 或 <a href="http://en.wikipedia.org/wiki/Dennis_Ritchie">Dennis</a> 添加了一些简单的代码。当时用的是汇编，不过代码看起来应该是像这样的：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;.&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">continue</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这比它应有的样子稍微短了一点点：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;..&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">continue</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>嘿，这很简单。</p>
-
-
-		
-		<a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-14T01:05:00+08:00" pubdate data-updated="true">Sep 14<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/unix/'>unix</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

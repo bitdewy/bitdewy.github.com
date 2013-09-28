@@ -3,11 +3,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Category: design pattern - Bitdewy</title>
+	<title>Bitdewy</title>
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="Category: design pattern">
+	<meta name="description" content="前言: Qt wiki 中这篇文章3月份再次更新，文章对 QThread 的用法，使用场景，有很好的论述，可以作为 Qt 多线程编程的使用指南，原文在这里，原作者 peppe 开的讨论贴在这里。 原文以姓名标识-相同方式分享 2.5 通用版发布 Creative Commons &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,54 +98,70 @@
 
 	
 	<div id="content" class="inner">
-	
 
 
-	
-	
-	<section class="archives"><h1 class="year">2013</h1>
-	
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/05/28/threads-events-qobjects/">
+		
+			[译]Threads, Events and QObjects</a>
+	</h2>
+	<div class="entry-content">
+		<p>前言: <a href="http://qt-project.org/wiki/">Qt wiki</a> 中这篇文章3月份再次更新，文章对 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 的用法，使用场景，有很好的论述，可以作为 Qt 多线程编程的使用指南，原文在<a href="http://qt-project.org/wiki/Threads_Events_QObjects">这里</a>，原作者 <a href="http://qt-project.org/member/5319">peppe</a> 开的讨论贴在<a href="http://developer.qt.nokia.com/forums/viewthread/2423/">这里</a>。</p>
 
-<article>
-	<h2 class="title"><a href="/blog/2013/07/15/static-visitor/">Visitor 模式 & boost.variant.static_visitor</a></h2>
-	<div class="meta">
-		<div class="date">Jul 15</div>
-		<div class="tags">
+<p>原文以姓名标识-相同方式分享 2.5 通用版发布</p>
+
+<p><a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 Generic</a></p>
+
+<h2>背景</h2>
+
+<p>在 <a href="irc://irc.freenode.net/#qt">#qt IRC channel</a> [irc.freenode.net] 中，讨论最多的话题之一就是多线程。很多同学选择了多线程并行编程，然后……呃，掉进了并行编程的无尽的陷阱中。</p>
+
+<p>由于缺乏 Qt 多线程编程经验（尤其是结合Qt 信号槽机制的异步网络编程）加上一些现有的其他语言（工具）的使用经验，导致在使用 Qt 时，一些同学有朝自己脚开枪的行为。Qt 的多线程支持是一把双刃剑：虽然 Qt 的多线程支持使得多线程编程变得简单，但同时也引入了一些其他特性（尤其是与 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 的交互），这些特性需要特别小心。</p>
+
+<p>本文的目的不是教你如何使用多线程，加锁、并行、扩展性，这不是本文的重点，而且这些问题已经有非常多的讨论，可以参考<a href="http://qt-project.org/doc/qt-4.8/threads.html#recommended-reading">这里</a> [doc.qt.nokia.com] 的推荐。本文作为 Qt 多线程的指南，目的是帮助开发者避免常见的陷阱，开发出更健壮的程序。</p>
 
 
-	<a class='category' href='/blog/categories/boost/'>boost</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
+		
+		<a href="/blog/2012/05/28/threads-events-qobjects/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-28T23:53:00+08:00" pubdate data-updated="true">May 28<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
 
 
 </div>
-	    
-	    <div class="comments"><a href="/blog/2013/07/15/static-visitor/#disqus_thread">Comments</a></div>
-	    
-	</div>
+	
+	<div class="comments"><a href="/blog/2012/05/28/threads-events-qobjects/#disqus_thread">Comments</a></div>
+	
+</div>
 </article>
 
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/2013/05/28/template-method-pattern/">模板方法模式</a></h2>
-	<div class="meta">
-		<div class="date">May 28</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/oo/'>OO</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
-
-
-</div>
-	    
-	    <div class="comments"><a href="/blog/2013/05/28/template-method-pattern/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
-
-
-</div>
+<nav id="pagenavi">
+    
+        <a href="/blog/page/3/" class="prev">Prev</a>
+    
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     bitdewy
