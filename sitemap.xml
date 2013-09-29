@@ -2,148 +2,148 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/05/28/threads-events-qobjects/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/06/24/effective-c-plus-plus-11/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/06/26/django-toy-blog/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/06/30/gotw100/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/07/02/gotw101/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/07/07/gotw102/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/07/14/gotw103/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/07/15/gotw104/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/08/21/unordered-map/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/08/21/cpp-orm-odb/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/09/14/unix-hidden-file-is-a-bug/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/11/25/hello-world/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/12/09/com-and-reference-counting/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/12/16/why-c-plus-plus-is-not-back/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/01/03/you-dont-know-const-and-mutable/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/02/05/strongly-type-safe-enum-in-cpp03/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/03/21/qtscript/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/04/09/staitc-and-dynamic-polymorphism/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/05/12/gotw1/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/05/28/template-method-pattern/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/06/04/cpp14-optional/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/2013/07/15/static-visitor/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>
             http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond/
         </loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:42:38+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/blog/archives/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:42:38+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:42:38+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/robots.txt</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://bitdewy.github.com/search.html</loc>
-        <lastmod>2013-09-30T00:33:32+08:00</lastmod>
+        <lastmod>2013-09-30T00:41:37+08:00</lastmod>
     </url>
 </urlset>
