@@ -7,7 +7,10 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="Qt从4.3开始, 提供了 ECMAScript 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8） 在 &hellip;">
+	<meta name="description" content="静态多态 (编译期多态) 与动态多态 (运行期多态) 关键字: 重载/模版和虚函数 类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
+编译期多态 (重载/模版), 运行期多态 (虚函数) 应用形式上:
+静多态是发散式的, 让相同的实现代码应用于不同的场合.
+动多态是收敛式的 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +101,86 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism/">
+		
+			使用静态多态辅助动态多态</a>
+	</h2>
+	<div class="entry-content">
+		<h2>静态多态 (编译期多态) 与动态多态 (运行期多态)</h2>
+
+<p>关键字: 重载/模版和虚函数</p>
+
+<p>类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
+编译期多态 (重载/模版), 运行期多态 (虚函数)</p>
+
+<p>应用形式上:
+静多态是发散式的, 让相同的实现代码应用于不同的场合.
+动多态是收敛式的, 让不同的实现代码应用于相同的场合.</p>
+
+<p>思维方式上:
+静多态是泛型式编程风格, 它看重的是算法的普适性.
+动多态是对象式编程风格, 它看重的是接口和实现的分离度.</p>
+
+<h2>std::shared_ptr 中的 deleter 是如何工作的?</h2>
+
+<p>标准库中的引用计数智能指针 shared_ptr 很有趣——你可以向其构造器传递一个函数或者仿函数 (function object, 或 functor), 当引用计数归零的时候, 它将在被引用对象上调用删除器 (deleter). 乍一看, 似乎没啥了不起啊, 但请看代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">shared_ptr</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="p">,</span> <span class="k">typename</span> <span class="n">D</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">explicit</span> <span class="n">shared_ptr</span><span class="p">(</span><span class="n">U</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">D</span> <span class="n">deleter</span><span class="p">);</span>
+</span><span class='line'>  <span class="c1">//...</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-09T23:13:00+08:00" pubdate data-updated="true">Apr 9<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -688,100 +771,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2012/12/09/qt-xcode-hello/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/11/25/hello-world/">
-		
-			Hello All</a>
-	</h2>
-	<div class="entry-content">
-		<p>Hello world, new github blog;</p>
-
-<h1>一级标题</h1>
-
-<h2>二级标题</h2>
-
-<h3>三级标题</h3>
-
-<h4>四级标题</h4>
-
-<h5>五级标题</h5>
-
-<h6>六级标题</h6>
-
-<blockquote><p>这是一个引用</p>
-
-<blockquote><p>引用中的引用</p></blockquote></blockquote>
-
-<p><a href="http://bitdewy.github.com">这是一个超链接</a></p>
-
-<p>下面是一个list：</p>
-
-<ul>
-<li>第一条</li>
-<li>第二条</li>
-<li>第三条</li>
-</ul>
-
-
-<p><em>斜体</em>、<em>还是斜体</em>、<strong><em>粗+斜</em></strong>、<strong>粗体</strong></p>
-
-<p>后面是代码-> <code>something.excute();</code> &lt;&ndash; 前面是代码</p>
-
-<p>下面是一段代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Fibonacci series:</span>
-</span><span class='line'><span class="c"># the sum of two elements defines the next</span>
-</span><span class='line'><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-</span><span class='line'><span class="k">while</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">b</span>
-</span><span class='line'>    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后来一张八爪萌猫大图：</p>
-
-
-		
-		<a href="/blog/2012/11/25/hello-world/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-25T22:18:00+08:00" pubdate data-updated="true">Nov 25<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/github/'>github</a>, <a class='category' href='/blog/categories/octopress/'>octopress</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/11/25/hello-world/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

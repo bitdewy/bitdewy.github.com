@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-29T01:21:38+08:00</updated>
+  <updated>2013-09-30T00:22:26+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用 condition variable 实现生产者-消费者模型]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond/"/>
+    <updated>2013-07-22T00:05:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond</id>
+    <content type="html"><![CDATA[<h2>什么是生产者-消费者问题?</h2>
+
+<p>生产者消费者问题 (英语: Producer-consumer problem), 也称有限缓冲问题 (英语: Bounded-buffer problem), 是一个多线程同步问题的经典案例. 该问题描述了两个共享固定大小缓冲区的线程 —— 即所谓的 “生产者” 和 “消费者” —— 在实际运行时会发生的问题. 生产者的主要作用是生成一定量的数据放到缓冲区中, 然后重复此过程. 与此同时, 消费者也在缓冲区消耗这些数据. 该问题的关键就是要保证生产者不会在缓冲区满时加入数据, 消费者也不会在缓冲区中空时消耗数据.</p>
+
+<p>要解决该问题, 就必须让生产者在缓冲区满时休眠 (要么干脆就放弃数据), 等到下次消费者消耗缓冲区中的数据的时候, 生产者才能被唤醒, 开始往缓冲区添加数据. 同样, 也可以让消费者在缓冲区空时进入休眠, 等到生产者往缓冲区添加数据之后, 再唤醒消费者. 通常采用进程间通信的方法解决该问题, 常用的方法有信号量等. 如果解决方法不够完善, 则容易出现死锁的情况. 出现死锁时, 两个线程都会陷入休眠, 等待对方唤醒自己. 该问题也能被推广到多个生产者和消费者的情形.</p>
+
+<!-- more -->
+
+
+<h2>使用 condition variable 实现生产者-消费者模型</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;condition_variable&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;mutex&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">buffer_mutex</span><span class="p">;</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span> <span class="n">buffer_not_empty</span><span class="p">;</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span> <span class="n">buffer_not_full</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">buffer</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">kBufferMaxSize</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;&amp;</span> <span class="n">s</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">rdbuf</span><span class="p">();</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span> <span class="n">s</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">send</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="n">buffer</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kBufferMaxSize</span><span class="p">;</span> <span class="p">});</span>
+</span><span class='line'>  <span class="n">buffer</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;produce: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">receive</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="o">!</span><span class="n">buffer</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">});</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">.</span><span class="n">back</span><span class="p">();</span>
+</span><span class='line'>  <span class="n">buffer</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+</span><span class='line'>  <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;consume: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">future_producer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">send</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">future_consumer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">receive</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>  <span class="n">future_producer</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="n">future_consumer</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">wikipedia: Producer–consumer problem</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/thread/condition_variable">cppreference.com: std::condition_variable</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Visitor 模式与 boost.variant.static_visitor]]></title>
@@ -3301,113 +3440,6 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
 <li><a href="http://qtnode.net/wiki/Qt4_with_Xcode">Qt4 with Xcode</a></li>
 </ol>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello All]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/11/25/hello-world/"/>
-    <updated>2012-11-25T22:18:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/11/25/hello-world</id>
-    <content type="html"><![CDATA[<p>Hello world, new github blog;</p>
-
-<h1>一级标题</h1>
-
-<h2>二级标题</h2>
-
-<h3>三级标题</h3>
-
-<h4>四级标题</h4>
-
-<h5>五级标题</h5>
-
-<h6>六级标题</h6>
-
-<blockquote><p>这是一个引用</p>
-
-<blockquote><p>引用中的引用</p></blockquote></blockquote>
-
-<p><a href="http://bitdewy.github.com">这是一个超链接</a></p>
-
-<p>下面是一个list：</p>
-
-<ul>
-<li>第一条</li>
-<li>第二条</li>
-<li>第三条</li>
-</ul>
-
-
-<p><em>斜体</em>、<em>还是斜体</em>、<strong><em>粗+斜</em></strong>、<strong>粗体</strong></p>
-
-<p>后面是代码-> <code>something.excute();</code> &lt;&ndash; 前面是代码</p>
-
-<p>下面是一段代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Fibonacci series:</span>
-</span><span class='line'><span class="c"># the sum of two elements defines the next</span>
-</span><span class='line'><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-</span><span class='line'><span class="k">while</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">b</span>
-</span><span class='line'>    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后来一张八爪萌猫大图：</p>
-
-<!-- more -->
-
-
-<p><img src="http://octodex.github.com/images/snowoctocat.jpg" alt="" /></p>
-
-<p>全文完整代 markdown 代码如下：</p>
-
-<pre><code>Hello world, new github blog;
-
-#一级标题
-##二级标题
-###三级标题
-####四级标题
-#####五级标题
-######六级标题
-
-&gt; 这是一个引用
-&gt;&gt; 引用中的引用
-
-[这是一个超链接](http://bitdewy.github.com)
-
-下面是一个list：
-
-- 第一条
-- 第二条
-- 第三条
-
-_斜体_、*还是斜体*、***粗+斜***、**粗体**
-
-后面是代码-&gt; `something.excute();` &lt;- 前面是代码
-
-下面是一段代码：
-
-``` python
-# Fibonacci series:
-# the sum of two elements defines the next
-a, b = 0, 1
-while b &lt; 10:
-    print b
-    a, b = b, a+b
-```
-
-最后来一张八爪萌猫大图：
-
-&lt;!-- more --&gt;
-![](http://octodex.github.com/images/snowoctocat.jpg)
-</code></pre>
 ]]></content>
   </entry>
   
