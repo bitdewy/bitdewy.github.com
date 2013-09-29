@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "使用 condition variable 实现生产者-消费者模型"
+title: "使用 condition variable 实现生产者 消费者模型"
 date: 2013-07-22 00:05
 comments: true
-categories: 
+categories: [C++]
 ---
 
 ##什么是生产者-消费者问题?
