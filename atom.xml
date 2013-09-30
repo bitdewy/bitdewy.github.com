@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-30T00:43:32+08:00</updated>
+  <updated>2013-09-30T18:38:29+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[类型选择]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/30/type-selection/"/>
+    <updated>2013-07-30T18:26:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/30/type-selection</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>在编译期间, 根据一些条件, 决定类型.</p>
+
+<h2>动机</h2>
+
+<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
+
+<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
+
+<h2>解决方案以及代码示例</h2>
+
+<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">IF</span>  <span class="c1">// primary template</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="n">R</span> <span class="n">type</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="n">L</span> <span class="n">type</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>下面就是使用类型选择实现的 Queue 类:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">CAPACITY</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Queue</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">T</span> <span class="n">array</span><span class="p">[</span><span class="n">CAPACITY</span><span class="p">];</span>
+</span><span class='line'>  <span class="k">typename</span> <span class="n">IF</span><span class="o">&lt;</span><span class="p">(</span><span class="n">CAPACITY</span> <span class="o">&lt;=</span> <span class="mi">256</span><span class="p">),</span>
+</span><span class='line'>      <span class="kt">unsigned</span> <span class="kt">char</span><span class="p">,</span>
+</span><span class='line'>      <span class="k">typename</span> <span class="n">IF</span><span class="o">&lt;</span><span class="p">(</span><span class="n">CAPACITY</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">),</span>
+</span><span class='line'>                  <span class="kt">unsigned</span> <span class="kt">short</span><span class="p">,</span>
+</span><span class='line'>                  <span class="kt">unsigned</span> <span class="kt">int</span>
+</span><span class='line'>                 <span class="o">&gt;::</span><span class="n">type</span>
+</span><span class='line'>    <span class="o">&gt;::</span><span class="n">type</span> <span class="n">size</span><span class="p">;</span>
+</span><span class='line'>  <span class="c1">// ...</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>模板类 Queue 声明了一个类型为 T 的数组, 数据成员 size 的类型由两个 IF 模板的结果来决定. 注意, 这些比较不是在运行时而是在编译期.</p>
+
+<h2>已知的应用</h2>
+
+<ul>
+<li><a href="http://www.boost.org/doc/libs/1_54_0/libs/mpl/doc/index.html">Boost.MPL Library</a></li>
+</ul>
+
+
+<h2>参考</h2>
+
+<ul>
+<li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用 condition variable 实现生产者 消费者模型]]></title>
@@ -3370,75 +3468,6 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
 <li>wikipedia: <a href="http://en.wikipedia.org/wiki/Application_binary_interface">Application binary interface</a></li>
 <li>wikipedia: <a href="http://en.wikipedia.org/wiki/Reference_counting">Reference counting</a></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Xcode 配置 Qt 开发环境手记]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello/"/>
-    <updated>2012-12-09T13:10:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/12/09/qt-xcode-hello</id>
-    <content type="html"><![CDATA[<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
-
-<p>其次，准备好 Xcode 先。正文开始：</p>
-
-<h2>安装Qt library</h2>
-
-<p>Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点<a href="http://qt-project.org/downloads">这里</a>，MAC 版的 release 和 debug 库是分开的，可以自由选择。一路安装，下一步就 OK。</p>
-
-<!-- more -->
-
-
-<h2>生成 xcodeproj</h2>
-
-<p>生成 xcodeproj 文件(夹)，(它是文件还是文件夹？)，先创建目录，然后进入，使用 <code>qmake -project</code> 生成 pro 文件，如果找不到 <code>qmake</code>，那就需要手工找，或者重新安装 Qt library 了，生成 pro 文件之后，就可以用 <code>qmake -spec macx-xcode</code> 生成 xcodeproj 了，然后，就没有然后了，直接用 Xcode 打开就 OK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>localhost:~ bitdewy<span class="nv">$ </span>mkdir Projects/qt_xcode_hello  <span class="c">#建个文件夹先</span>
-</span><span class='line'>localhost:~ bitdewy<span class="nv">$ </span><span class="nb">cd </span>Projects/qt_xcode_hello/    <span class="c">#进入新建的文件夹</span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -project    <span class="c">#生成pro文件 </span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>ls                <span class="c">#看看生成了啥玩意儿</span>
-</span><span class='line'>qt_xcode_hello.pro
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -spec macx-xcode  <span class="c">#生成xcodeproj</span>
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>ls                      <span class="c">#再看看</span>
-</span><span class='line'>qt_xcode_hello.pro        qt_xcode_hello.xcodeproj
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>open qt_xcode_hello.xcodeproj/  <span class="c">#用 Xcode 打开</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>配置 Xcode 工程</h2>
-
-<p>打开个空工程，自然是毛也没有，首先工程中新建个文件，然后新建 target 选 other &ndash;> External Build System ，Product Name 就叫 qmake，Build Tool 指定到 qmake 的路径，Finish 之后，删除 Arguments 中的 <code>$(ACTION)</code>。Command + D，Duplicate 出来个 qmake copy，改名 <code>qmake -project</code>，Arguments 填上 <code>-project</code>，先run <code>qmake -project</code>，再run <code>qmake</code>，xcode 工程就和谐了，现在可以写代码跑了。</p>
-
-<p>明白人一看就知道上面是在干什么了，新建文件，然后 <code>qmake -project</code> 更新pro文件，再 <code>qmake</code> 生成 makefile。整个过程实际上就三行 shell 搞定。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>touch qt_xcode_hello.cpp
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake -project
-</span><span class='line'>localhost:qt_xcode_hello bitdewy<span class="nv">$ </span>qmake
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>为毛不直接生成能用的 Xcode 工程</h2>
-
-<p>更明白的人可能要说脏话了，你妹的搞这么麻烦，生成 xcodeproj 之前补上一句 <code>touch qt_xcode_hello.cpp</code> 不就不用配置 XCode 工程了么？ bitdewy 也不是二货，为毛要配置 Xcode 工程？ 因为 Qt 的 Meta Object Compile，用到 signal 和 slot 的时候，都需要 qmake 生成 moc 文件，所以先配置一下没什么坏处这样。</p>
-
-<h4>参考</h4>
-
-<ol>
-<li><a href="http://qtnode.net/wiki/Qt4_with_Xcode">Qt4 with Xcode</a></li>
-</ol>
 
 ]]></content>
   </entry>

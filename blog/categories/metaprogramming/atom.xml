@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: metaprogramming | Bitdewy]]></title>
+  <link href="http://bitdewy.github.com/blog/categories/metaprogramming/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-09-30T18:38:29+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[类型选择]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/30/type-selection/"/>
+    <updated>2013-07-30T18:26:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/30/type-selection</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>在编译期间, 根据一些条件, 决定类型.</p>
+
+<h2>动机</h2>
+
+<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
+
+<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
+
+<h2>解决方案以及代码示例</h2>
+
+<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
+
+<p><code>cpp
+template &lt;bool, class L, class R&gt;
+struct IF  // primary template
+{
+  typedef R type;
+};
+template &lt;class L, class R&gt;
+struct IF&lt;true, L, R&gt; // partial specialization
+{
+  typedef L type;
+};
+IF&lt;false, int, long&gt;::type i; // is equivalent to long i;
+IF&lt;true,  int, long&gt;::type i; // is equivalent to int i;
+</code></p>
+
+<!-- more -->
+
+
+<p>下面就是使用类型选择实现的 Queue 类:</p>
+
+<p>```cpp
+template <class T, unsigned int CAPACITY>
+class Queue
+{
+  T array[CAPACITY];
+  typename IF&lt;(CAPACITY &lt;= 256),</p>
+
+<pre><code>  unsigned char,
+  typename IF&lt;(CAPACITY &lt;= 65536),
+              unsigned short,
+              unsigned int
+             &gt;::type
+&gt;::type size;
+</code></pre>
+
+<p>  // &hellip;
+};
+```</p>
+
+<p>模板类 Queue 声明了一个类型为 T 的数组, 数据成员 size 的类型由两个 IF 模板的结果来决定. 注意, 这些比较不是在运行时而是在编译期.</p>
+
+<h2>已知的应用</h2>
+
+<ul>
+<li><a href="http://www.boost.org/doc/libs/1_54_0/libs/mpl/doc/index.html">Boost.MPL Library</a></li>
+</ul>
+
+
+<h2>参考</h2>
+
+<ul>
+<li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

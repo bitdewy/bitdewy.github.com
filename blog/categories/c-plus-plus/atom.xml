@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-09-30T00:43:32+08:00</updated>
+  <updated>2013-09-30T18:38:29+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[类型选择]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/07/30/type-selection/"/>
+    <updated>2013-07-30T18:26:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/07/30/type-selection</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>在编译期间, 根据一些条件, 决定类型.</p>
+
+<h2>动机</h2>
+
+<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
+
+<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
+
+<h2>解决方案以及代码示例</h2>
+
+<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
+
+<p><code>cpp
+template &lt;bool, class L, class R&gt;
+struct IF  // primary template
+{
+  typedef R type;
+};
+template &lt;class L, class R&gt;
+struct IF&lt;true, L, R&gt; // partial specialization
+{
+  typedef L type;
+};
+IF&lt;false, int, long&gt;::type i; // is equivalent to long i;
+IF&lt;true,  int, long&gt;::type i; // is equivalent to int i;
+</code></p>
+
+<!-- more -->
+
+
+<p>下面就是使用类型选择实现的 Queue 类:</p>
+
+<p>```cpp
+template <class T, unsigned int CAPACITY>
+class Queue
+{
+  T array[CAPACITY];
+  typename IF&lt;(CAPACITY &lt;= 256),</p>
+
+<pre><code>  unsigned char,
+  typename IF&lt;(CAPACITY &lt;= 65536),
+              unsigned short,
+              unsigned int
+             &gt;::type
+&gt;::type size;
+</code></pre>
+
+<p>  // &hellip;
+};
+```</p>
+
+<p>模板类 Queue 声明了一个类型为 T 的数组, 数据成员 size 的类型由两个 IF 模板的结果来决定. 注意, 这些比较不是在运行时而是在编译期.</p>
+
+<h2>已知的应用</h2>
+
+<ul>
+<li><a href="http://www.boost.org/doc/libs/1_54_0/libs/mpl/doc/index.html">Boost.MPL Library</a></li>
+</ul>
+
+
+<h2>参考</h2>
+
+<ul>
+<li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用 condition variable 实现生产者 消费者模型]]></title>
@@ -489,194 +565,6 @@ struct is_pointer
 
 <ul>
 <li>Wikipedia：<a href="http://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">Substitution failure is not an error</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 多线程, std::future & std::promise]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future/"/>
-    <updated>2013-06-14T22:36:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/06/14/cpp11-multithread-promise-future</id>
-    <content type="html"><![CDATA[<p>C++11 中最让人高兴的新特性中线程库的支持一定榜上有名. C++11 中提供了 future 和 promise 来简化任务线程间的返回值操作; 同时为启动任务线程提供了 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">packaged_task</a> 以方便操作.</p>
-
-<h2>std::packaged_task</h2>
-
-<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 可以包装任何可调用的对象(函数, lambda 表达式, std::bind, 或其他函数对象), 以便异步调用, 调用结果保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中, 可以通过成员函数 get_future 访问. 需要注意的是, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a> 是不可拷贝的(move only).</p>
-
-<p>示例代码</p>
-
-<p>```cpp</p>
-
-<h1>include <iostream></h1>
-
-<h1>include <cmath></h1>
-
-<h1>include <thread></h1>
-
-<h1>include <future></h1>
-
-<h1>include <functional></h1>
-
-<p>void task_lambda()
-{</p>
-
-<pre><code>std::packaged_task&lt;int(int,int)&gt; task([](int a, int b) {
-    return std::pow(a, b); 
-});
-std::future&lt;int&gt; result = task.get_future();
-task(2, 9);
-std::cout &lt;&lt; "task_lambda:\t" &lt;&lt; result.get() &lt;&lt; '\n';
-</code></pre>
-
-<p>}</p>
-
-<p>void task_bind()
-{</p>
-
-<pre><code>std::packaged_task&lt;int()&gt; task(std::bind(std::pow, 2, 11));
-std::future&lt;int&gt; result = task.get_future();
-task();
-std::cout &lt;&lt; "task_bind:\t" &lt;&lt; result.get() &lt;&lt; '\n';
-</code></pre>
-
-<p>}</p>
-
-<p>void task_thread()
-{</p>
-
-<pre><code>std::packaged_task&lt;int(int,int)&gt; task(std::pow);
-std::future&lt;int&gt; result = task.get_future();
-std::thread task_td(std::move(task), 2, 10);
-task_td.join();
-std::cout &lt;&lt; "task_thread:\t" &lt;&lt; result.get() &lt;&lt; '\n';
-</code></pre>
-
-<p>}</p>
-
-<p>int main()
-{</p>
-
-<pre><code>task_lambda();
-task_bind();
-task_thread();
-</code></pre>
-
-<p>}
-```</p>
-
-<!-- more -->
-
-
-<p>仅仅有 packaged_task 还远远不够, 我们还需要更强大的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a>.</p>
-
-<p>基本思路很简单: 当一个任务需要向父线程(启动它的线程)返回值时, 它把这个值放到 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 中. 之后, 这个返回值会出现在和此 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 关联的 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 中.于是父线程就能读到返回值. 更简单点的方法, 参看 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a>.</p>
-
-<p>如果我们有一个 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> f, 通过 get() 可以获得它的值:</p>
-
-<p><code>cpp
-X v = f.get();  // if necessary wait for the value to get computed
-</code></p>
-
-<p>如果它的返回值还没有到达, 调用线程会进行阻塞等待. 要是等啊等啊, 等到花儿也谢了的话, get() 会抛出异常的(从标准库或等待的线程那个线程中抛出).</p>
-
-<p>如果我们不需要等待返回值(非阻塞方式), 可以简单询问一下 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a>, 看返回值是否已经到达:</p>
-
-<p>```cpp
-if (f.wait_for(0))  {</p>
-
-<pre><code>// there is a value to get()
-// do something
-</code></pre>
-
-<p>} else {</p>
-
-<pre><code>// do something else
-</code></pre>
-
-<p>}
-```</p>
-
-<p>但是 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 最主要的用途是一个简单的获取返回值的方法: get().</p>
-
-<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 的主要用途是提供一个 &ldquo;put"（或"get"，随你）操作, 以和 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 的 get() 对应.</p>
-
-<p><a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 为 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 传递的结果类型有 2 种: 传一个普通值或者抛出一个异常</p>
-
-<p>```cpp
-try {</p>
-
-<pre><code>X res; 
-// compute a value for res
-p.set_value(res);
-</code></pre>
-
-<p>} catch (&hellip;) {   // oops: couldn&rsquo;t compute res</p>
-
-<pre><code>p.set_exception(std::current_exception()); 
-</code></pre>
-
-<p>}
-```</p>
-
-<p>到目前为止还不错, 不过我们如何匹配 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> / <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 对呢? 一个在我的线程, 另一个在别的啥线程中吗? 是这样: 既然 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 和 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 可以被到处移动(不是拷贝), 那么可能性就挺多的. 最普遍的情况是父子线程配对形式, 父线程用 <a href="http://en.cppreference.com/w/cpp/thread/future">future</a> 获取子线程 <a href="http://en.cppreference.com/w/cpp/thread/promise">promise</a> 返回的值. 在这种情况下, 使用 <a href="http://en.cppreference.com/w/cpp/thread/async">async()</a> 是很优雅的方法.</p>
-
-<h2>std::promise</h2>
-
-<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 提供一个存储设施, 当一个异步任务通过 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 来获取结果时, <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 可以提供.</p>
-
-<h2>std::future</h2>
-
-<p>模板类 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 提供了一种机制来访问异步操作的结果:
-由 <a href="http://en.cppreference.com/w/cpp/thread/async">std::async</a>, <a href="http://en.cppreference.com/w/cpp/thread/packaged_task">std::packaged_task</a>, 或者 <a href="http://en.cppreference.com/w/cpp/thread/promise">std::promise</a> 创建的异步操作, 可以提供一个 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 对象, 给创建者, 用来访问异步操作的结果.</p>
-
-<p>异步操作的创建者, 可以使用各种不同的操作来查询, 等待, 或者从 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中取到异步操作的结果. 如果异步操作还没有执行完的话, 这些操作有可能会阻塞.
-当一个异步操作完成时可以通过更改(例如使用 <code>std::promise::set_value</code>) 共享状态(该状态保存在 <a href="http://en.cppreference.com/w/cpp/thread/future">std::future</a> 中) 将结果返回给异步操作的创建者.</p>
-
-<p>示例代码</p>
-
-<p>```cpp</p>
-
-<h1>include <iostream></h1>
-
-<h1>include <future></h1>
-
-<h1>include <thread></h1>
-
-<p>int main()
-{</p>
-
-<pre><code>// future from a packaged_task
-std::packaged_task&lt;int()&gt; task([](){ return 7; }); // wrap the function
-std::future&lt;int&gt; f1 = task.get_future();  // get a future
-std::thread(std::move(task)).detach(); // launch on a thread
-// future from an async()
-std::future&lt;int&gt; f2 = std::async(std::launch::async, [](){ return 8; });
-// future from a promise
-std::promise&lt;int&gt; p;
-std::future&lt;int&gt; f3 = p.get_future();
-std::thread([](std::promise&lt;int&gt;&amp; p){ p.set_value(9); },
-             std::ref(p)).detach();
-std::cout &lt;&lt; "Waiting..." &lt;&lt; std::flush;
-f1.wait();
-</code></pre>
-
-<p>   f2.wait();</p>
-
-<pre><code>f3.wait();
-std::cout &lt;&lt; "Done!\nResults are: "
-          &lt;&lt; f1.get() &lt;&lt; ' ' &lt;&lt; f2.get() &lt;&lt; ' ' &lt;&lt; f3.get() &lt;&lt; '\n';
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://en.cppreference.com/w/cpp/thread">Cppreference：Thread support library</a></li>
-<li><a href="http://en.wikipedia.org/wiki/Futures_and_promises">wikipedia: futures and promises</a></li>
 </ul>
 
 ]]></content>
