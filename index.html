@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="目的 在编译期间, 根据一些条件, 决定类型. 动机 在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型. 例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量 &hellip;">
+	<meta name="description" content="阻塞 I/O 考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换. 如图, 进程调用 recvfrom, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,56 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/05/io-model/">
+		
+			IO 模型</a>
+	</h2>
+	<div class="entry-content">
+		<h2>阻塞 I/O</h2>
+
+<p>考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换.</p>
+
+<p><img src="https://qhphgq.bay.livefilestore.com/y2phHS9QdKTk72WhYIFa-lFwlDMsjamzFQBdW1mjvT0vYOpfDLWNSmFLAMuxoPS6x_xLHeijtsHpX8s7MGeQJ6ka_5KsiVxH-WZxkvLbsQ0C68/1.png" alt="" /></p>
+
+<p>如图, 进程调用 recvfrom, 此时系统调用直到数据报到达且拷贝到应用缓冲区, 或者出错才返回. 我们所说的进程阻塞的整段时间是指从调用 recvfrom 开始到它返回的这段时间, 当进程返回成功指示时, 应用进程开始处理数据报.</p>
+
+
+		
+		<a href="/blog/2013/08/05/io-model/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-05T15:24:00+08:00" pubdate data-updated="true">Aug 5<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/io/'>IO</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/08/05/io-model/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -752,79 +802,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/05/28/template-method-pattern/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/05/21/cpp11-keywords-using/">
-		
-			C++11 关键字 Using</a>
-	</h2>
-	<div class="entry-content">
-		<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
-
-<h2>使用小技巧来声明函数指针</h2>
-
-<p>在 c++03 中, 函数指针要这么写:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
-
-<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;type_traits&gt;</span>
-</span><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">add_pointer</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
-
-
-		
-		<a href="/blog/2013/05/21/cpp11-keywords-using/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-21T00:45:00+08:00" pubdate data-updated="true">May 21<span>st</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/05/21/cpp11-keywords-using/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
