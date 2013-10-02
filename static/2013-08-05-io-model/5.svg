@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 5.svg Page-1 -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="11.6929in" height="8.26772in"
+		viewBox="0 0 841.89 595.276" xml:space="preserve" color-interpolation-filters="sRGB" class="st11">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+			<v:ud v:nameU="msvConvertTheme"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {visibility:visible}
+		.st2 {fill:none;filter:url(#filter_2);stroke:#5b9bd5;stroke-opacity:0.22}
+		.st3 {stroke:#000000;stroke-width:0.25}
+		.st4 {fill:none;stroke:none;stroke-width:0.25}
+		.st5 {fill:#000000;font-family:微软雅黑;font-size:1.00001em}
+		.st6 {fill:#000000;font-family:Consolas;font-size:1.00001em}
+		.st7 {marker-end:url(#mrkr4-31);stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.25}
+		.st8 {fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:0.090252707581227}
+		.st9 {font-family:Consolas;font-size:1em}
+		.st10 {font-size:1em}
+		.st11 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Markers">
+		<g id="lend4">
+			<path d="M 2 1 L 0 0 L 2 -1 L 2 1 " style="stroke:none"/>
+		</g>
+		<marker id="mrkr4-31" class="st8" v:arrowType="4" v:arrowSize="2" v:setback="22.16" refX="-22.16" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-11.08,-11.08) "/>
+		</marker>
+	</defs>
+	<defs id="Filters">
+		<filter id="filter_2">
+			<feGaussianBlur stdDeviation="2"/>
+		</filter>
+	</defs>
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<v:userDefs>
+			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+		</v:userDefs>
+		<title>页-1</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<v:layer v:name="连接线" v:index="0"/>
+		<g id="shape2-1" v:mID="2" v:groupContext="shape" transform="translate(646.278,-278.882)">
+			<title>右括号</title>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<g id="shadow2-2" v:groupContext="shadow" v:shadowOffsetX="0.3456" v:shadowOffsetY="-1.9728" v:shadowType="1"
+					transform="matrix(1,0,0,1,0.3456,1.9728)" class="st1">
+				<path d="M0 595.28 A43.7417 38.4361 -180 0 0 16.34 572.31 L16.34 480.44 L32.67 480.44 L16.34 480.44 L16.34 388.57
+							 A43.7417 38.4361 -180 0 0 -0 365.6" class="st2"/>
+			</g>
+			<path d="M0 595.28 A43.7417 38.4361 -180 0 0 16.34 572.31 L16.34 480.44 L32.67 480.44 L16.34 480.44 L16.34 388.57 A43.7417
+						 38.4361 -180 0 0 -0 365.6" class="st3"/>
+		</g>
+		<g id="shape3-9" v:mID="3" v:groupContext="shape" transform="translate(646.278,-97.9891)">
+			<title>右括号.3</title>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<g id="shadow3-10" v:groupContext="shadow" v:shadowOffsetX="0.3456" v:shadowOffsetY="-1.9728" v:shadowType="1"
+					transform="matrix(1,0,0,1,0.3456,1.9728)" class="st1">
+				<path d="M0 595.28 A43.7417 28.7719 -180 0 0 16.34 578.08 L16.34 509.31 L32.67 509.31 L16.34 509.31 L16.34 440.54
+							 A43.7417 28.7719 -180 0 0 -0 423.35" class="st2"/>
+			</g>
+			<path d="M0 595.28 A43.7417 28.7719 -180 0 0 16.34 578.08 L16.34 509.31 L32.67 509.31 L16.34 509.31 L16.34 440.54 A43.7417
+						 28.7719 -180 0 0 -0 423.35" class="st3"/>
+		</g>
+		<g id="shape6-17" v:mID="6" v:groupContext="shape" transform="translate(151.958,-527.356)">
+			<title>工作表.6</title>
+			<desc>应用进程</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="63.6" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>应用进程</text>		</g>
+		<g id="shape7-20" v:mID="7" v:groupContext="shape" transform="translate(476.999,-530.747)">
+			<title>工作表.7</title>
+			<desc>内核</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="75.6" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>内核</text>		</g>
+		<g id="shape8-23" v:mID="8" v:groupContext="shape" transform="translate(171.961,-484.291)">
+			<title>工作表.8</title>
+			<desc>aio_read</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="41.4" y="588.44" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>aio_read</text>		</g>
+		<g id="shape10-26" v:mID="10" v:groupContext="shape" v:layerMember="0" transform="translate(307.551,-488.452)">
+			<title>动态连接线</title>
+			<v:userDefs>
+				<v:ud v:nameU="msvThemeColors" v:val="VT0(254):26"/>
+			</v:userDefs>
+			<path d="M0 588.78 L169.26 587.63" class="st7"/>
+		</g>
+		<g id="shape11-32" v:mID="11" v:groupContext="shape" transform="translate(302.82,-505.824)">
+			<title>工作表.11</title>
+			<desc>系统调用 sigaction</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="30.61" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>系统调用<tspan
+						class="st9"> </tspan><tspan class="st9">sigaction</tspan></text>		</g>
+		<g id="shape12-37" v:mID="12" v:groupContext="shape" transform="translate(499.253,-291.117)">
+			<title>工作表.12</title>
+			<desc>数据报准备好</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="31.79" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>数据报准备好</text>		</g>
+		<g id="shape13-40" v:mID="13" v:groupContext="shape" transform="translate(179.228,-126.968)">
+			<title>工作表.13</title>
+			<desc>信号处理程序处理数据报</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="7.79" y="581.1" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>信号处理程序处理数据<tspan
+						x="61.8" dy="1.218em" class="st10">报</tspan></text>		</g>
+		<g id="shape14-44" v:mID="14" v:groupContext="shape" transform="translate(500.523,-249.041)">
+			<title>工作表.14</title>
+			<desc>拷贝数据报</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="37.79" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>拷贝数据报</text>		</g>
+		<g id="shape15-47" v:mID="15" v:groupContext="shape" transform="translate(494.806,-125.824)">
+			<title>工作表.15</title>
+			<desc>拷贝完成</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="43.79" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>拷贝完成</text>		</g>
+		<g id="shape17-50" v:mID="17" v:groupContext="shape" v:layerMember="0" transform="translate(554.588,-240.96)">
+			<title>动态连接线.17</title>
+			<v:userDefs>
+				<v:ud v:nameU="msvThemeColors" v:val="VT0(254):26"/>
+			</v:userDefs>
+			<path d="M6.38 595.28 L7.71 678.92" class="st7"/>
+		</g>
+		<g id="shape18-55" v:mID="18" v:groupContext="shape" v:layerMember="0" transform="translate(494.806,-144.344)">
+			<title>动态连接线.18</title>
+			<v:userDefs>
+				<v:ud v:nameU="msvThemeColors" v:val="VT0(254):26"/>
+			</v:userDefs>
+			<path d="M0 602.21 L-174.16 602.5" class="st7"/>
+		</g>
+		<g id="shape19-60" v:mID="19" v:groupContext="shape" transform="translate(317.214,-146.117)">
+			<title>工作表.19</title>
+			<desc>递交在 aio_read 中指定的信号</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="6.61" y="581.17" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>递交在<tspan class="st9"> </tspan><tspan
+						class="st9">aio</tspan><tspan class="st9">_</tspan><tspan class="st9">read </tspan>中指定的信<tspan x="81.6"
+						dy="1.223em" class="st10">号</tspan></text>		</g>
+		<g id="shape20-68" v:mID="20" v:groupContext="shape" transform="translate(646.278,-383.282)">
+			<title>工作表.20</title>
+			<desc>等待数据</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="43.79" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>等待数据</text>		</g>
+		<g id="shape21-71" v:mID="21" v:groupContext="shape" transform="translate(680.221,-173.515)">
+			<title>工作表.21</title>
+			<desc>将数据从内核拷贝到用户空间</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="7.79" y="581.1" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>将数据从内核拷贝到用<tspan
+						x="49.79" dy="1.218em" class="st10">户空间</tspan></text>		</g>
+		<g id="shape22-75" v:mID="22" v:groupContext="shape" transform="translate(316.76,-26.6491)">
+			<title>工作表.22</title>
+			<desc>异步 I/O 模型</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="47.1" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>异步<tspan class="st9"> </tspan><tspan
+						class="st9">I</tspan><tspan class="st9">/</tspan><tspan class="st9">O </tspan>模型</text>		</g>
+		<g id="shape36-82" v:mID="36" v:groupContext="shape" transform="translate(146.873,-107.819)">
+			<title>左括号.36</title>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<g id="shadow36-83" v:groupContext="shadow" v:shadowOffsetX="0.3456" v:shadowOffsetY="-1.9728" v:shadowType="1"
+					transform="matrix(1,0,0,1,0.3456,1.9728)" class="st1">
+				<path d="M32.67 595.28 A43.7417 66.8435 0 0 1 16.34 555.33 L16.34 395.56 L0 395.56 L16.34 395.56 L16.34 235.79 A43.7417
+							 66.8435 0 0 1 32.67 195.85" class="st2"/>
+			</g>
+			<path d="M32.67 595.28 A43.7417 66.8435 0 0 1 16.34 555.33 L16.34 395.56 L0 395.56 L16.34 395.56 L16.34 235.79 A43.7417
+						 66.8435 0 0 1 32.67 195.85" class="st3"/>
+		</g>
+		<g id="shape37-90" v:mID="37" v:groupContext="shape" transform="translate(26.3622,-297.093)">
+			<title>工作表.37</title>
+			<desc>进程继续执行</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="59.6269" cy="584.838" width="119.26" height="20.8752"/>
+			<rect x="0" y="574.4" width="119.254" height="20.8752" class="st4"/>
+			<text x="23.63" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>进程继续执行</text>		</g>
+		<g id="shape43-93" v:mID="43" v:groupContext="shape" v:layerMember="0" transform="translate(484.115,-491.525)">
+			<title>动态连接线.43</title>
+			<v:userDefs>
+				<v:ud v:nameU="msvThemeColors" v:val="VT0(254):26"/>
+			</v:userDefs>
+			<path d="M0 602.21 L-174.16 602.5" class="st7"/>
+		</g>
+		<g id="shape45-98" v:mID="45" v:groupContext="shape" transform="translate(315.135,-462.758)">
+			<title>工作表.45</title>
+			<desc>返回</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="87.598" cy="584.838" width="175.2" height="20.8752"/>
+			<rect x="0" y="574.4" width="175.196" height="20.8752" class="st4"/>
+			<text x="75.6" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>返回</text>		</g>
+		<g id="shape47-101" v:mID="47" v:groupContext="shape" transform="translate(497.916,-477.655)">
+			<title>工作表.47</title>
+			<desc>无数据报准备好</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="67.795" cy="584.838" width="135.6" height="20.8752"/>
+			<rect x="0" y="574.4" width="135.59" height="20.8752" class="st4"/>
+			<text x="25.79" y="588.51" class="st5" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>无数据报准备好</text>		</g>
+		<g id="shape48-104" v:mID="48" v:groupContext="shape" v:layerMember="0" transform="translate(555.024,-462.861)">
+			<title>动态连接线.48</title>
+			<v:userDefs>
+				<v:ud v:nameU="msvThemeColors" v:val="VT0(254):26"/>
+			</v:userDefs>
+			<path d="M6.6 595.28 L7.54 731.75" class="st7"/>
+		</g>
+	</g>
+</svg>
