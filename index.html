@@ -112,7 +112,7 @@
 
 <p>考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换.</p>
 
-<p><img src="https://qhphgq.bay.livefilestore.com/y2phHS9QdKTk72WhYIFa-lFwlDMsjamzFQBdW1mjvT0vYOpfDLWNSmFLAMuxoPS6x_xLHeijtsHpX8s7MGeQJ6ka_5KsiVxH-WZxkvLbsQ0C68/1.png" alt="" /></p>
+<p><img src="https://bitdewy.github.io/static/2013-08-05-io-model/1.svg" alt="" /></p>
 
 <p>如图, 进程调用 recvfrom, 此时系统调用直到数据报到达且拷贝到应用缓冲区, 或者出错才返回. 我们所说的进程阻塞的整段时间是指从调用 recvfrom 开始到它返回的这段时间, 当进程返回成功指示时, 应用进程开始处理数据报.</p>
 
