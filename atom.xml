@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-02T15:25:55+08:00</updated>
+  <updated>2013-10-02T15:34:29+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -100,7 +100,9 @@
 </ul>
 
 
-<p><em>文中使用的图做完之后就后悔了… 先这样吧, 下次一定要用矢量图, SVG 什么的… 现在完全看不清啊,还有不和谐的纯白底色, 魂淡…</em> (╯‵□′)╯︵┻━┻</p>
+<p><del><em>文中使用的图做完之后就后悔了… 先这样吧, 下次一定要用矢量图, SVG 什么的… 现在完全看不清啊,还有不和谐的纯白底色, 魂淡…</em> (╯‵□′)╯︵┻━┻</del></p>
+
+<p>实在是无法忍受看不清的图片, 全都换成 svg 了, 这下整个人都舒服了. O(∩_∩)O 哈!</p>
 ]]></content>
   </entry>
   
