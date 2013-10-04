@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-02T15:34:29+08:00</updated>
+  <updated>2013-10-04T11:29:35+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,208 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Attorney Client]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/08/14/attorney-client/"/>
+    <updated>2013-08-14T00:45:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/08/14/attorney-client</id>
+    <content type="html"><![CDATA[<h2>目的</h2>
+
+<p>控制访问一个类内部实现细节的粒度.</p>
+
+<h2>动机</h2>
+
+<p>C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口.</p>
+
+<p>看下面的例子, 下面的类 Foo 中声明了 Bar 友元. 因此 Bar 类可以访问 Foo 的全部私有成员. 这不可取, 因为它增加了耦合. Bar 类会变得没有 Foo 类就无法单独使用.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="c1">// This class needs access to Foo::A and Foo::B only.</span>
+</span><span class='line'><span class="c1">// C++ friendship rules, however, give access to all the private members of Foo.</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>提供选择性访问成员子集的功能, 是可取的. 这样的话, 剩余的私有成员如果需要的话, 可以更改接口. 它有助于减少两个类之间的耦合. Attorney-Client 可以精确控制它的友元能够访问的成员的数量.</p>
+
+<!-- more -->
+
+
+<h2>解决方案 &amp; 示例代码</h2>
+
+<p>Attorney-Client 通过增加一个间接层来解决上面描述的问题. 想要访问一个类的实现细节, 我们需要一个 Attorney 类, 一个真正的 C++ 友元. Attorney 类是精心设计的一个代理类. 和一般的代理类不同, Attorney 类只负责复制 Foo 类的内部实现的接口的子集. 为了更好的描述, 我们把 Foo 类重新命名为 Client, Client 仅仅想通过 Attorney 提供 Client::A 以及 Client::B 的访问权限.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Client</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Attorney</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Attorney</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callA</span><span class="p">(</span><span class="n">Client</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">A</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callB</span><span class="p">(</span><span class="n">Client</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">float</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">B</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="c1">// Bar now has access to only Client::A and Client::B through the Attorney.</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Attorney 类限制仅能访问部分函数, Attorney 类中仅函数静态内联成员函数, 每个都需要一个 Client 类实例的引用, 然后将调用转到这个实例上. 他的实现是完全私有的. 这可以禁止其他类去访问 Client 内部. Attorney 可以决定哪些类, 成员函数, 以及自由函数可以访问 Client. 它只需要将能访问这些细节的东西声明为友元即可. 如果没有 Attorney 类, Client 也需要子集来做.</p>
+
+<p>它也可以有多个 attorney 类来提供访问 Client 的不同细节. 比如 AttorneyC 类只提供 Client::C 的访问.</p>
+
+<p>在下面的例子中, Attorney-client 用在了 类 Base 和 main 函数中间. Derived::Func 函数通过多态性得以访问. 不过如果想要再访问 Derived 类的一些细节的时候, 那就需要再次使用 Attorney 了.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;cstdio&gt;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Base</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">Func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Attorney</span><span class="p">;</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">virtual</span> <span class="o">~</span><span class="n">Base</span><span class="p">()</span> <span class="p">{}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Derived</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Base</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">Func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Derived::Func</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span> <span class="c1">// This is called even though main is not a friend of Derived.</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="o">~</span><span class="n">Derived</span><span class="p">()</span> <span class="p">{}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Attorney</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callFunc</span><span class="p">(</span><span class="n">Base</span> <span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">b</span><span class="p">.</span><span class="n">Func</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="kt">int</span> <span class="n">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">Derived</span> <span class="n">d</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">Attorney</span><span class="o">::</span><span class="n">callFunc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>已知的应用</h2>
+
+<ul>
+<li><a href="http://www.boost.org/doc/libs/1_50_0/libs/iterator/doc/iterator_facade.html#iterator-core-access">Boost.Iterators library</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_50_0/libs/serialization/doc/serialization.html#member">Boost.Serialization: class boost::serialization::access</a></li>
+</ul>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://drdobbs.com/184402053">Friendship and the Attorney-Client Idiom (Dr. Dobb&rsquo;s Journal)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[IO 模型]]></title>
@@ -3439,38 +3641,6 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
 <li><a href="http://channel9.msdn.com/posts/C-and-Beyond-2011-Herb-Sutter-Why-C">Herb Sutter &ndash; Why C++?</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CMake lua 5.2]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2/"/>
-    <updated>2012-12-15T18:09:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/12/15/cmake-lua5-dot-2</id>
-    <content type="html"><![CDATA[<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
-
-<h2>什么是 CMake？</h2>
-
-<p><a href="http://www.cmake.org/">CMake</a> 是个开源的跨平台自动化建构系统，它用组态档控制建构过程（build process）的方式和 Unix 的 Make 相似，只是 <a href="http://www.cmake.org/">CMake</a> 的组态档取名为 CMakeLists.txt。<a href="http://www.cmake.org/">CMake</a> 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 <a href="http://www.cmake.org/">CMake</a> 和 SCons 等其他类似系统的区别之处。</p>
-
-<p>有了 <a href="http://www.cmake.org/">CMake</a> 就不用在 vcproj 的各个版本之前来回的切换了，每次用 <a href="http://www.cmake.org/">CMake</a> 生成相应的工程文件就一切 OK 了。</p>
-
-<h2>Windows 下用 CMake 安装 lua 5.2.1</h2>
-
-<h3>安装 CMake</h3>
-
-<p>从<a href="http://cmake.org/cmake/resources/software.html">官方下载</a>相应的安装包，安装完成后，别忘了把 <a href="http://www.cmake.org/">CMake</a> 加入 <code>PATH</code> 中。</p>
-
-<h3>使用 CMake 生成 vcproj</h3>
-
-<p>lua官方不提供带 CMake 的源码，会的朋友可以手工写几个 CMakeList.txt 就 OK，不会的直接下载 bitdewy 写好的 <a href="http://sdrv.ms/TTp5Y6">cmake-lua-5.2.1.tar.gz</a> 吧。解压后用 visual studio 的命令行进入 <code>lua-5.2.1/build</code> 目录，然后输入：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bat'><span class='line'>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="s2">&quot;C:\lua52&quot;</span> ..
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>完成之后就可以打开 build 目录下的 lua.sln 文件直接编译了，编译 INSTALL 工程，会在上面设置的 <code>C:\lua52</code> 目录中安装 lua，luac，静态链接库，动态链接库，头文件、源代码以及文档，如果不想安装，不编译 INSTALL 工程就好。如果不设置安装目录，那么 windows 下默认的安装目录就是 <code>%ProgramFiles%</code> 。</p>
 ]]></content>
   </entry>
   

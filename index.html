@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="阻塞 I/O 考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换. 如图, 进程调用 recvfrom, &hellip;">
+	<meta name="description" content="目的 控制访问一个类内部实现细节的粒度. 动机 C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,91 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/14/attorney-client/">
+		
+			Attorney Client</a>
+	</h2>
+	<div class="entry-content">
+		<h2>目的</h2>
+
+<p>控制访问一个类内部实现细节的粒度.</p>
+
+<h2>动机</h2>
+
+<p>C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口.</p>
+
+<p>看下面的例子, 下面的类 Foo 中声明了 Bar 友元. 因此 Bar 类可以访问 Foo 的全部私有成员. 这不可取, 因为它增加了耦合. Bar 类会变得没有 Foo 类就无法单独使用.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="c1">// This class needs access to Foo::A and Foo::B only.</span>
+</span><span class='line'><span class="c1">// C++ friendship rules, however, give access to all the private members of Foo.</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>提供选择性访问成员子集的功能, 是可取的. 这样的话, 剩余的私有成员如果需要的话, 可以更改接口. 它有助于减少两个类之间的耦合. Attorney-Client 可以精确控制它的友元能够访问的成员的数量.</p>
+
+
+		
+		<a href="/blog/2013/08/14/attorney-client/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-14T00:45:00+08:00" pubdate data-updated="true">Aug 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/idiom/'>idiom</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/08/14/attorney-client/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -744,64 +829,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/06/04/cpp14-optional/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/05/28/template-method-pattern/">
-		
-			模板方法模式</a>
-	</h2>
-	<div class="entry-content">
-		<h2>意图</h2>
-
-<ol>
-<li>定义一个操作中的算法骨架, 将一些步骤延迟到子类中定义. 模板方法模式, 可以让子类不改变算法的结构重新定义算法的某些步骤.</li>
-<li>基类声明算法的“占位符”, 子类来实现这个“占位符”.</li>
-</ol>
-
-
-<h2>讨论</h2>
-
-<p>组件设计者决定哪些算法的步骤是不变的? 哪些是会变化的? 不变的步骤在抽象类中直接实现, 可能变化的步骤给出默认的实现, 或者完全不实现. 变化的部分代表“hooks”, 或占位符. 可以在使用组件时, 在派生类中实现.</p>
-
-<p>组件设计者设计算法的步骤, 步骤的顺序, 但同时允许用户来扩展或替换算法中的某些步骤.</p>
-
-<p>模板方法模式在框架中的使用非常广泛. 每个框架都会实现框架的主要结构, 然后定义一系列的“占位符”给用户, 让用户有机会来自定义一些操作.这么做时, 框架就变成了核心部分, 用户自定义的操作就会变得容易. 这使得控制结构发生反转, 这个方式有一个很好的名字, “好莱坞原则”——“不要给我们打电话, 我们会打电话给你.”</p>
-
-
-		
-		<a href="/blog/2013/05/28/template-method-pattern/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-28T01:26:00+08:00" pubdate data-updated="true">May 28<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/oo/'>OO</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/05/28/template-method-pattern/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
