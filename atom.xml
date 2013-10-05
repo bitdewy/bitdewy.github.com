@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-04T11:29:35+08:00</updated>
+  <updated>2013-10-06T00:21:57+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,186 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[异步编程 async & await]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/08/20/async-and-await/"/>
+    <updated>2013-08-20T01:17:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/08/20/async-and-await</id>
+    <content type="html"><![CDATA[<h2>使用异步编程</h2>
+
+<p>使用异步编程, 可以避免性能瓶颈和增强应用程序的总体响应能力. 但是编写异步程序在以前技术上比较复杂, 使得它们难以编写, 调试以及维护.</p>
+
+<p>在 .NET Framework 4.5 中, 引入了简化的异步编程方式, 编译器帮我们实现了之前需要实现的异步操作, 程序员只需要关注自己的代码逻辑即可. 程序员可以更专注到业务逻辑当中.</p>
+
+<h2>async &amp; await</h2>
+
+<p>在 C# 中, 关键字 async 和 await 是异步编程的核心, 当使用这两个关键字的时候, 我们可以直接创建一个异步函数, 就像创建一个同步函数一样简单. 看下面的例子, 所有的东西看起来都是那么的熟悉.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Three things to note in the signature: </span>
+</span><span class='line'><span class="c1">//  - The method has an async modifier.  </span>
+</span><span class='line'><span class="c1">//  - The return type is Task or Task&lt;T&gt;. (See &quot;Return Types&quot; section.)</span>
+</span><span class='line'><span class="c1">//    Here, it is Task&lt;int&gt; because the return statement returns an integer. </span>
+</span><span class='line'><span class="c1">//  - The method name ends in &quot;Async.&quot;</span>
+</span><span class='line'><span class="n">async</span> <span class="n">Task</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">AccessTheWebAsync</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// You need to add a reference to System.Net.Http to declare client.</span>
+</span><span class='line'>    <span class="n">HttpClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpClient</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// GetStringAsync returns a Task&lt;string&gt;. That means that when you await the </span>
+</span><span class='line'>    <span class="c1">// task you&#39;ll get a string (urlContents).</span>
+</span><span class='line'>    <span class="n">Task</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getStringTask</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">GetStringAsync</span><span class="p">(</span><span class="s">&quot;http://msdn.microsoft.com&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// You can do work here that doesn&#39;t rely on the string from GetStringAsync.</span>
+</span><span class='line'>    <span class="n">DoIndependentWork</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// The await operator suspends AccessTheWebAsync. </span>
+</span><span class='line'>    <span class="c1">//  - AccessTheWebAsync can&#39;t continue until getStringTask is complete. </span>
+</span><span class='line'>    <span class="c1">//  - Meanwhile, control returns to the caller of AccessTheWebAsync. </span>
+</span><span class='line'>    <span class="c1">//  - Control resumes here when getStringTask is complete.  </span>
+</span><span class='line'>    <span class="c1">//  - The await operator then retrieves the string result from getStringTask. </span>
+</span><span class='line'>    <span class="n">string</span> <span class="n">urlContents</span> <span class="o">=</span> <span class="n">await</span> <span class="n">getStringTask</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// The return statement specifies an integer result. </span>
+</span><span class='line'>    <span class="c1">// Any methods that are awaiting AccessTheWebAsync retrieve the length value. </span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">urlContents</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h2>async 方法中到底发生了什么？</h2>
+
+<p>在异步编程中, 最重要的需要了解的事情是, 方法与方法之间的执行流程是什么. 下面的图可以帮助我们理解执行流程.</p>
+
+<p><img src="https://qhphgq.bay.livefilestore.com/y2pPcdpEqnMPWdvKOr5yjswLE7F201mPiHRsjrk0PteSCWt9jdSWQxA3Tgkas4qOECf2vishbMkp4GnpFvE_ZQJcMwRppgT7hM0UrQxVevorwg/async.png" alt="" /></p>
+
+<p>图上的标记对应以下步骤</p>
+
+<ol>
+<li>事件处理程序调用并等待 AccessTheWebAsync 异步方法.</li>
+<li>AccessTheWebAsync 创建 HttpClient 实例并调用GetStringAsync 异步方法下载网页内容, 作为字符串.</li>
+<li>GetStringAsync 会造成挂起, 这时会发生一些事情. 可能它必须等待网页下载完成或者其他一些会阻塞的事情. 为了避免阻塞, GetStringAsync 会交出控制权给他的调用者, AccessTheWebAsync. AccessTheWebAsync 是返回一个模板参数是 string 的 Task 对象, 赋值给 getStringTask 变量. task 不会因为 GetStringAsync 的调用而阻塞当前进程, 而是当任务实际执行完成时, 再提交.</li>
+<li>由于 getStringTask 此时还没有 await, AccessTheWebAsync 可以继续执行一些不依赖 GetStringAsync 结果的一些操作. 这些工作在一个同步的叫做 DoIndependentWork 函数中执行.</li>
+<li>DoIndependentWork 是一个同步函数, 当它的工作做完之后会将结果返回给调用者.</li>
+<li><p>AccessTheWebAsync 做完了不依赖 getStringTask 的所有事情, AccessTheWekAsync 接下来需要计算 getStringTask 的结果, 但是此时函数还没有返回. 因此, AccessTheWebAsync 使用了 await 将当前的操作挂起, 然后将控制权移交到 AccessTheWebAsync 的调用者. AccessTheWebAsync 返回一个 task<int> 给调用者. 这个 task 给了外部一个承诺 (promise) 当计算完成时会返回给调用者一个整数, 这个整数就是下载的数据量的长度. <em>注意: 如果 GetStringAsync (以及 getStringTask) 在 AccessTheWebAsync await 之前就完成了, 那么控制权会仍然在 AccessTheWebAsync 中. 如果在不需要 await 时, 还继续进行代价很高的控制权转移的话, 是严重的浪费.</em> 在调用者中 (本例的 event handler), 这个过程会重复多次. 调用者可能会在 await 之前, 做一些其他的不依赖 AccessTheWebAsync 的操作, 或者直接 await. 当 event handler 执行到 await 语句时, 应用程序正在等待 AccessTheWebAsync, 同时 AccessTheWebAsync 正在等待 GetStringAsync.</p></li>
+<li><p>GetStringAsync 完成工作并返回了字符串结果. 这个字符串不是直接由 GetStringAsync 调用返回的. (在第 3 步的时候我们就已经返回了一个 task). 取而代之, 这个字符串是存储在已完成的 task 中的, getStringTask. await 会得到 getStringTask 的结果. 赋值语句会将得到的结果赋值给 urlContents.</p></li>
+<li>当 AccessTheWebSync 得到了结果之后, 他就可以计算字符串的长度了. 然后 AccessTheWebAsync 的任务就全部完成了. 正在等待的 event handler 就可以恢复工作了.</li>
+</ol>
+
+
+<h2>C++ 中的 async 以及 await</h2>
+
+<p>上面是一个 C# 的例子, C++11 中虽然对线程的支持作了相当多的工作, 但是异步编程方面还没有引入与 C# 中的 async 以及 await 类似的东西. 但标准委员会正在做这方面的工作, 提案名字叫做 Resumable Functions (n3650), 虽然 C++14 中不会引入这个特性 (这个特性应该是 C++1y 中的特性 (y应该等于7)), 但微软会很快的将该特性的实现引入到新版的 visual studio 中.</p>
+
+<p>一个例子感受一下没有 async 以及 await 时我们是如何做异步编程的</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">task</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">read</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">file</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">suffix</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">.</span><span class="n">then</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span> <span class="n">fi</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">auto</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
+</span><span class='line'>      <span class="k">auto</span> <span class="n">next</span> <span class="o">=</span>
+</span><span class='line'>         <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">task</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+</span><span class='line'>      <span class="p">[</span><span class="o">=</span><span class="p">]{</span>
+</span><span class='line'>         <span class="n">fi</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+</span><span class='line'>         <span class="p">.</span><span class="n">then</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">chunk</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span> <span class="n">chunk</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>               <span class="o">*</span><span class="n">ret</span> <span class="o">+=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">;</span>
+</span><span class='line'>               <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="o">*</span><span class="n">ret</span><span class="p">;</span>
+</span><span class='line'>         <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>      <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
+</span><span class='line'>   <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看看上面的一堆代码，WTF，谁能快速的搞明白？？？？？</p>
+
+<p>再看看下面清爽的代码吧…</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">task</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">read</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">file</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">suffix</span> <span class="p">)</span> <span class="n">__async</span> <span class="p">{</span>
+</span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">istream</span> <span class="n">fi</span> <span class="o">=</span> <span class="n">__await</span> <span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+</span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ret</span><span class="p">,</span> <span class="n">chunk</span><span class="p">;</span>
+</span><span class='line'>   <span class="k">while</span><span class="p">((</span><span class="n">chunk</span> <span class="o">=</span> <span class="n">__await</span> <span class="n">fi</span><span class="p">.</span><span class="n">read</span><span class="p">()).</span><span class="n">size</span><span class="p">())</span>
+</span><span class='line'>      <span class="n">ret</span> <span class="o">+=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">;</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>是不是迫不及待的想要尝试了呢？</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://msdn.microsoft.com/en-us/library/vstudio/hh191443.aspx">Asynchronous Programming with Async and Await (C# and Visual Basic)</a></li>
+<li><a href="http://channel9.msdn.com/Events/Build/2013/2-306">The future of C++</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Attorney Client]]></title>
@@ -3455,190 +3635,6 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
 <ul>
 <li>wikipedia: <a href="http://en.wikipedia.org/wiki/C%2B%2B11">C++11</a></li>
 <li><a href="http://qt-project.org/wiki/New_Signal_Slot_Syntax">New Signal Slot Syntax Coming in Qt 5</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] why c++ is not back]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/12/16/why-c-plus-plus-is-not-back/"/>
-    <updated>2012-12-16T17:42:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/12/16/why-c-plus-plus-is-not-back</id>
-    <content type="html"><![CDATA[<p>前言：这个月初，<a href="http://herbsutter.com/">Herb Sutter</a> 发了一篇名为 <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Perspective: “Why C++ Is Not ‘Back’”</a>，的文章，虽然 <a href="http://herbsutter.com/">Sutter</a> 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如<a href="http://coolshell.cn/articles/7992.html">这里</a>。</p>
-
-<p>本译文中不会发表任何观点，尽量表达原作者的意图，如有翻译不当的地方欢迎大家积极指出，我会做出修改。</p>
-
-<p>原文在这里： <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Why C++ Is Not “Back”</a></p>
-
-<p><strong>下面是译文：</strong></p>
-
-<p>我喜爱 C++。</p>
-
-<p>C++ 真正教会了我如何写代码。</p>
-
-<p>以前，我会学习语言本身的复杂性，<a href="http://www.cplusplus.com/reference/stl/">STL</a>，以及内存管理和指针运算中的所有细节。</p>
-
-<p>这些都是很美好的时光。我还记得一遍又一遍的读 <a href="http://www.aristeia.com/">Scott Meyers</a> 的 <a href="http://www.amazon.com/gp/product/B008E30L9A/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B008E30L9A&amp;linkCode=as2&amp;tag=makithecompsi-20">Effective C++</a> 系列。每一次都能从中学到一些新的东西，或者更理解如何使用 C++。</p>
-
-<p>我说上面这些只是想让你知道，<strong>我不讨厌 C++</strong>。我喜欢 C++。</p>
-
-<p>我知道，有很多优秀现在仍然在使用 C++ 并教别人如何使用，这一点也没有错。</p>
-
-<p>但问题是什么？</p>
-
-<!-- more -->
-
-
-<h2>新消息是不正确的</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/C%2B%2B11">C++11</a> 发布了，最近大家对使用 C++ 开发又提起了兴趣。</p>
-
-<p>不要误会我的意思，C++11非常棒！我100%的同意新标准中所做的一切。C++ 无疑已经变得更易用也更强大。</p>
-
-<p>但有一件事，它并没有做到，这是最重要的——更简单。</p>
-
-<p><strong>看来，许多经验丰富的开发人员已经忘记了当初为什么抛弃 C++ 而转到 Java，C# 以及其他的开发语言中。</strong></p>
-
-<p>许多年轻的或者新入行的开发者不知道这些历史，被现在 C++ 的新消息和复兴所迷惑。</p>
-
-<p>每个人都在问我，是否需要学习 C++，就像几年前一样，我现在的答案还是一样——<strong>不</strong>！</p>
-
-<p>好吧，大写的 “不” 是有点苛刻。一个更好的答案是 “为什么？”</p>
-
-<h2>你为什么想要学习 C++？</h2>
-
-<p>我所能想到的今天去学习 C++ 的理由只有下面三个。</p>
-
-<ul>
-<li>你绝对的需要每一 bit 都发挥出最大的性能，并且想要用一个支持面向对象抽象的语言</li>
-<li>你写的代码将跑在原生的硬件上。（比如：你正在写一个底层驱动程序）</li>
-<li>当内存控制和时间绝对重要的时候，你需要系统有确定性的行为以及手动管理内存的能力。（想想实时嵌入式操作系统正在控制的一个移动的机械装置）</li>
-</ul>
-
-
-<p>虽然我可能少考虑了其他的情况，但是其他的情况基本上也无法逃出上面所说的三个范围。</p>
-
-<p>等等，等等，可移植性呢？</p>
-
-<p>不需要！<strong>不要想着学习 C++ 然后构建任何地方都能跑起来的软件。</strong> 今天我们还有大量的其他选择，而且 C++ 根本没有人们以为的那样有多好的可移植性。每个操作系统或者平台的底层抽象是非常不同的。</p>
-
-<p>另外，请不要告诉我 C++正好可以给你你所需要的更多的权利和可控性。</p>
-
-<p><strong>大多数软件开发是解决实际问题，管理复杂性，而不是在玩底层的细节。</strong>在几乎所有的现代大型软件开发中，我们需要的都是更高级的抽象，而不是低级别的抽象。</p>
-
-<h2>但是，我就是想学 C++</h2>
-
-<p>好了，听着，我知道你认为 Windows 8 非常酷，并且有很多人都在学习 C++ 来开发他们的 Windows 8 应用，但是在你喝 “Kool-Aid” 之前，你应该知道它里面有些什么。</p>
-
-<p>写 C++ 代码不是去野餐。</p>
-
-<p>即使 C++11 做了一些改变，C++ 仍然是一个非常难学习，也非常难掌握的语言。</p>
-
-<p>你也许听说过下面这个关于 C++ 的说法：</p>
-
-<blockquote><p>C makes it easy to shoot yourself in the foot. C++ makes it harder, but when you do, you blow away your whole leg!</p>
-
-<p>— Bjarne Stroustrup</p></blockquote>
-
-<p>你不知道 Bjarne 是谁？好吧，他是 C++ 之父。我想你能从他的话里面得到自己的结论。</p>
-
-<p>我不断的听到 C++11 相对于 C++98 的改进，我一点也不怀疑。</p>
-
-<p><strong>但它没有改进的是语言的规模大小——事实上反而增加了。</strong></p>
-
-<p>当然，你可以使用 C++ 的一个子集。当然，你也可以使用新的<a href="http://en.wikipedia.org/wiki/Smart_pointer">智能指针</a>，把你从手工管理内存的情况中解救出来。你可以使用 <a href="http://msdn.microsoft.com/en-us/library/dd293608.aspx">lambda</a> 来避免使用函数指针。当然类型自动推导也是非常必要的新鲜空气。</p>
-
-<p><strong>问题是，你仍然需要知道底层的东西，以了解当你调试一个有内存问题的 C++ 程序时，究竟问题在哪儿。</strong>（如果你生在脱管代码的时代，这些可能是你从来都没有听说过的东西。）</p>
-
-<p>你也可能会遇到 20 年前的 C++ 代码，它看起来就像一个完全不同的语言。</p>
-
-<p>下面是一个 C++ 开发人员的面试问题列表：</p>
-
-<ol>
-<li>C++ 中有多少种方式初始化一个基本类型数据，它们分别是什么？</li>
-<li>为什么析构函数要声明为虚函数？</li>
-<li>C++ 支持重载，是什么意思？</li>
-<li>C++ 重载的例子有哪些？</li>
-<li>什么是 name mangling，为什么要用它？</li>
-<li>什么是抽象基类？</li>
-<li>什么是 RTTI？</li>
-<li>如何访问一个同名但是被”隐藏“的变量？</li>
-<li>namespace 是什么，如何使用？</li>
-<li>struct 与 class 有什么区别，与 C 比又有什么区别？</li>
-<li>template 是什么，如何使用？</li>
-<li>什么是拷贝构造函数，什么时候需要拷贝构造函数，与赋值操作符相比有哪些不同？</li>
-<li>深拷贝和浅拷贝有什么不同？</li>
-<li>const 的作用是什么，如何使用？</li>
-<li>在 C++ 中，传值，传引用和传递指针的区别是什么？</li>
-<li>什么时候应该返回一个值的引用，什么时候不应该返回一个值的引用？</li>
-<li>在堆和栈上创建一个变量有什么不同？</li>
-<li>如何释放一个数组动态分配的内存？只使用 delete 的含义是什么？</li>
-<li>什么是多继承？ 什么时候使用多继成？</li>
-<li>什么是纯虚函数？</li>
-<li>关键字 mutable 是做什么的？</li>
-<li>关键字 volatile 是做什么的？</li>
-<li>STL 是什么？</li>
-<li>什么是 vector ？</li>
-<li>头文件 algorithms 中包含哪些内容？</li>
-<li><code>#include&lt;iostream.h&gt;</code> 和 <code>#include&lt;iostream&gt;</code> 有什么区别？</li>
-<li><code>++i</code> 和 <code>i++</code> 有什么区别？</li>
-<li>什么是短路计算？怎样才能使用它？它为什么是危险的？</li>
-<li>什么是逗号表达式？</li>
-<li>唯一的三目运算符是什么？如何使用？</li>
-<li>const 成员函数有什么作用？如何使用？</li>
-<li>在 C++ 中使用 try/catch 好不好？</li>
-<li>为什么不能在析构函数中抛异常？</li>
-<li>关键字 explicit 是做什么的？</li>
-<li>C++ 中类型转换的正确方式是什么？</li>
-<li>内联函数是什么，都做了什么？</li>
-</ol>
-
-
-<p>上面一些问题，在 C# 或 Java 中，有相同的答案，但是你可以从这个问题列表看出来，C++ 水非常非常深。需要花费大量的精力来了解语言本身。</p>
-
-<p>C# 或 Java 开发会有些关于语言本身的学习，但更多的是学习库的使用。</p>
-
-<p>C++ 开发更多的是学习语言的每一个角落。</p>
-
-<h2>C++ 不是未来的方向</h2>
-
-<p>最大的问题，编程语言真正需要的是简单和增加它的抽象能力，而不是降低。</p>
-
-<p>底层的代码总会有需求，但是今天大部分的代码都是更高层次的。</p>
-
-<p>很多年前，当我无法再说 C++ 比 C# 开发效率更高的时候，我第一次跳下了 C++ 这条船。</p>
-
-<p>我很长时间都试图相信曾经在 C++ 上耗费的精力时没有白费的，但是<strong>事实证明，C# 把事情简化到了伟大的程度，它有 C++ 一样的能力，却不需要额外的责任。</strong></p>
-
-<p>当我想休息一下再写这篇博客的时候，我碰巧发现了微软研究院的一个叫做 <a href="https://www.touchdevelop.com/">touchdevelop</a> 的项目。这才是我们的方向。我们需要编程语言越来越简单，而不是越来越复杂。</p>
-
-<p>不要误会我的意思，<a href="https://www.touchdevelop.com/">touchdevelop</a> 会有非常多的限制，但是我相信像这样的东西才是未来。</p>
-
-<p>似乎微软正在努力推动让 C++ 回归主流，让 Windows 8 支持 C++ 开发，并试图干掉 XNA，但我觉得这是一个扭曲的看法，这似乎是 Windows 系统的开发人员根深蒂固的想法——开发人员想要使用 C++。</p>
-
-<p>我只是不想看到自己再回到以前，在能使用 C# 在各个平台写代码的时候，还使用那么复杂的语言。C# 不是完美的语言，但是它非常优雅，简单。</p>
-
-<h2>关于 C++ 的只言片语</h2>
-
-<p>虽然我说了上面那些话，但我还是相信学习 C++ 是值得的。</p>
-
-<p>不，我不是在自相矛盾，请允许我解释。</p>
-
-<p>如果你能写 C++，那么你能用其他任何语言写代码。如果你了解堆、栈、内存，引用和指针以及让 C++ 如此复杂的其他底层细节，它会在你使用高级别抽象语言时给你帮助，让你能够明白计算机是如何工作的。</p>
-
-<p><strong>这篇文章，我的观点不是抨击 C++，或抨击 C++ 使用者，和教别人 C++ 的人，只是说出我的观点，这貌似是热心的 C++ 社区所鼓励的。</strong></p>
-
-<p>每个人都不会成为 C++ 开发人员，而且也不需要。也许 C++ 有能力让你的程序更高效（在某些情况下），它几乎绝对不可能让你开发过程更高效（除非极少数的极端情况下。）</p>
-
-<p>我很高兴，C++ 有了很大的改进，但是我不认为它能很快的东山再起，而且这是一个好事情。</p>
-
-<p><strong>译文完。</strong></p>
-
-<h3>参考</h3>
-
-<ul>
-<li><a href="http://channel9.msdn.com/posts/C-and-Beyond-2011-Herb-Sutter-Why-C">Herb Sutter &ndash; Why C++?</a></li>
 </ul>
 
 ]]></content>
