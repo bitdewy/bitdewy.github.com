@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-06T00:21:57+08:00</updated>
+  <updated>2013-10-07T00:04:01+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,138 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/09/02/atomic-operation/"/>
+    <updated>2013-09-02T23:34:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/09/02/atomic-operation</id>
+    <content type="html"><![CDATA[<p>所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, 但是原子操作更加接近底层, 因而效率更高.</p>
+
+<p>在以往的 C++ 标准中并没有对原子操作进行规定, 我们往往是使用汇编语言, 或者是借助第三方的线程库, 例如 intel 的 pthread 来实现. 在新标准 C++11, 引入了原子操作的概念, 并通过这个新的头文件提供了多种原子操作数据类型, 例如, atomic_bool, atomic_int 等等, 如果我们在多个线程中对这些类型的共享资源进行操作, 编译器将保证这些操作都是原子性的, 也就是说, 确保任意时刻只有一个线程对这个资源进行访问, 编译器将保证, 多个线程访问这个共享资源的正确性. 从而避免了锁的使用, 提高了效率.</p>
+
+<p>我们还是来看一个实际的例子. 假若我们要设计一个广告点击统计程序, 在服务器程序中, 使用多个线程模拟多个用户对广告的点击:</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <thread></h1>
+
+<h1>include &lt;time.h></h1>
+
+<p>// 全局的结果数据
+long total = 0;
+// 点击函数
+void click()
+{
+  for(int i = 0; i &lt; 10000; ++i) {</p>
+
+<pre><code>// 对全局数据进行无锁访问
+total += 1;
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>int main(int argc, char* argv[])
+{
+  // 计时开始
+  clock_t start = clock();
+  // 创建100个线程模拟点击统计
+  std::thread threads[100];
+  for(int i = 0; i &lt; 100; ++i) {</p>
+
+<pre><code>std::thread t(&amp;click);
+threads[i].swap(t);
+</code></pre>
+
+<p>  }
+  for(int i=0; i&lt;100; ++i) {</p>
+
+<pre><code>threads[i].join();
+</code></pre>
+
+<p>  }
+  // 计时结束
+  clock_t finish = clock();
+  // 输出结果
+  std::cout &lt;&lt; &ldquo;result:&rdquo; &lt;&lt; total &lt;&lt; std::endl;
+  std::cout &lt;&lt; &ldquo;duration:&rdquo; &lt;&lt; finish -start &lt;&lt; &ldquo;ms&rdquo; &lt;&lt; std::endl;
+  return 0;
+}
+```</p>
+
+<!-- more -->
+
+
+<p>执行结果如下:</p>
+
+<blockquote><p>result: 955700</p>
+
+<p>duration: 49ms</p></blockquote>
+
+<p>从执行的结果来看, 这样的方法虽然非常快, 但是结果不正确.</p>
+
+<p>很自然地, 我们会想到使用互斥对象来对全局共享资源的访问进行保护, 于是有了下面的实现:</p>
+
+<p>```cpp
+///
+std::mutex m;
+// 点击函数
+void click()
+{
+  for(int i = 0; i &lt; 10000; ++i) {</p>
+
+<pre><code>// 对全局数据进行无锁访问
+std::unique_lock&lt;std::mutex&gt; lk(m);
+total += 1;
+</code></pre>
+
+<p>  }
+}
+///
+```</p>
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 32350ms</p></blockquote>
+
+<p>互斥对象的使用, 保证了同一时刻只有唯一的一个线程对这个共享进行访问, 从执行的结果来看, 互斥对象保证了结果的正确性, 但是也有非常大的性能损失, 从刚才的 49ms 变成了现在的 32350ms. 这 TMD 差距也太大了.(感觉有些异常，差距没理由这么大的, 可能是线程太多, CPU 光忙着线程切换了 = =!)</p>
+
+<p>如果是在 C++11 之前, 我们的解决方案也就到此为止了. 但是, C++ 对性能的追求是永无止境的, 他总是想尽一切办法榨干 CPU 的性能. 在 C++11 中, 实现了原子操作的数据类型 (atomic_bool, atomic_int, atomic_long 等等), 对于这些原子数据类型的共享资源的访问, 无需借助 mutex 等锁机制, 也能够实现对共享资源的正确访问.</p>
+
+<p>将原本的 long 类型改为 std::atomic_long 类型即可</p>
+
+<p>```cpp
+//long total = 0;</p>
+
+<p>std::atomic_long total;
+```</p>
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 117ms</p></blockquote>
+
+<p>结果正确, 时间上仅仅是不采用任何保护机制时的 3 倍左右, 和使用 mutex 做同步的版本不知差了几个数量级了.</p>
+
+<p>原子操作的实现跟普通数据类型类似, 但是它能够在保证结果正确的前提下, 提供比 mutex 等锁机制更好的性能, 如果我们要访问的共享资源可以用原子数据类型表示, 那么在多线程程序中使用这种新的等价数据类型, 是一个不错的选择.</p>
+
+<p>但值得注意的是, <code>std::atomic</code> 只能作用于基本类型以及 POD 类型上.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
+<li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[类型选择]]></title>
@@ -474,97 +606,6 @@ is_r_value(std::move&lt;int&amp;&gt;(i)); // 使用 std::move&lt;T&gt;() 取得�
 <li><a href="https://zh.wikipedia.org/zh-cn/C%2B%2B11#.E5.8F.B3.E5.80.BC.E5.BC.95.E7.94.A8.E5.92.8C_move_.E8.AA.9E.E6.84.8F">维基百科C++11: 右值引用和 move 语义</a></li>
 <li><a href="http://stackoverflow.com/questions/3106110/what-are-move-semantics/3109981">Stackoverflow：What are move semantics？</a></li>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2027.html#Move_Semantics">标准文档提案：Move Semantics</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++ 泛型编程之 SFINAE]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae/"/>
-    <updated>2013-06-25T23:01:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/06/25/cpp-template-sfinae</id>
-    <content type="html"><![CDATA[<h2>什么是 SFINAE?</h2>
-
-<p>(Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例.</p>
-
-<p>SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中, C++ 编译器会试图实例化一些候选的函数签名, 以确保函数调用时模板的精确匹配, 当找到一个不合适的匹配时(例如无效的参数或范围值), 则会将这个不合适的匹配从重载决议中删除, 而不是产生一个编译错误. 如果有且只有一个函数的话, 才会产生一个编译错误.</p>
-
-<p>考虑下面的简单的乘法计数器</p>
-
-<p>```cpp
-long multiply(int i, int j) { return i * j; }</p>
-
-<p>template <class T>
-typename T::multiplication_result multiply(T t1, T t2)
-{
-  return t1 * t2;
-}</p>
-
-<p>int main(void)
-{
-  multiply(4,5);
-  return 0;
-}
-```</p>
-
-<p>在 main 函数中的函数调用 multiply, 会导致编译器对模板参数的实例化, 虽然第一个非模板函数 multiply 明显是一个更佳的匹配. 在实例化的过程中, 会产生一个非法的类型 int::multiplication_result. 根据 SFINAE, 这个非法的实例化会被自动丢弃. 最终, 非模板的 multiply 会被调用. 编译通过.</p>
-
-<!-- more -->
-
-
-<h2>SFINAE 的应用</h2>
-
-<p>SFINAE 通常被用作编译时期的类型属性检查. 比如下面的 is_pointer 元函数, 它可以在编译期检查参数类型是否是一个指针.</p>
-
-<p>```cpp
-template <typename T>
-struct is_pointer
-{
-  template <typename U>
-  static char is_ptr(U *);</p>
-
-<p>  template <typename X, typename Y>
-  static char is_ptr(Y X::*);</p>
-
-<p>  template <class U>
-  static char is_ptr(U (*)());</p>
-
-<p>  static double is_ptr(&hellip;);</p>
-
-<p>  static T t;
-  enum { value = sizeof(is_ptr(t)) == sizeof(char) };
-};</p>
-
-<p>struct Foo {
-  int bar;
-};</p>
-
-<p>int main(void)
-{
-  typedef int * IntPtr;
-  typedef int Foo::<em> FooMemberPtr;
-  typedef int (</em>FuncPtr)();</p>
-
-<p>  printf(&ldquo;%d\n&rdquo;,is_pointer<IntPtr>::value);         // prints 1
-  printf(&ldquo;%d\n&rdquo;,is_pointer<FooMemberPtr>::value);  // prints 1
-  printf(&ldquo;%d\n&rdquo;,is_pointer<FuncPtr>::value);        // prints 1
-  return 0;
-}
-```</p>
-
-<p>如果没有 SFINAE 的话, 元函数 is_pointer 是无法正常工作的. 在 is_pointer 中, 有四个模板函数 is_ptr, 其中三个都会返回一个 char, 这是经过精心设计的. 这三个分别接收不同的参数类型, 一个接受指针变量, 一个接受一个成员指针, 以及一个简单的函数指针类型. 最后一个 is_ptr 是接收任意类型的(使用了省略号), 它的返回值类型是 double, 它的大小始终会大于 char 类型.</p>
-
-<p>当传递一个指针类型(例如上面的 IntPtr)给 is_pointer 时, value 的值将会初始化为 true (因为 sizeof 两边是相等的). 第一个 sizeof 表达式调用 is_ptr, 如果它是一个指针类型, 那么只有一个模板的重载版本会匹配. 根据 SFINAE, 编译不会报错，因为至少有一个函数被匹配上了.  如果没有合适的实例化版本, 那么会选择那个省略号的版本. 不过那个版本会返回 double 类型, 会导致 value 值被初始化为 false (因为 sizeof(double) != sizeof(char)).</p>
-
-<p>需要注意的是, is_ptr 只有声明, 没有定义. 因为声明足以引发 SFINAE 规则, 但是这些必须都是模板函数。一个模板类的非模板函数是不会参与 SFINAE 的, 只有模板函数才会遵循 SFINAE 规则.</p>
-
-<p>在标准库中, 有大量的 SFINAE 应用, 比如 type traits. 有了 SFINAE 我们就可以根据自己的需求, 为我们所关心的特定类型, 写相应的函数重载函数版本, 也可以在编译期判断类型是否符合我们的需求.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li>Wikipedia：<a href="http://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">Substitution failure is not an error</a></li>
 </ul>
 
 ]]></content>

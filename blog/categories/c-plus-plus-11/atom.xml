@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++11 | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus-11/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-06T00:21:57+08:00</updated>
+  <updated>2013-10-07T00:04:01+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,138 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/09/02/atomic-operation/"/>
+    <updated>2013-09-02T23:34:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/09/02/atomic-operation</id>
+    <content type="html"><![CDATA[<p>所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, 但是原子操作更加接近底层, 因而效率更高.</p>
+
+<p>在以往的 C++ 标准中并没有对原子操作进行规定, 我们往往是使用汇编语言, 或者是借助第三方的线程库, 例如 intel 的 pthread 来实现. 在新标准 C++11, 引入了原子操作的概念, 并通过这个新的头文件提供了多种原子操作数据类型, 例如, atomic_bool, atomic_int 等等, 如果我们在多个线程中对这些类型的共享资源进行操作, 编译器将保证这些操作都是原子性的, 也就是说, 确保任意时刻只有一个线程对这个资源进行访问, 编译器将保证, 多个线程访问这个共享资源的正确性. 从而避免了锁的使用, 提高了效率.</p>
+
+<p>我们还是来看一个实际的例子. 假若我们要设计一个广告点击统计程序, 在服务器程序中, 使用多个线程模拟多个用户对广告的点击:</p>
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <thread></h1>
+
+<h1>include &lt;time.h></h1>
+
+<p>// 全局的结果数据
+long total = 0;
+// 点击函数
+void click()
+{
+  for(int i = 0; i &lt; 10000; ++i) {</p>
+
+<pre><code>// 对全局数据进行无锁访问
+total += 1;
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>int main(int argc, char* argv[])
+{
+  // 计时开始
+  clock_t start = clock();
+  // 创建100个线程模拟点击统计
+  std::thread threads[100];
+  for(int i = 0; i &lt; 100; ++i) {</p>
+
+<pre><code>std::thread t(&amp;click);
+threads[i].swap(t);
+</code></pre>
+
+<p>  }
+  for(int i=0; i&lt;100; ++i) {</p>
+
+<pre><code>threads[i].join();
+</code></pre>
+
+<p>  }
+  // 计时结束
+  clock_t finish = clock();
+  // 输出结果
+  std::cout &lt;&lt; &ldquo;result:&rdquo; &lt;&lt; total &lt;&lt; std::endl;
+  std::cout &lt;&lt; &ldquo;duration:&rdquo; &lt;&lt; finish -start &lt;&lt; &ldquo;ms&rdquo; &lt;&lt; std::endl;
+  return 0;
+}
+```</p>
+
+<!-- more -->
+
+
+<p>执行结果如下:</p>
+
+<blockquote><p>result: 955700</p>
+
+<p>duration: 49ms</p></blockquote>
+
+<p>从执行的结果来看, 这样的方法虽然非常快, 但是结果不正确.</p>
+
+<p>很自然地, 我们会想到使用互斥对象来对全局共享资源的访问进行保护, 于是有了下面的实现:</p>
+
+<p>```cpp
+///
+std::mutex m;
+// 点击函数
+void click()
+{
+  for(int i = 0; i &lt; 10000; ++i) {</p>
+
+<pre><code>// 对全局数据进行无锁访问
+std::unique_lock&lt;std::mutex&gt; lk(m);
+total += 1;
+</code></pre>
+
+<p>  }
+}
+///
+```</p>
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 32350ms</p></blockquote>
+
+<p>互斥对象的使用, 保证了同一时刻只有唯一的一个线程对这个共享进行访问, 从执行的结果来看, 互斥对象保证了结果的正确性, 但是也有非常大的性能损失, 从刚才的 49ms 变成了现在的 32350ms. 这 TMD 差距也太大了.(感觉有些异常，差距没理由这么大的, 可能是线程太多, CPU 光忙着线程切换了 = =!)</p>
+
+<p>如果是在 C++11 之前, 我们的解决方案也就到此为止了. 但是, C++ 对性能的追求是永无止境的, 他总是想尽一切办法榨干 CPU 的性能. 在 C++11 中, 实现了原子操作的数据类型 (atomic_bool, atomic_int, atomic_long 等等), 对于这些原子数据类型的共享资源的访问, 无需借助 mutex 等锁机制, 也能够实现对共享资源的正确访问.</p>
+
+<p>将原本的 long 类型改为 std::atomic_long 类型即可</p>
+
+<p>```cpp
+//long total = 0;</p>
+
+<p>std::atomic_long total;
+```</p>
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 117ms</p></blockquote>
+
+<p>结果正确, 时间上仅仅是不采用任何保护机制时的 3 倍左右, 和使用 mutex 做同步的版本不知差了几个数量级了.</p>
+
+<p>原子操作的实现跟普通数据类型类似, 但是它能够在保证结果正确的前提下, 提供比 mutex 等锁机制更好的性能, 如果我们要访问的共享资源可以用原子数据类型表示, 那么在多线程程序中使用这种新的等价数据类型, 是一个不错的选择.</p>
+
+<p>但值得注意的是, <code>std::atomic</code> 只能作用于基本类型以及 POD 类型上.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
+<li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11 完美转发]]></title>
@@ -571,40 +703,6 @@ using PFD = void (*)(double);           // 新增与否
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf">Templates Aliases (Revision 3)</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 std::unordered_map]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/08/21/unordered-map/"/>
-    <updated>2012-08-21T17:54:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/08/21/unordered-map</id>
-    <content type="html"><![CDATA[<h2>历史</h2>
-
-<p>在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
-由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。</p>
-
-<p>例如，GCC 的 lisbstdc++ , 以及微软的 MSVC 标准库。在这些公用的名字后面，有不同的实现，呃，不同的实现。它们在接口、能力、内在数据结构和支持操作的相关效率方面不同。写出使用哈希表的可移植代码是可能的，但不可能像使用标准库中的容器一样容易。（知道标准的重要性了吧。）好在 <code>hash_*</code> 这一组类加入了 C++ TR1 , 可惜由于名字被非标准的各家实现占用，只能退而求其次，改名为 <code>unordered_*</code>。</p>
-
-<p>C++11 中，不排序的关联容器已经正式进入标准库。现在再选择的话，可以毫不犹豫的放弃非标准的 <code>hash_*</code> 而选择标准库中的 <code>unordered_*</code> 系类了。boost &lt;<a href="http://www.boost.org/doc/libs/1_53_0/boost/unordered_map.hpp">boost/unordered_map.hpp</a>> 中同样有实现。</p>
-
-<!-- more -->
-
-
-<h2>选择合适的数据结构</h2>
-
-<p>对于一个程序员来说，分析具体的问题，选择适合的数据结构，有时候比算法更重要。好的数据结构可以帮助程序员解决大部分效率问题。Soctt Meyers 在《Effective STL》的第一条就提到：“仔细选择你的容器”。</p>
-
-<p><code>std::unordered_map</code> 与 <code>std::map</code> 的区别是, <code>std::map</code> 是按照 <code>operator&lt;</code> 比较判断元素是否相同，以及比较元素的大小，然后选择合适的位置插入到树中。所以，如果对 map 进行遍历（中序遍历）的话，输出的结果是有序的。顺序就是按照 <code>operator&lt;</code> 定义的大小排序。</p>
-
-<p>而 <code>std::unordered_map</code> 是计算元素的 hash 值，根据 hash 值判断元素是否相同。所以，对 <code>unordered_map</code> 进行遍历，结果是无序的。</p>
-
-<p>用法的区别是，<code>std::map</code> 的 key 需要定义 <code>operator&lt;</code> 。 而 <code>std::unordered_map</code> 需要定义 <code>hash_value</code> 函数并且重载 <code>operator==</code>。
-对于内置类型，如 <code>std::string</code>, 这些都不用操心。对于自定义的类型做 key, 就需要自己重载 <code>operator&lt;</code> 或者 <code>hash_value()</code> 了。</p>
-
-<p>选择时,请基于时间和空间的综合考虑, <em>当不关心空间, 也不需要结果排好序时, 可以选择 <code>unordered_map</code> 获得更好的时间效率。</em></p>
-
-<p><code>std::map</code> 对应与 java 中的 <code>TreeMap</code>, 而 <code>std::unordered_map</code> 对应于 java 中的 <code>HashMap</code>. 对于标准库中的散列表无法取名为 <code>hash_*</code>, 只能叫 <code>unordered_*</code>, 我只能说… 标准库进展太慢，结果好白菜都让猪给拱了……遗憾啊……</p>
 ]]></content>
   </entry>
   

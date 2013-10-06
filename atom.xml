@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-06T00:21:57+08:00</updated>
+  <updated>2013-10-07T00:04:01+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,173 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/09/02/atomic-operation/"/>
+    <updated>2013-09-02T23:34:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/09/02/atomic-operation</id>
+    <content type="html"><![CDATA[<p>所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, 但是原子操作更加接近底层, 因而效率更高.</p>
+
+<p>在以往的 C++ 标准中并没有对原子操作进行规定, 我们往往是使用汇编语言, 或者是借助第三方的线程库, 例如 intel 的 pthread 来实现. 在新标准 C++11, 引入了原子操作的概念, 并通过这个新的头文件提供了多种原子操作数据类型, 例如, atomic_bool, atomic_int 等等, 如果我们在多个线程中对这些类型的共享资源进行操作, 编译器将保证这些操作都是原子性的, 也就是说, 确保任意时刻只有一个线程对这个资源进行访问, 编译器将保证, 多个线程访问这个共享资源的正确性. 从而避免了锁的使用, 提高了效率.</p>
+
+<p>我们还是来看一个实际的例子. 假若我们要设计一个广告点击统计程序, 在服务器程序中, 使用多个线程模拟多个用户对广告的点击:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;thread&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;time.h&gt;</span>
+</span><span class='line'><span class="c1">// 全局的结果数据</span>
+</span><span class='line'><span class="kt">long</span> <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// 点击函数</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">click</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// 对全局数据进行无锁访问</span>
+</span><span class='line'>    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">// 计时开始</span>
+</span><span class='line'>  <span class="n">clock_t</span> <span class="n">start</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span><span class='line'>  <span class="c1">// 创建100个线程模拟点击统计</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">threads</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">t</span><span class="p">(</span><span class="o">&amp;</span><span class="n">click</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">swap</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">threads</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="c1">// 计时结束</span>
+</span><span class='line'>  <span class="n">clock_t</span> <span class="n">finish</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span><span class='line'>  <span class="c1">// 输出结果</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;result:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">total</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;duration:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">finish</span> <span class="o">-</span><span class="n">start</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;ms&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>执行结果如下:</p>
+
+<blockquote><p>result: 955700</p>
+
+<p>duration: 49ms</p></blockquote>
+
+<p>从执行的结果来看, 这样的方法虽然非常快, 但是结果不正确.</p>
+
+<p>很自然地, 我们会想到使用互斥对象来对全局共享资源的访问进行保护, 于是有了下面的实现:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">///</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">m</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// 点击函数</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">click</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// 对全局数据进行无锁访问</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">///</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 32350ms</p></blockquote>
+
+<p>互斥对象的使用, 保证了同一时刻只有唯一的一个线程对这个共享进行访问, 从执行的结果来看, 互斥对象保证了结果的正确性, 但是也有非常大的性能损失, 从刚才的 49ms 变成了现在的 32350ms. 这 TMD 差距也太大了.(感觉有些异常，差距没理由这么大的, 可能是线程太多, CPU 光忙着线程切换了 = =!)</p>
+
+<p>如果是在 C++11 之前, 我们的解决方案也就到此为止了. 但是, C++ 对性能的追求是永无止境的, 他总是想尽一切办法榨干 CPU 的性能. 在 C++11 中, 实现了原子操作的数据类型 (atomic_bool, atomic_int, atomic_long 等等), 对于这些原子数据类型的共享资源的访问, 无需借助 mutex 等锁机制, 也能够实现对共享资源的正确访问.</p>
+
+<p>将原本的 long 类型改为 std::atomic_long 类型即可</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">//long total = 0;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">atomic_long</span> <span class="n">total</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>运行结果如下:</p>
+
+<blockquote><p>result: 1000000</p>
+
+<p>duration: 117ms</p></blockquote>
+
+<p>结果正确, 时间上仅仅是不采用任何保护机制时的 3 倍左右, 和使用 mutex 做同步的版本不知差了几个数量级了.</p>
+
+<p>原子操作的实现跟普通数据类型类似, 但是它能够在保证结果正确的前提下, 提供比 mutex 等锁机制更好的性能, 如果我们要访问的共享资源可以用原子数据类型表示, 那么在多线程程序中使用这种新的等价数据类型, 是一个不错的选择.</p>
+
+<p>但值得注意的是, <code>std::atomic</code> 只能作用于基本类型以及 POD 类型上.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
+<li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[异步编程 async & await]]></title>
@@ -3458,183 +3625,6 @@ C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.htm
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3242.pdf">C++ 标准草案 n3242</a></li>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2669.htm">Thread-Safety in the Standard Library (Rev 2)</a></li>
 <li><a href="http://channel9.msdn.com/posts/C-and-Beyond-2012-Herb-Sutter-You-dont-know-blank-and-blank">C++ and Beyond 2012: Herb Sutter &ndash; You don&rsquo;t know [blank] and [blank]</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 lambda in Qt5]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/"/>
-    <updated>2012-12-23T22:32:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5</id>
-    <content type="html"><![CDATA[<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
-
-<h2>lambda 函数与表达式</h2>
-
-<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
-
-<!-- more -->
-
-
-<p>假设你想计算某个字符串包含多少个大写字母，使用 for_each() 遍历一个 char 数组，下面的 lambda 表达式确定每个字母是否是大写字母，每当它发现一个大写字母，lambda 表达式给 Uppercase 加 1：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="kt">char</span> <span class="n">s</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&quot;Hello World!&quot;</span><span class="p">;</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">Uppercase</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//modified by the lambda  </span>
-</span><span class='line'>    <span class="n">for_each</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">Uppercase</span><span class="p">]</span> <span class="p">(</span><span class="kt">char</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">isupper</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
-</span><span class='line'>            <span class="n">Uppercase</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">Uppercase</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; uppercase letters in: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>匿名函数的威力当然不是只有这么一点，不过这不是本文的重点，关于匿名函数和闭包可以向会 javascript 的同学学习。</p>
-
-<h2>Qt5</h2>
-
-<h3>old signal &amp; slot</h3>
-
-<p>Qt5 终于在末日前一天——12月20日正式发布了，信号槽有了新的用法。</p>
-
-<p>在 Qt5 之前，信号槽连接要这么写：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">connect</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="n">valueChanged</span><span class="p">(</span><span class="n">QString</span><span class="p">,</span><span class="n">QString</span><span class="p">)),</span>
-</span><span class='line'>             <span class="n">receiver</span><span class="p">,</span> <span class="n">SLOT</span><span class="p">(</span><span class="n">updateValue</span><span class="p">(</span><span class="n">QString</span><span class="p">)));</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Qt 利用 SIGNAL 和 SLOT 这两个宏，把函数名转换成一个字符串。然后后，moc 将会扫描全部文件，将所有的 signal 和 slot 提取出来做成一个映射表。QObject::connect() 函数会从这个映射表里面找到该字符串，从 signal 的名字就可以找到 slot 的名字，就知道了在 signal emit 的时候，该去调用哪一个 slot 函数。</p>
-
-<p>但是，由于信号槽都被处理成了字符串，所以编译期间是无法检查的，所有检查都是在运行时完成的。而且，由于是字符串，所以 slot 中的参数类型名必须与 signal 的完全一致。</p>
-
-<h3>new signal &amp; slot</h3>
-
-<p>在 Qt5 中我们有了更好的选择（原来的语法仍然支持）：使用函数指针</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">connect</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Sender</span><span class="o">::</span><span class="n">valueChanged</span><span class="p">,</span>
-</span><span class='line'>        <span class="n">receiver</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Receiver</span><span class="o">::</span><span class="n">updateValue</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>看起来和之前的版本很类似，但新的用法有很多好处：</p>
-
-<ul>
-<li>编译期类型检查，以及 <code>Q_OBJECT</code> 宏检查</li>
-<li>可以随意使用 typedef 和 namespace 了</li>
-<li>支持参数类型的隐式转换，比如(QString 转换为 QVariant)</li>
-<li>可以连接任何成员函数，不仅仅是槽函数</li>
-</ul>
-
-
-<p>坏处是，槽函数从此以后不能用默认参数了。(也没那么坏，是吧)</p>
-
-<p>更有威力的是，connect 可以连接简单函数了，不仅仅是 QObject 对象的成员函数：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">connect</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Sender</span><span class="o">::</span><span class="n">valueChanged</span><span class="p">,</span> <span class="n">someFunction</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>看到这儿，就能想到最开始的 lambda 了吧，没错，<code>someFunction</code> 可以是个 function 也可以是一个 lambda 表达式，新的连接方式可以和 <code>tr1::bind(std::bind)</code> 以及 lambda 表达式完美的配合。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">connect</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Sender</span><span class="o">::</span><span class="n">valueChanged</span><span class="p">,</span>
-</span><span class='line'>    <span class="n">tr1</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">receiver</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Receiver</span><span class="o">::</span><span class="n">updateValue</span><span class="p">,</span> <span class="s">&quot;senderValue&quot;</span><span class="p">,</span> <span class="n">tr1</span><span class="o">::</span><span class="n">placeholder</span><span class="o">::</span><span class="n">_1</span><span class="p">));</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">connect</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Sender</span><span class="o">::</span><span class="n">valueChanged</span><span class="p">,</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">QString</span> <span class="o">&amp;</span><span class="n">newValue</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">receiver</span><span class="o">-&gt;</span><span class="n">updateValue</span><span class="p">(</span><span class="s">&quot;senderValue&quot;</span><span class="p">,</span> <span class="n">newValue</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>唯一的坏处就是： <code>receiver</code> 在销毁的时候，无法自动断开连接</p>
-
-<h3>异步操作变的更简单</h3>
-
-<p>有了 C++11 的 lambda 表达式，与 STL 的算法一样，关于网络的一些异步操作同样变的非常简单了。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">doYourStuff</span><span class="p">(</span><span class="k">const</span> <span class="n">QByteArray</span> <span class="o">&amp;</span><span class="n">page</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="n">QTcpSocket</span> <span class="o">*</span><span class="n">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QTcpSocket</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">socket</span><span class="o">-&gt;</span><span class="n">connectToHost</span><span class="p">(</span><span class="s">&quot;qt.nokia.com&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">QTcpSocket</span><span class="o">::</span><span class="n">connected</span><span class="p">,</span> <span class="p">[</span><span class="n">socket</span><span class="p">,</span> <span class="n">page</span><span class="p">]</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">socket</span><span class="o">-&gt;</span><span class="n">write</span><span class="p">(</span><span class="n">QByteArray</span><span class="p">(</span><span class="s">&quot;GET &quot;</span> <span class="o">+</span> <span class="n">page</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">));</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>    <span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">QTcpSocket</span><span class="o">::</span><span class="n">readyRead</span><span class="p">,</span> <span class="p">[</span><span class="n">socket</span><span class="p">]</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">qDebug</span><span class="p">()</span><span class="o">&lt;&lt;</span> <span class="s">&quot;GOT DATA &quot;</span><span class="o">&lt;&lt;</span> <span class="n">socket</span><span class="o">-&gt;</span><span class="n">readAll</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下面是一个 <code>QDialog</code> 的例子，代码没有被割裂，也没有重入消息循环，看起来干净多了。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">Doc</span><span class="o">::</span><span class="n">saveDocument</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">QFileDialog</span> <span class="o">*</span><span class="n">dlg</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QFileDialog</span><span class="p">();</span>
-</span><span class='line'>    <span class="n">dlg</span><span class="o">-&gt;</span><span class="n">open</span><span class="p">();</span>
-</span><span class='line'>    <span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="n">dlg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">QDialog</span><span class="o">::</span><span class="n">finished</span><span class="p">,</span> <span class="p">[</span><span class="n">dlg</span><span class="p">,</span> <span class="k">this</span><span class="p">](</span><span class="kt">int</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="n">QFile</span> <span class="n">file</span><span class="p">(</span><span class="n">dlg</span><span class="o">-&gt;</span><span class="n">selectedFiles</span><span class="p">().</span><span class="n">first</span><span class="p">());</span>
-</span><span class='line'>            <span class="c1">// ...</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="n">dlg</span><span class="o">-&gt;</span><span class="n">deleteLater</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>虽然 C++ 不推崇函数式，但 lambda 的引入绝对是一大进步，据说 Java 8 也会引入 lambda，不过 Java 8 什么时候发布都还没谱呢……</p>
-
-<h3>参考</h3>
-
-<ul>
-<li>wikipedia: <a href="http://en.wikipedia.org/wiki/C%2B%2B11">C++11</a></li>
-<li><a href="http://qt-project.org/wiki/New_Signal_Slot_Syntax">New Signal Slot Syntax Coming in Qt 5</a></li>
 </ul>
 
 ]]></content>
