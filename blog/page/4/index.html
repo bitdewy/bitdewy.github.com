@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="原文在这里 GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10) JG 问题 1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。 Guru 问题 2. 为什么要使用 make_shared &hellip;">
+	<meta name="description" content="原文在这里 GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10) 当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明： widget* load_widget( widget::id desired ); JG 问题 1. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,64 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/07/15/gotw104/">
+		
+			[译] GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>原文在这里 <a href="http://herbsutter.com/gotw/_104/">GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10)</a></p>
+
+<p>当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明：</p>
+
+<p><code>widget* load_widget( widget::id desired );</code></p>
+
+<h2>JG 问题</h2>
+
+<p>1. 返回值的类型有什么问题？</p>
+
+<h2>Guru 问题</h2>
+
+<p>2. 返回值的推荐类型是是什么？ 解释你的答案，包括任何的权衡。</p>
+
+<p>3. 你希望更改返回值的类型为问题 #2 中推荐的类型，但是你担心破坏了原有代码的函数调用的兼容性；重新编译现有的函数调用是可行的，但修改所有的函数调用就……。然后你灵光一闪，意识到这是一个相当新的项目，所有的代码都使用现代 C++ 惯用法，然后你继续修改返回值类型，而没有一点担心，知道重构仅仅需要一点点或者更不不需要更改调用函数的代码。是什么让你如此自信？</p>
+
+
+		
+		<a href="/blog/2012/07/15/gotw104/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-15T16:28:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/07/15/gotw104/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">

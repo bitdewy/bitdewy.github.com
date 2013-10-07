@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: exception | Bitdewy]]></title>
+  <link href="http://bitdewy.github.com/blog/categories/exception/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-10-07T23:40:15+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[异常与多线程]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread/"/>
+    <updated>2013-09-23T23:30:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread</id>
+    <content type="html"><![CDATA[<p>C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference).</p>
+
+<p>有些时候, 我们不得不使用多线程来提高工作的执行效率, 但由于异常都是基于线程的, 如何在线程间传递异常, 就成为了一个问题. C++11 之前异常是无法在线程之前传递的, C++11 在这方面提供了支持.</p>
+
+<h2>使用 C++11 中的异常相关内容实现在线程间传递异常</h2>
+
+<p>相关类如下:</p>
+
+<p><code>std::exception_ptr</code></p>
+
+<ul>
+<li>一个智能指针类型的异常对象, 支持 bool 操作符, 可以存储空异常 (null) 对象. 也支持比较 (operator==).</li>
+</ul>
+
+
+<p><code>std::current_exception</code></p>
+
+<ul>
+<li>当在异常处理块中 (catch块) 调用时, 会捕获当前异常对象并由被捕获的对象创建一个 <code>std::exception_ptr</code> 对象并返回.</li>
+</ul>
+
+
+<p><code>std::make_exception_ptr</code></p>
+
+<ul>
+<li>接受一个 Exception 对象参数, 并由这个异常对象创建一个 <code>std::exception_ptr</code> 对象</li>
+</ul>
+
+
+<p><code>std::rethrow_exception</code></p>
+
+<ul>
+<li>接受一个 <code>std::exception_ptr</code> 参数, 重新抛出这个异常</li>
+</ul>
+
+
+<p>(<em>以上的一切, 很大一部分都是因为 C++ 的值传递特性引起的一系列不适!!!</em>, !!(╯' &ndash; &lsquo;)╯︵ ┻━┻)</p>
+
+<!-- more -->
+
+
+<p>示例代码</p>
+
+<p>```cpp</p>
+
+<h1>include <future></h1>
+
+<h1>include <exception></h1>
+
+<h1>include <iostream></h1>
+
+<p>int calc(std::exception_ptr&amp; eptr)
+{
+  try {</p>
+
+<pre><code>std::string s;
+s.at(0);  // throw out of range exception
+eptr = std::make_exception_ptr(std::exception()); // if no exception use default
+</code></pre>
+
+<p>  } catch (&hellip;) {</p>
+
+<pre><code>eptr = std::current_exception();
+</code></pre>
+
+<p>  }
+  return 0;
+}</p>
+
+<p>int main()
+{
+  std::exception_ptr eptr;
+  auto f = std::async(std::launch::async, std::bind(calc, std::ref(eptr)));
+  try {</p>
+
+<pre><code>int i = f.get();
+if (eptr) {
+  std::rethrow_exception(eptr);
+}
+std::cout &lt;&lt; i &lt;&lt; std::endl;
+</code></pre>
+
+<p>  } catch (const std::exception&amp; e) {</p>
+
+<pre><code>std::cout &lt;&lt; e.what() &lt;&lt; std::endl;
+</code></pre>
+
+<p>  }
+  return 0;
+}
+```</p>
+
+<p>如代码所示:</p>
+
+<p>函数 calc 在子线程中工作, 并有可能抛出异常. 主线程中, 等待子线程返回结果, 并在返回后检测是否有异常, 如果有异常, 则重新抛出异常. 主线程将上述工作都放到 try 块中, 如果有异常则打印. 这样, 子线程 calc 函数的异常就被成功的转移到了主线程中.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>《More Effective C++》Item 13: Catch exceptions by reference</li>
+<li>Cppreference.com <a href="http://en.cppreference.com/w/cpp/error">http://en.cppreference.com/w/cpp/error</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
