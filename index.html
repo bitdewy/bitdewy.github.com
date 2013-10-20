@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference). 有些时候, &hellip;">
+	<meta name="description" content="上周同事问了个没法回答的问题, “统计, 日志应该放到哪一层, 或者哪个模块中?” 首先, 所有的编程范式都不是万能的, 更不用说反并发、反模块化的面向对象范式了. 我们不能总是以同一种编程范式来思考问题. 类似日志, 权限验证, 事务管理等会横跨多个模块的东西, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,70 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/10/20/aop/">
+		
+			面向切面编程(AOP)</a>
+	</h2>
+	<div class="entry-content">
+		<p>上周同事问了个没法回答的问题, <em>“统计, 日志应该放到哪一层, 或者哪个模块中?”</em></p>
+
+<p>首先, 所有的编程范式都不是万能的, 更不用说<a href="http://existentialtype.wordpress.com/2011/03/15/teaching-fp-to-freshmen/">反并发、反模块化</a>的面向对象范式了. 我们不能总是以同一种编程范式来思考问题. 类似日志, 权限验证, 事务管理等会横跨多个模块的东西, 我们需要新的思路来解决代码割裂的问题.</p>
+
+<h2>面向切面编程</h2>
+
+<p>面向切面编程 (AOP), 不是什么新玩意儿, 早在 199x 年开始, 研究人员就对面向对象思想的局限性进行了分析. 研究出了一种新的编程思想, 借助这一思想可以通过减少代码重复模块从而帮助开发人员提高工作效率. 随着研究的逐渐深入, AOP 也逐渐发展成一套完整的程序设计思想, 各种应用 AOP 的技术也应运而生. 比较著名的有 Java 阵营的 AspectJ 和 Spring AOP, C++ 中也有 AspectC++.</p>
+
+<h3>AOP 中的概念</h3>
+
+<ul>
+<li>cross-cutting concerns, (横切关注点)指的是一些具有横越多个模块的行为, 使用传统的软件开发方法不能够达到有效的模块化的一类特殊关注点. 如日志, 权限验证等不属于业务逻辑, 但多个模块都需要插入的东西, 即属于横切关注点.</li>
+<li>advice, (通知)指的是切面中的具体逻辑. 如打印日志, 验证权限.</li>
+<li>pointcut, (切入点)指的是切面代码要插入的位置.</li>
+<li>aspect, (切面)指的是通知以及切入点模块化之后的整体.</li>
+</ul>
+
+
+<p>上面的内容都属于动态横切, 基本上所作的工作就是方法拦截, 插入指定的代码. 还有一种静态横切, Mixin 它可以可以在不修改原有职责的基础上增加新的职责, 可以模拟多继承, 而不增加耦合性, 不过这就不是本文所要讨论的内容了.</p>
+
+<p>看下面的伪代码来感受一下 AOP:</p>
+
+
+		
+		<a href="/blog/2013/10/20/aop/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-20T13:58:00+08:00" pubdate data-updated="true">Oct 20<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/aop/'>AOP</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/10/20/aop/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -509,7 +573,7 @@
 
 <p>考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换.</p>
 
-<p><img src="https://bitdewy.github.io/static/2013-08-05-io-model/1.svg" alt="" /></p>
+<p><img src="http://bitdewy.github.io/static/2013-08-05-io-model/1.svg" alt="" /></p>
 
 <p>如图, 进程调用 recvfrom, 此时系统调用直到数据报到达且拷贝到应用缓冲区, 或者出错才返回. 我们所说的进程阻塞的整段时间是指从调用 recvfrom 开始到它返回的这段时间, 当进程返回成功指示时, 应用进程开始处理数据报.</p>
 
@@ -803,75 +867,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/07/08/cpp11-perfect-forward/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/07/02/cpp11-rvalue-ref/">
-		
-			C++11 右值引用</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是右值引用?</h2>
-
-<p>在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>  <span class="c1">// OK</span>
-</span><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// Error</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这是因为标准中规定, 当定义一个引用时, 我们必须使用一个左值来初始化它. 在上面的代码中, n 是一个左值, 而 3 不是. 所以我们不能用 3 来初始化 s. 这个规定可以帮助编译器来捕捉错误, 比如下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// equals std::cin.operator&gt;&gt;(3);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>简单的说, 上面的代码调用了 std::cin 的名为 operator>> 的成员函数, 并使用 3 作为参数. operator>> 是重载函数, 虽然它有接受一个 int&amp; 参数的重载版本, 但是没有能接受一个简单的 int 常量, 或者 int 右值作为参数的重载. 因此, 编译器会检查出我们无法使用 int 的右值作为参数来调用 operator>>.</p>
-
-
-		
-		<a href="/blog/2013/07/02/cpp11-rvalue-ref/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-02T22:49:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/07/02/cpp11-rvalue-ref/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

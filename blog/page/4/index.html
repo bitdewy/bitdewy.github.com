@@ -7,7 +7,8 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="原文在这里 GotW #104: Smart Pointers, Part 2 (Difficulty: 5/10) 当你正在研究最近新加入的项目的代码时，你发下了下面的工厂方法的声明： widget* load_widget( widget::id desired ); JG 问题 1. &hellip;">
+	<meta name="description" content="历史 在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
+由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。 例如，GCC 的 lisbstdc &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +99,57 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/08/21/unordered-map/">
+		
+			C++11 Std::unordered_map</a>
+	</h2>
+	<div class="entry-content">
+		<h2>历史</h2>
+
+<p>在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
+由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。</p>
+
+<p>例如，GCC 的 lisbstdc++ , 以及微软的 MSVC 标准库。在这些公用的名字后面，有不同的实现，呃，不同的实现。它们在接口、能力、内在数据结构和支持操作的相关效率方面不同。写出使用哈希表的可移植代码是可能的，但不可能像使用标准库中的容器一样容易。（知道标准的重要性了吧。）好在 <code>hash_*</code> 这一组类加入了 C++ TR1 , 可惜由于名字被非标准的各家实现占用，只能退而求其次，改名为 <code>unordered_*</code>。</p>
+
+<p>C++11 中，不排序的关联容器已经正式进入标准库。现在再选择的话，可以毫不犹豫的放弃非标准的 <code>hash_*</code> 而选择标准库中的 <code>unordered_*</code> 系类了。boost &lt;<a href="http://www.boost.org/doc/libs/1_53_0/boost/unordered_map.hpp">boost/unordered_map.hpp</a>> 中同样有实现。</p>
+
+
+		
+		<a href="/blog/2012/08/21/unordered-map/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-21T17:54:00+08:00" pubdate data-updated="true">Aug 21<span>st</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/08/21/unordered-map/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">

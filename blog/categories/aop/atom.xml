@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: AOP | Bitdewy]]></title>
+  <link href="http://bitdewy.github.com/blog/categories/aop/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-10-21T02:56:07+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[面向切面编程(AOP)]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/10/20/aop/"/>
+    <updated>2013-10-20T13:58:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/10/20/aop</id>
+    <content type="html"><![CDATA[<p>上周同事问了个没法回答的问题, <em>“统计, 日志应该放到哪一层, 或者哪个模块中?”</em></p>
+
+<p>首先, 所有的编程范式都不是万能的, 更不用说<a href="http://existentialtype.wordpress.com/2011/03/15/teaching-fp-to-freshmen/">反并发、反模块化</a>的面向对象范式了. 我们不能总是以同一种编程范式来思考问题. 类似日志, 权限验证, 事务管理等会横跨多个模块的东西, 我们需要新的思路来解决代码割裂的问题.</p>
+
+<h2>面向切面编程</h2>
+
+<p>面向切面编程 (AOP), 不是什么新玩意儿, 早在 199x 年开始, 研究人员就对面向对象思想的局限性进行了分析. 研究出了一种新的编程思想, 借助这一思想可以通过减少代码重复模块从而帮助开发人员提高工作效率. 随着研究的逐渐深入, AOP 也逐渐发展成一套完整的程序设计思想, 各种应用 AOP 的技术也应运而生. 比较著名的有 Java 阵营的 AspectJ 和 Spring AOP, C++ 中也有 AspectC++.</p>
+
+<h3>AOP 中的概念</h3>
+
+<ul>
+<li>cross-cutting concerns, (横切关注点)指的是一些具有横越多个模块的行为, 使用传统的软件开发方法不能够达到有效的模块化的一类特殊关注点. 如日志, 权限验证等不属于业务逻辑, 但多个模块都需要插入的东西, 即属于横切关注点.</li>
+<li>advice, (通知)指的是切面中的具体逻辑. 如打印日志, 验证权限.</li>
+<li>pointcut, (切入点)指的是切面代码要插入的位置.</li>
+<li>aspect, (切面)指的是通知以及切入点模块化之后的整体.</li>
+</ul>
+
+
+<p>上面的内容都属于动态横切, 基本上所作的工作就是方法拦截, 插入指定的代码. 还有一种静态横切, Mixin 它可以可以在不修改原有职责的基础上增加新的职责, 可以模拟多继承, 而不增加耦合性, 不过这就不是本文所要讨论的内容了.</p>
+
+<p>看下面的伪代码来感受一下 AOP:</p>
+
+<!-- more -->
+
+
+<p>```
+function mainProgram()
+{
+  var x =  foo();
+  doSomethingWith(x);
+  return x;
+}</p>
+
+<p>aspect logging
+{
+  before (mainProgram is called):
+  {</p>
+
+<pre><code>log.Write("entering mainProgram");
+</code></pre>
+
+<p>  }</p>
+
+<p>  after (mainProgram is called):
+  {</p>
+
+<pre><code>log.Write("exiting mainProgram with return value of "
+          + mainProgram.returnValue);
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>aspect verification
+{
+  before (doSomethingWith is called):
+  {</p>
+
+<pre><code>if (doSomethingWith.arguments[0] == null) 
+{
+  throw NullArgumentException();
+}
+
+if (!doSomethingWith.caller.isAuthenticated)
+{
+  throw Securityexception();
+}
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>有了业务代码, 并且定义好了切面, 以及切入点等一切 AOP 所需的内容之后, 通过一些神奇的办法, 我们最终生成的代码看起来应该和下面的差不多:</p>
+
+<p>```
+function mainProgram()
+{
+  log.Write(&ldquo;entering mainProgram&rdquo;);</p>
+
+<p>  var x = foo();</p>
+
+<p>  if (x == null) throw NullArgumentException();
+  if (!mainProgramIsAuthenticated()) throw Securityexception();
+  doSomethingWith(x);</p>
+
+<p>  log.Write(&ldquo;exiting mainProgram with return value of &rdquo;+ x);
+  return x;
+}
+```</p>
+
+<p>这样就解决了文中开头提的问题. 日志, 权限验证这些会分散在各个模块中的东西, 通过 AOP 避免了割裂, 保持了完整性.</p>
+
+<p>在 C++ 中, 可以使用 template 来模拟切面, 类似《Modern C++ Design》中所讲述的基于 policy 的设计.</p>
+
+<p>在纯函数式的编程语言中, 也许用高阶函数就可以直接模拟 AOP ?</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>wikipedia: <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented programming</a></li>
+<li>Java: <a href="http://docs.spring.io/spring/docs/2.5.x/reference/aop.html">Spring AOP</a></li>
+<li><a href="http://www.lisha.ufsc.br/teaching/sce/aop_with_c++.pdf">Aspect-Oriented Programming with C++</a></li>
+<li><a href="http://www.aspectc.org/">AspectC++</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
