@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-21T02:56:07+08:00</updated>
+  <updated>2013-11-11T13:17:36+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,98 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[返回值类型推导]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/11/11/return-type-resolver/"/>
+    <updated>2013-11-11T10:21:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/11/11/return-type-resolver</id>
+    <content type="html"><![CDATA[<p>模版函数的参数类型可以自动推导, 它可以让我们在调用函数的时候不必写丑陋的<code>&lt;&gt;</code>, 但如果是返回值类型需要自动推导, 似乎就没有那么容易了. 虽然语言本身不支持返回值的类型自动推导, 但我们可以尝试其他的办法来完成这项任务.</p>
+
+<h2>目的</h2>
+
+<p>在使用函数返回值初始化变量或给变量赋值时模版函数能够自动推导出类型.</p>
+
+<h2>例子</h2>
+
+<p>在某些情况下, 明确被初始化的变量类型是有用的. 考虑下面的例子, 我们使用随机数来初始化 STL 容器. 但是我们不知道用户会选择哪个具体的容器类型. 它可能是 <code>std::list</code>, <code>std::vector</code> 或者其他的行为像 STL 容器的自定义类型. 最直接的方法如下所示:</p>
+
+<p>```cpp</p>
+
+<h1>include <list></h1>
+
+<h1>include <vector></h1>
+
+<h1>include <random></h1>
+
+<p>template <class Container>
+Container GetRandomN(size_t n) {
+  Container c;
+  for(size_t i = 0; i &lt; n; ++i) {</p>
+
+<pre><code>c.insert(c.end(), rand());
+</code></pre>
+
+<p>  }
+  return c;
+}</p>
+
+<p>int main () {
+  std::list<int> l = GetRandomN&lt;std::list<int> >(10);
+  std::vector<long> v = GetRandomN&lt;std::vector<long> >(100);
+  return 0;
+}
+```</p>
+
+<!-- more -->
+
+
+<p>我们可以注意到, 代码中必须显示的指定返回值的类型, 很显然我们必须写两次返回值类型, 类型声明写一次, 函数调用又写了一次. 返回值类型推导可以帮助我们解决这个问题, 当然 C++11 中的 auto 类型也可以解决.</p>
+
+<h2>解决方案 &amp; 示例代码</h2>
+
+<p>```cpp</p>
+
+<h1>include <list></h1>
+
+<h1>include <set></h1>
+
+<h1>include <vector></h1>
+
+<h1>include <random></h1>
+
+<p>class GetRandomN {
+ public:
+  GetRandomN(int n = 1) : count(n) {}</p>
+
+<p>  template <class Container>
+  operator Container() {</p>
+
+<pre><code>Container c;
+for (size_t i = 0; i &lt; count; ++i) {
+  c.insert(c.end(), rand()); // push_back is not supported by all standard containers.
+}
+return c;
+</code></pre>
+
+<p>  }
+ private:
+  size_t count;
+};</p>
+
+<p>int main() {
+  std::set<int> random_s = GetRandomN(10);
+  std::vector<int> random_v = GetRandomN(10);
+  std::list<int> random_l = GetRandomN(10);
+  return 0;
+}
+```</p>
+
+<p>类 GetRandomN 有一个构造函数, 以及一个模版的类型隐式转换函数. 初始化的时候, 会产生一个 GetRandomN 类的临时对象, 当赋值给 STL 容器类型时, 编译器会去尝试将对象隐式转换. 而隐式转换的途径就是取寻找隐式转换函数, 这样就完成了返回值自动推导. 有了返回值类型自动推导, 我们就不必手写返回值类型参数了. 唔… 再注意一点, 为了支持 <code>std::set</code> 我们将原始的 <code>push_back</code> 函数改为了 <code>insert</code>.</p>
+
+<p><em>注: 在 C++11 引入 <code>nullptr</code> 之前, 手工实现一个 <code>nullptr</code> 的惯用法就使用了返回值类型推导.</em></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
@@ -489,123 +581,6 @@ static_cast&lt;A&amp;&amp;&gt;(a);
 <ul>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
 <li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 右值引用]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref/"/>
-    <updated>2013-07-02T22:49:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref</id>
-    <content type="html"><![CDATA[<h2>什么是右值引用?</h2>
-
-<p>在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明:</p>
-
-<p><code>cpp
-int n;
-</code></p>
-
-<p>那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码:</p>
-
-<p><code>cpp
-int&amp; r = n;  // OK
-int&amp; s = 3;  // Error
-</code></p>
-
-<p>这是因为标准中规定, 当定义一个引用时, 我们必须使用一个左值来初始化它. 在上面的代码中, n 是一个左值, 而 3 不是. 所以我们不能用 3 来初始化 s. 这个规定可以帮助编译器来捕捉错误, 比如下面的代码:</p>
-
-<p><code>cpp
-std::cin &gt;&gt; 3;  // equals std::cin.operator&gt;&gt;(3);
-</code></p>
-
-<p>简单的说, 上面的代码调用了 std::cin 的名为 operator>> 的成员函数, 并使用 3 作为参数. operator>> 是重载函数, 虽然它有接受一个 int&amp; 参数的重载版本, 但是没有能接受一个简单的 int 常量, 或者 int 右值作为参数的重载. 因此, 编译器会检查出我们无法使用 int 的右值作为参数来调用 operator>>.</p>
-
-<!-- more -->
-
-
-<p>C++11 扩展了引用的概念, 增加了右值引用. 右值引用也是一个引用, 但与普通的引用不同, 它只能绑定到右值上. 下面是一个右值引用的声明:</p>
-
-<p><code>cpp
-int&amp;&amp; t = 3;
-</code></p>
-
-<p>一个普通的引用只能绑定左值, 一个右值引用只能绑定到右值, 也就是说如果我们写了下面的代码, 编译器会报一个错误.</p>
-
-<p><code>cpp
-int&amp;&amp; t = n;    // Error: n is an lvalue
-</code></p>
-
-<p>右值引用是一个有趣的组合, 虽然你只能绑定右值到右值引用, 但是你使用时它却是一个左值.</p>
-
-<p>例如下面的代码:</p>
-
-<p><code>cpp
-int&amp;&amp; t = 3;
-++t;
-</code></p>
-
-<p>通常情况下, 程序员不能修改右值. 但是通过右值引用, 获得了左值, 这样我们就能修改它的值了. 另外, 右值在通过右值引用绑定之后, 这个右值就不在可访问, 它使用了转移语义来代替拷贝操作.</p>
-
-<p>定义一个接收右值引用参数的函数, 那么函数就会使用转移语义来替代拷贝操作. 但是这样会禁止接收左值参数.</p>
-
-<p><code>cpp
-void foo(int&amp;&amp;);
-foo(42);        // OK;
-int n;
-foo(n);         // Error: n is an lvalue
-</code></p>
-
-<p>我们当然可以定义一个左值的版本来解决上面的问题:</p>
-
-<p><code>cpp
-void bar(int&amp;&amp;);
-void bar(const int&amp;);
-bar(42);             // calls bar(int&amp;&amp;)
-int n;
-bar(n);               // calls bar(const int&amp;)
-</code></p>
-
-<p>这个技术有个值得记住的地方是, 通过 const 引用和右值引用的两个重载版本, 你告诉了编译器哪个修改参数是安全的, 哪个不是. 此外, 编译器在编译期就决定了使用哪个, 从而避免了运行时的开销.</p>
-
-<h2>Move 语义</h2>
-
-<p>右值引用的引入, 从语言层面提升了性能, 提高了内存与时间上的效率.</p>
-
-<p>在 C++03 及之前的标准中, 临时对象 (称为右值 &ldquo;R-values&rdquo;, 位于赋值运算符之右) 无法被改变, 在 C 中亦同 (且被视为无法和 const T&amp; 做出区分). 虽然在某些情况下临时对象的确会被改变, 甚至也被视为是一个有用的漏洞.</p>
-
-<p>C++11 增加一个新的非常数引用 (reference) 类型, 称作右值引用 (R-value reference), 标记为 <code>T&amp;&amp;</code>. 右值引用所引用的临时对象可以在该临时对象被初始化之后做修改, 这是为了允许 move 语义.</p>
-
-<p>C++03 性能上被长期被诟病的其中之一, 就是其耗时且不必要的深度拷贝. 深度拷贝会发生在当对象是以传值的方式传递. 举例而言, <code>std::vector&lt;T&gt;</code> 是内部保存了 C-style 数组的一个包装, 如果一个 <code>std::vector&lt;T&gt;</code> 的临时对象被建构或是从函数返回, 要将其存储只能通过生成新的 <code>std::vector&lt;T&gt;</code>并且把该临时对象所有的数据复制进去. 该临时对象和其拥有的內存会被摧毁. (为了讨论上的方便，这里忽略返回值优化)</p>
-
-<p>在 C++11 中, 一个 <code>std::vector</code> 的 &ldquo;move 构造函数&rdquo; 对某个 vector 的右值引用可以单纯地从右值复制其内部 C-style 数组的指针到新的 vector, 然后留下空的右值. 这个操作不需要数组的复制, 而且空的临时对象的析构也不会摧毁内存. 传回 vector 临时对象的函数不需要显式地传回 <code>std::vector&lt;T&gt;&amp;&amp;</code>. 如果 vector 没有 move 构造函数, 那么复制构造函数将被调用, 以 <code>const std::vector&lt;T&gt; &amp;</code> 的正常形式. 如果它确实有 move 构造函数, 那么就会调用 move 构造函数, 这能够免除大幅的内存配置.</p>
-
-<p>基于安全的理由, 具名的参数将永远不被认定为右值, 即使它是被如此声明的; 为了获得右值必须使用 <code>std::move&lt;T&gt;()</code>.</p>
-
-<p>```cpp
-bool is_r_value(int &amp;&amp;) { return true; }
-bool is_r_value(const int &amp;) { return false; }</p>
-
-<p>void test(int &amp;&amp; i)
-{</p>
-
-<pre><code>is_r_value(i); // i 为具名变量，即使被声明成右值也不會被认为是右值。
-is_r_value(std::move&lt;int&amp;&gt;(i)); // 使用 std::move&lt;T&gt;() 取得右值。
-</code></pre>
-
-<p>}
-```</p>
-
-<p>由于右值引用的用语特性以及对于左值引用 (L-value references;regular references) 的某些用语修正, 右值引用允许开发者提供完美转发 (perfect function forwarding). 当与变长参数模板结合, 这项能力允许函数模板能够完美地转送引数给其他接受这些特定引数的函数. 最大的用处在于转发构造函数参数, 创造出能够自动为这些特定引数调用正确建构式的工厂函数 (factory function).</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://blog.csdn.net/pongba/article/details/1684519">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(上)</a></li>
-<li><a href="https://zh.wikipedia.org/zh-cn/C%2B%2B11#.E5.8F.B3.E5.80.BC.E5.BC.95.E7.94.A8.E5.92.8C_move_.E8.AA.9E.E6.84.8F">维基百科C++11: 右值引用和 move 语义</a></li>
-<li><a href="http://stackoverflow.com/questions/3106110/what-are-move-semantics/3109981">Stackoverflow：What are move semantics？</a></li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2027.html#Move_Semantics">标准文档提案：Move Semantics</a></li>
 </ul>
 
 ]]></content>

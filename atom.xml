@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-10-21T02:56:07+08:00</updated>
+  <updated>2013-11-11T13:17:36+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,130 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[返回值类型推导]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/11/11/return-type-resolver/"/>
+    <updated>2013-11-11T10:21:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/11/11/return-type-resolver</id>
+    <content type="html"><![CDATA[<p>模版函数的参数类型可以自动推导, 它可以让我们在调用函数的时候不必写丑陋的<code>&lt;&gt;</code>, 但如果是返回值类型需要自动推导, 似乎就没有那么容易了. 虽然语言本身不支持返回值的类型自动推导, 但我们可以尝试其他的办法来完成这项任务.</p>
+
+<h2>目的</h2>
+
+<p>在使用函数返回值初始化变量或给变量赋值时模版函数能够自动推导出类型.</p>
+
+<h2>例子</h2>
+
+<p>在某些情况下, 明确被初始化的变量类型是有用的. 考虑下面的例子, 我们使用随机数来初始化 STL 容器. 但是我们不知道用户会选择哪个具体的容器类型. 它可能是 <code>std::list</code>, <code>std::vector</code> 或者其他的行为像 STL 容器的自定义类型. 最直接的方法如下所示:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;list&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;random&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Container</span><span class="o">&gt;</span>
+</span><span class='line'><span class="n">Container</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">Container</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">rand</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>我们可以注意到, 代码中必须显示的指定返回值的类型, 很显然我们必须写两次返回值类型, 类型声明写一次, 函数调用又写了一次. 返回值类型推导可以帮助我们解决这个问题, 当然 C++11 中的 auto 类型也可以解决.</p>
+
+<h2>解决方案 &amp; 示例代码</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;list&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;random&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">GetRandomN</span> <span class="p">{</span>
+</span><span class='line'> <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">GetRandomN</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span> <span class="n">count</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Container</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">operator</span> <span class="n">Container</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">Container</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">rand</span><span class="p">());</span> <span class="c1">// push_back is not supported by all standard containers.</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'> <span class="k">private</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">size_t</span> <span class="n">count</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_s</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_v</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">random_l</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>类 GetRandomN 有一个构造函数, 以及一个模版的类型隐式转换函数. 初始化的时候, 会产生一个 GetRandomN 类的临时对象, 当赋值给 STL 容器类型时, 编译器会去尝试将对象隐式转换. 而隐式转换的途径就是取寻找隐式转换函数, 这样就完成了返回值自动推导. 有了返回值类型自动推导, 我们就不必手写返回值类型参数了. 唔… 再注意一点, 为了支持 <code>std::set</code> 我们将原始的 <code>push_back</code> 函数改为了 <code>insert</code>.</p>
+
+<p><em>注: 在 C++11 引入 <code>nullptr</code> 之前, 手工实现一个 <code>nullptr</code> 的惯用法就使用了返回值类型推导.</em></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[面向切面编程(AOP)]]></title>
@@ -3349,135 +3473,6 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 <li><a href="http://qt-project.org/doc/qt-4.8/qtscript.html">http://qt-project.org/doc/qt-4.8/qtscript.html</a></li>
 <li><a href="http://qt-project.org/doc/qt-4.8/scripting.html">http://qt-project.org/doc/qt-4.8/scripting.html</a></li>
 <li><a href="http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html">http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[空基类优化]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization/"/>
-    <updated>2013-02-25T07:50:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/02/25/empty-base-optimization</id>
-    <content type="html"><![CDATA[<h2>目的</h2>
-
-<p>优化空类数据成员的存储空间</p>
-
-<h2>别名</h2>
-
-<p>EBCO: Empty Base Class Optimization
-Empty Member Optimization</p>
-
-<h2>动机</h2>
-
-<p>大小为 0 的类在 C++ 中是不存在的. C++ 需要空类大小不为 0 以确保对象的标识. 例如下面的 <code>EmptyClass</code> 的大小就是非 0 的, 因为数组中每一个对象的标识都是唯一的. 如果 <code>sizeof(EmptyClass)</code> 的大小为 0, 指针算数就会失效. 一般情况下, 类似 <code>EmptyClass</code> 的类大小通常为 1.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">EmptyClass</span> <span class="p">{};</span>
-</span><span class='line'><span class="n">EmptyClass</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span> <span class="c1">// Size of this array can’t be zero.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当类似的类作为另一个类的数据成员时, 它的大小一般比 1 字节要大. 编译器通常 4 字节对齐来避免切割. 4 字节的空类对象只是占位符, 毫无用处. 避免浪费空间, 节省内存, 帮助对象更适应 CPU 缓存是非常有好处的.</p>
-
-<!-- more -->
-
-
-<h2>解决方案&amp;示例代码</h2>
-
-<p>在 C++ 中, 如果一个空类作为基类被继承时, 情况会和上面的有些区别. 编译器允许继承层次结构扁平化, 被继承的空基类不占用空间. 例如下面的代码中 <code>sizeof(AnInt)</code> 在 32 位架构中是 4 字节, <code>sizeof(AnotherEmpty)</code> 是 1 字节, 虽然这两个类都继承自 <code>EmptyClass</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">AnInt</span> <span class="o">:</span> <span class="k">public</span> <span class="n">EmptyClass</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>   <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>   <span class="c1">// size = sizeof(int)</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">AnotherEmpty</span> <span class="o">:</span> <span class="k">public</span> <span class="n">EmptyClass</span> <span class="p">{};</span>  <span class="c1">// size =  1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>EBCO 有效的利用了这个特性. 这并不是说简单, 天真的将数据成员的空类变成基类是可取的, 因为这可能会暴露原本需要对用户隐藏的接口. 例如下面的 EBCO 实现方式, 可能会有副作用: 类 <code>Foo</code> 的用户现在可以看到一些方法 (如果在 E1, E2 中存在的话), 虽然他们是私有继承而来的, 不可访问.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">E1</span> <span class="p">{};</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">E2</span> <span class="p">{};</span>
-</span><span class='line'><span class="c1">// **** before EBCO ****</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">E1</span> <span class="n">e1</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">E2</span> <span class="n">e2</span><span class="p">;</span>
-</span><span class='line'>  <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 8</span>
-</span><span class='line'><span class="c1">// **** after EBCO ****</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="o">:</span> <span class="k">private</span> <span class="n">E1</span><span class="p">,</span> <span class="k">private</span> <span class="n">E2</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 4</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一种实现 EBCO 的实用方法是: 将空的类成员组合到单一的存储结构扁平的成员中. 下面的模板 <code>BaseOptimization</code> 的前两个模板参数是用来实现 EBCO的. 使用 <code>BaseOptimization</code> 改写类 <code>Foo</code> 如下:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Base1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Base2</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Member</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">BaseOptimization</span> <span class="o">:</span> <span class="n">Base1</span><span class="p">,</span> <span class="n">Base2</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>   <span class="n">Member</span> <span class="n">member</span><span class="p">;</span>
-</span><span class='line'>   <span class="n">BaseOptimization</span><span class="p">()</span> <span class="p">{}</span>
-</span><span class='line'>   <span class="n">BaseOptimization</span><span class="p">(</span><span class="n">Base1</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">b1</span><span class="p">,</span> <span class="n">Base2</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">b2</span><span class="p">,</span> <span class="n">Member</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">mem</span><span class="p">)</span>
-</span><span class='line'>       <span class="o">:</span> <span class="n">Base1</span><span class="p">(</span><span class="n">b1</span><span class="p">),</span> <span class="n">Base2</span><span class="p">(</span><span class="n">b2</span><span class="p">),</span> <span class="n">member</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>   <span class="n">Base1</span> <span class="o">*</span> <span class="n">first</span><span class="p">()</span>  <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>   <span class="n">Base2</span> <span class="o">*</span> <span class="n">second</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">BaseOptimization</span><span class="o">&lt;</span><span class="n">E1</span><span class="p">,</span> <span class="n">E2</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span> <span class="c1">// sizeof(Foo) = 4</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>使用 EBCO 并没有改变类 Foo 的继承体系. 保证基类不会互相冲突, 这是至关重要的. 也就是说 Base1 与 Base2 是独立的集成体系中的一部分.</p>
-
-<p><strong>注意</strong>: 对象身份标识的问题, 不同的编译器处理起来是不相同的. 空对象的地址可能是相同的, 也可能是不同的. 例如: BaseOptimization 的成员函数 first 和 second 返回的指针, 在有些编译器上可能是相同的, 而有些编译器上可能是不同的. 更多的讨论请看这里：<a href="http://stackoverflow.com/questions/7694158/boost-compressed-pair-and-addresses-of-empty-objects">stackoverflow</a></p>
-
-<h2>已知的用途</h2>
-
-<p><a href="http://www.boost.org/doc/libs/1_53_0/libs/utility/compressed_pair.htm">boost::compressed_pair</a> 使用了该惯用法, 来优化 pair 的存储空间
-C++03 模拟实现 <a href="http://home.roadrunner.com/~hinnant/unique_ptr03.html">unique­_ptr</a> 也使用了该惯用法</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://www.informit.com/articles/article.aspx?p=31473&amp;seqNum=2">The Empty Base Class Optimization (EBCO)</a></li>
-<li><a href="http://www.cantrip.org/emptyopt.html">The &ldquo;Empty Member&rdquo; C++ Optimization</a></li>
-<li><a href="http://www.ibm.com/developerworks/aix/library/au-boostutilities/index.html">Internals of boost::compressed_pair</a></li>
 </ul>
 
 ]]></content>

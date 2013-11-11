@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="上周同事问了个没法回答的问题, “统计, 日志应该放到哪一层, 或者哪个模块中?” 首先, 所有的编程范式都不是万能的, 更不用说反并发、反模块化的面向对象范式了. 我们不能总是以同一种编程范式来思考问题. 类似日志, 权限验证, 事务管理等会横跨多个模块的东西, &hellip;">
+	<meta name="description" content="模版函数的参数类型可以自动推导, 它可以让我们在调用函数的时候不必写丑陋的&lt;&gt;, 但如果是返回值类型需要自动推导, 似乎就没有那么容易了. 虽然语言本身不支持返回值的类型自动推导, 但我们可以尝试其他的办法来完成这项任务. 目的 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,97 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/11/11/return-type-resolver/">
+		
+			返回值类型推导</a>
+	</h2>
+	<div class="entry-content">
+		<p>模版函数的参数类型可以自动推导, 它可以让我们在调用函数的时候不必写丑陋的<code>&lt;&gt;</code>, 但如果是返回值类型需要自动推导, 似乎就没有那么容易了. 虽然语言本身不支持返回值的类型自动推导, 但我们可以尝试其他的办法来完成这项任务.</p>
+
+<h2>目的</h2>
+
+<p>在使用函数返回值初始化变量或给变量赋值时模版函数能够自动推导出类型.</p>
+
+<h2>例子</h2>
+
+<p>在某些情况下, 明确被初始化的变量类型是有用的. 考虑下面的例子, 我们使用随机数来初始化 STL 容器. 但是我们不知道用户会选择哪个具体的容器类型. 它可能是 <code>std::list</code>, <code>std::vector</code> 或者其他的行为像 STL 容器的自定义类型. 最直接的方法如下所示:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;list&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;random&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Container</span><span class="o">&gt;</span>
+</span><span class='line'><span class="n">Container</span> <span class="n">GetRandomN</span><span class="p">(</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">Container</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">rand</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="n">GetRandomN</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2013/11/11/return-type-resolver/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-11T10:21:00+08:00" pubdate data-updated="true">Nov 11<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/11/11/return-type-resolver/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -787,86 +878,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/07/15/static-visitor/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/07/08/cpp11-perfect-forward/">
-		
-			C++11 完美转发</a>
-	</h2>
-	<div class="entry-content">
-		<h2>动机</h2>
-
-<p>在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变.</p>
-
-<h2>C++03 中参数转发存在的问题</h2>
-
-<p>下面来看一个例子, 对于表达式 <code>E(a, b, …, c)</code> 我们希望它与 <code>f(a, b, …, c)</code> 完全等价. 在 C++03 中这是不可能的. 下面是几种设计方案, 但所有的都会在某些条件下失效.</p>
-
-<p>最简单的, 使用引用参数:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>很遗憾, 函数 f 无法处理临时变量, 例如 <code>f(1, 2, 3)</code>; 会编译失败. 这三个参数都无法绑定到引用.</p>
-
-<p>再来看看 const 引用:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-
-		
-		<a href="/blog/2013/07/08/cpp11-perfect-forward/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-08T22:09:00+08:00" pubdate data-updated="true">Jul 8<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/07/08/cpp11-perfect-forward/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
