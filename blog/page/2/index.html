@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="动机 在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变. C++03 中参数转发存在的问题 下面来看一个例子, 对于表达式 E(a, b, …, c) 我们希望它与 f &hellip;">
+	<meta name="description" content="visitor 模式 visitor 模式是一种将算法与对象结构分离的软件设计模式. 这个模式的基本想法如下: 首先我们拥有一个由许多对象构成的对象结构, 这些对象的类都拥有一个 accept 方法用来接受访问者对象; 访问者是一个接口, 它拥有一个 visit 方法, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,56 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/07/15/static-visitor/">
+		
+			Visitor 模式与 boost.variant.static_visitor</a>
+	</h2>
+	<div class="entry-content">
+		<h2>visitor 模式</h2>
+
+<p>visitor 模式是一种将算法与对象结构分离的软件设计模式.</p>
+
+<p>这个模式的基本想法如下: 首先我们拥有一个由许多对象构成的对象结构, 这些对象的类都拥有一个 accept 方法用来接受访问者对象; 访问者是一个接口, 它拥有一个 visit 方法, 这个方法对访问到的对象结构中不同类型的元素作出不同的反应; 在对象结构的一次访问过程中, 我们遍历整个对象结构, 对每一个元素都实施 accept 方法, 在每一个元素的 accept 方法中回调访问者的 visit 方法, 从而使访问者得以处理对象结构的每一个元素. 我们可以针对对象结构设计不同的实在的访问者类来完成不同的操作.</p>
+
+<p>访问者模式使得我们可以在传统的单分派语言 (如 Smalltalk, Java 和 C++) 中模拟双分派技术.</p>
+
+
+		
+		<a href="/blog/2013/07/15/static-visitor/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-15T00:36:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/boost/'>boost</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/07/15/static-visitor/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -820,61 +870,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/04/09/staitc-and-dynamic-polymorphism/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/03/21/qtscript/">
-		
-			QtScript 与信号槽</a>
-	</h2>
-	<div class="entry-content">
-		<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
-
-<h2>在 QtScript 中使用信号槽</h2>
-
-<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
-
-<ol>
-<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
-<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
-<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
-</ol>
-
-
-
-		
-		<a href="/blog/2013/03/21/qtscript/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-21T14:53:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>, <a class='category' href='/blog/categories/webkit/'>webkit</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/03/21/qtscript/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

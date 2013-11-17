@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-11T13:17:36+08:00</updated>
+  <updated>2013-11-18T03:40:40+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,230 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[crypto++ 试用]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/11/18/cryptopp-aes-rsa/"/>
+    <updated>2013-11-18T00:04:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/11/18/cryptopp-aes-rsa</id>
+    <content type="html"><![CDATA[<p>由于某些需求, 需要研究一下加密解密的相关内容, 于是找到了 crypto++, 常见的加密算法, 这里面差不多都有了, 但是想用的话, 还是需要先补一下密码学相关的基础知识.</p>
+
+<h2>对等加密</h2>
+
+<p>对等加密 (Reciprocal cipher) 又称为对称密钥加密 (Symmetric-key algorithm), 对称加密, 私钥加密, 共享密钥加密, 是密码学中的一类加密算法. 该类密码的加密算法是它自己本身的逆反函数, 所以其解密算法等同于加密算法, 也就是说, 要还原对等加密的密文, 套用加密同样的算法即可得到明文. 换句话说, 若参数 (或密钥) 合适的话, 两次连续的对等加密运算后会回复原始文字. 在数学上, 这有时称之为对合. 在实际应用中, 体现为加密和解密使用同一个密钥, 或者知道一方密钥能够轻易计算出另一方密钥.</p>
+
+<p>常见的对称加密算法有 DES, 3DES, AES, Blowfish, IDEA, RC4, RC5, RC6.</p>
+
+<p>在对称钥匙密码学中, 加密和解密使用相同的钥匙, 也许对不同的信息使用不同的钥匙, 但都面临钥匙管理的难题. 由于每对通讯方都必须使用异于他组的钥匙, 当网络成员的数量增加时, 钥匙数量成二次方增加. 更尴尬的难题是: 当安全的通道不存在于双方时, 如何建立一个共有的钥匙以利安全的通讯? 如果有通道可以安全地建立钥匙, 何不使用现有的通道. 这个 &ldquo;鸡生蛋, 蛋生鸡&rdquo; 的矛盾是长年以来密码学无法在真实世界应用的阻碍.</p>
+
+<h2>公开密钥加密</h2>
+
+<p>公开密钥加密 (英语: Public-key cryptography, 也称为非对称(密钥)加密), 该思想最早由雷夫·莫寇 (Ralph C. Merkle) 在 1974 年提出, 之后在 1976 年. 狄菲 (Whitfield Diffie) 与赫尔曼 (Martin Hellman) 两位学者以单向函数与单向暗门函数为基础, 为发讯与收讯的两方创建密钥.</p>
+
+<p>非对称密钥, 是指一对加密密钥与解密密钥, 这两个密钥是数学相关, 用某用户密钥加密后所得的信息, 只能用该用户的解密密钥才能解密. 如果知道了其中一个, 并不能计算出另外一个. 因此如果公开了一对密钥中的一个, 并不会危害到另外一个的秘密性质. 称公开的密钥为公钥; 不公开的密钥为私钥.</p>
+
+<!-- more -->
+
+
+<p>如果加密密钥是公开的, 这用于客户给私钥所有者上传加密的数据, 这被称作为公开密钥加密 (狭义). 例如, 网络银行的客户发给银行网站的账户操作的加密数据.</p>
+
+<p>如果解密密钥是公开的, 用私钥加密的信息, 可以用公钥对其解密, 用于客户验证持有私钥一方发布的数据或文件是完整准确的, 接收者由此可知这条信息确实来自于拥有私钥的某人, 这被称作数字签名, 公钥的形式就是数字证书. 例如, 从网上下载的安装程序, 一般都带有程序制作者的数字签名, 可以证明该程序的确是该作者 (公司) 发布的而不是第三方伪造的且未被篡改过 (身份认证/验证).</p>
+
+<p>常见的公钥加密算法有: RSA, ElGamal, 背包算法, Rabin (RSA的特例), 迪菲－赫尔曼密钥交换协议中的公钥加密算法, 椭圆曲线加密算法 (英语: Elliptic Curve Cryptography, ECC). 使用最广泛的是 RSA 算法 (由发明者 Rivest, Shmir 和 Adleman 姓氏首字母缩写而来) 是著名的公开金钥加密算法, ElGamal 是另一种常用的非对称加密算法。</p>
+
+<p>与对称密钥加密相比, 优点在于无需共享的通用密钥, 解密的私钥不发往任何用户. 即使公钥在网上被截获, 如果没有与其匹配的私钥, 也无法解密, 所截获的公钥是没有任何用处的.</p>
+
+<p>由于公开密钥加密能加密的数据与密钥长度相关, 所以通常不会直接使用公开密钥加密的方式来加密数据, 在数字签名中, RSA 是用来加密/解密原始数据的散列值的(如 MD5, SHA1). 而在加密数据时, 公开密钥加密是用来加密对等加密的密钥的. 下面来看 crypto++ 中具体的加密算法的应用.</p>
+
+<h2>AES</h2>
+
+<p>AES, 高级加密标准 (Advanced Encryption Standard，AES), 在密码学中又称 Rijndael 加密法, 是美国联邦政府采用的一种区块加密标准. 这个标准用来替代原先的 DES, 已经被多方分析且广为全世界所使用. 经过五年的甄选流程, 高级加密标准由美国国家标准与技术研究院 (NIST) 于 2001 年 11 月 26 日发布于 FIPS PUB 197, 并在 2002 年 5 月 26 日成为有效的标准. 2006 年, 高级加密标准已然成为对称密钥加密中最流行的算法之一.</p>
+
+<p>分组加密 (Block cipher, 又称分块加密), 是一种对称密钥算法. 它将明文分成多个等长的模块 (block), 使用确定的算法和对称密钥对每组分别加密解密.</p>
+
+<p>分组加密就要涉及到块密码的工作模式, AES 有 5 种块密码的工作模式, 分别是: 电子密码本 (ECB), 密码块链接 (CBC), 密文反馈 (CFB), 输出反馈 (OFB), 计数器模式(CTR), 各种优缺点详见<a href="http://zh.wikipedia.org/wiki/%E5%9D%97%E5%AF%86%E7%A0%81%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F">块密码的工作模式</a>.</p>
+
+<p>下面是利用 crypto++ 实现 CBC 模式的 AES 加密/解密测试程序</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &quot;aes.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;modes.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;filters.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">byte</span> <span class="n">key</span><span class="p">[</span><span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">byte</span> <span class="n">iv</span><span class="p">[</span><span class="n">AES</span><span class="o">::</span><span class="n">BLOCKSIZE</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">BLOCKSIZE</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">origin</span> <span class="o">=</span> <span class="s">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ciphertext</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">origin</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">AES</span><span class="o">::</span><span class="n">Encryption</span> <span class="n">aes_encryption</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">CBC_Mode_ExternalCipher</span><span class="o">::</span><span class="n">Encryption</span> <span class="n">cbc_encryption</span><span class="p">(</span><span class="n">aes_encryption</span><span class="p">,</span> <span class="n">iv</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">StreamTransformationFilter</span> <span class="n">encryptor</span><span class="p">(</span><span class="n">cbc_encryption</span><span class="p">,</span> <span class="k">new</span> <span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">));</span>
+</span><span class='line'>  <span class="n">encryptor</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">origin</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span> <span class="n">origin</span><span class="p">.</span><span class="n">length</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">encryptor</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mh">0xFF</span> <span class="o">&amp;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">AES</span><span class="o">::</span><span class="n">Decryption</span> <span class="n">aes_decryption</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">CBC_Mode_ExternalCipher</span><span class="o">::</span><span class="n">Decryption</span> <span class="n">cbc_decryption</span><span class="p">(</span><span class="n">aes_decryption</span><span class="p">,</span> <span class="n">iv</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">StreamTransformationFilter</span> <span class="n">decryptor</span><span class="p">(</span><span class="n">cbc_decryption</span><span class="p">,</span> <span class="k">new</span> <span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">));</span>
+</span><span class='line'>  <span class="n">decryptor</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">decryptor</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>RSA</h2>
+
+<p>RSA 加密算法是一种非对称加密算法. 在公开密钥加密和电子商业中 RSA 被广泛使用. RSA 是 1977 年由罗纳德·李维斯特 (Ron Rivest), 阿迪·萨莫尔 (Adi Shamir) 和伦纳德·阿德曼 (Leonard Adleman) 一起提出的. 当时他们三人都在麻省理工学院工作. RSA 就是他们三人姓氏开头字母拼在一起组成的.</p>
+
+<p>1973 年, 在英国政府通讯总部工作的数学家克利福德·柯克斯 (Clifford Cocks) 在一个内部文件中提出了一个相同的算法, 但他的发现被列入机密, 一直到1997年才被发表.</p>
+
+<p>对极大整数做因数分解的难度决定了 RSA 算法的可靠性. 换言之, 对一极大整数做因数分解愈困难, RSA 算法愈可靠. 尽管如此, 只有一些 RSA 算法的变种被证明为其安全性依赖于因数分解. 假如有人找到一种快速因数分解的算法的话, 那么用 RSA 加密的信息的可靠性就肯定会极度下降. 但找到这样的算法的可能性是非常小的. 今天只有短的 RSA 钥匙才可能被强力方式解破. 到 2008 年为止, 世界上还没有任何可靠的攻击 RSA 算法的方式. 只要其钥匙的长度足够长, 用 RSA 加密的信息实际上是不能被解破的.</p>
+
+<p>下面是利用 crypto++ 实现的 RSA 测试程序</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;rsa.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">InvertibleRSAFunction</span> <span class="n">params</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">params</span><span class="p">.</span><span class="n">GenerateRandomWithKeySize</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">1024</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">origin</span> <span class="o">=</span> <span class="s">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ciphertext</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">origin</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">RSA</span><span class="o">::</span><span class="n">PrivateKey</span> <span class="n">private_key</span><span class="p">(</span><span class="n">params</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">RSA</span><span class="o">::</span><span class="n">PublicKey</span> <span class="n">public_key</span><span class="p">(</span><span class="n">params</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Encryptor</span> <span class="n">e</span><span class="p">(</span><span class="n">public_key</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mh">0xFF</span> <span class="o">&amp;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Decryptor</span> <span class="n">d</span><span class="p">(</span><span class="n">private_key</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://www.cryptopp.com/">Crypto++ HomePage</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">Block cipher mode of operation</a></li>
+<li><a href="http://en.wikipedia.org/wiki/RSA_%28cryptosystem%29">RSA</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html">RSA 算法原理(一)</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html">RSA 算法原理(二)</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[返回值类型推导]]></title>
@@ -3394,85 +3618,6 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 <ul>
 <li><a href="http://svn.boost.org/svn/boost/trunk/boost/any.hpp">boost::any</a></li>
 <li><a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[QtScript 与信号槽]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/03/21/qtscript/"/>
-    <updated>2013-03-21T14:53:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/03/21/qtscript</id>
-    <content type="html"><![CDATA[<p>Qt从4.3开始, 提供了 <a href="http://zh.wikipedia.org/wiki/ECMAScript">ECMAScript</a> 支持，QtScript 模块提供了一些让 Qt 应用程序脚本化的类. 在 Qt4 中 Webkit 与 QtScript 使用了相同的 javascript 引擎实现.（Qt5 中, javascript 引擎使用了 google 的 V8）</p>
-
-<h2>在 QtScript 中使用信号槽</h2>
-
-<p>Qt Script 可以使用Qt的核心特性: 信号槽. 信号只能存在于 C++ 的代码中, 但槽函数，以及连接的动作可以放到 javascript 中来做</p>
-
-<ol>
-<li>C++ 调用 script: 连接 C++ 代码中的信号到 script 函数上. 这个 script 函数可以是 C++ 代码中包含的 script 字符串, 也可以是从文件中读进来的. 如果不想将 QObject 对象泄露到脚本的运行环境中时, 这个方法是非常有用的. 仅仅需要在 script 代码中定义信号需要怎么被响应, 剩下的就是把连接工作放到 C++ 代码里就可以了.</li>
-<li>Script 调用 C++: script 可以连接注入到脚本环境中的 C++ 对象的信号和槽, 在这种情况下, 槽函数还是定义在 C++ 代码中, 但是信号和槽的连接完全是动态的（在 script 中完成）</li>
-<li>纯script: script 可以定义信号的响应函数句柄, 然后使用句柄建立信号与槽的连接. 比如： script 可以定义一个函数用来响应 <code>QLineEdit::returnPressed()</code> 信号, 然后连接信号与 script 函数.</li>
-</ol>
-
-
-<!-- more -->
-
-
-<p>使用 <code>qScriptConnect()</code> 函数连接 C++ 信号到 script 函数上. 下面的例子中, handler 用来处理 <code>QLineEdit::textChanged()</code> 信号:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">QScriptEngine</span> <span class="n">eng</span><span class="p">;</span>
-</span><span class='line'><span class="n">QLineEdit</span> <span class="o">*</span><span class="n">edit</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QLineEdit</span><span class="p">();</span>
-</span><span class='line'><span class="n">QScriptValue</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">eng</span><span class="p">.</span><span class="n">evaluate</span><span class="p">(</span>
-</span><span class='line'><span class="s">&quot;(function(text) { print(&#39;text was changed to&#39;, text); })&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="n">qScriptConnect</span><span class="p">(</span><span class="n">edit</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="n">textChanged</span><span class="p">(</span><span class="k">const</span> <span class="n">QString</span> <span class="o">&amp;</span><span class="p">)),</span> <span class="n">QScriptValue</span><span class="p">(),</span> <span class="n">handler</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>qScriptConnect()</code> 的前两个参数与 <code>QObject::connect()</code> 的完全一致. 第三个参数是 script 对象, 当 signal handler 被调用时, 它充当 <code>this</code> 的角色. 在上面的代码中, 我们传入了一个不可用的值, 此时 <code>this</code> 是全局对象. 第四个参数是 script 函数, 相当于槽函数.
-下面的代码展示如何使用 <code>this</code> 参数:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">QLineEdit</span> <span class="o">*</span><span class="n">edit1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QLineEdit</span><span class="p">();</span>
-</span><span class='line'><span class="n">QLineEdit</span> <span class="o">*</span><span class="n">edit2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QLineEdit</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">QScriptValue</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">eng</span><span class="p">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s">&quot;(function() { print(&#39;I am&#39;, this.name); })&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="n">QScriptValue</span> <span class="n">obj1</span> <span class="o">=</span> <span class="n">eng</span><span class="p">.</span><span class="n">newObject</span><span class="p">();</span>
-</span><span class='line'><span class="n">obj1</span><span class="p">.</span><span class="n">setProperty</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;the walrus&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="n">QScriptValue</span> <span class="n">obj2</span> <span class="o">=</span> <span class="n">eng</span><span class="p">.</span><span class="n">newObject</span><span class="p">();</span>
-</span><span class='line'><span class="n">obj2</span><span class="p">.</span><span class="n">setProperty</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;Sam&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">qScriptConnect</span><span class="p">(</span><span class="n">edit1</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="n">returnPressed</span><span class="p">()),</span> <span class="n">obj1</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
-</span><span class='line'><span class="n">qScriptConnect</span><span class="p">(</span><span class="n">edit2</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="n">returnPressed</span><span class="p">()),</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我们创建了两个 <code>QLineEdit</code> 对象, 然后定义了信号响应函数. 信号槽链接使用了相同的响应函数, 但是使用不同的 <code>this</code> 对象, 具体使用哪个, 取决于哪个对象发出信号, 因此 <code>print()</code> 语句输出的内容将会有所不同.</p>
-
-<p>在某个项目中,设计之初曾经考虑过以下的交互方式: javascript 传入 json 对象, 其中某个 value 是匿名 function, 来实现异步调用. 这种方式看起来很美, 也与第一种方式类似, 但是存在问题. C++ 无法获得当前 webkit 的 javascript 运行环境. QtScript 曾考虑过提供 API 来访问 webkit 的 javascript 运行环境, 详细信息可以参考：<a href="https://bugreports.qt-project.org/browse/QTWEBKIT-2">https://bugreports.qt-project.org/browse/QTWEBKIT-2</a>, 但由于种种原因最终放弃了, 不得不说这是个遗憾.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://qt-project.org/doc/qt-4.8/qtscript.html">http://qt-project.org/doc/qt-4.8/qtscript.html</a></li>
-<li><a href="http://qt-project.org/doc/qt-4.8/scripting.html">http://qt-project.org/doc/qt-4.8/scripting.html</a></li>
-<li><a href="http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html">http://qt-project.org/doc/qt-4.8/qtwebkit-bridge.html</a></li>
 </ul>
 
 ]]></content>
