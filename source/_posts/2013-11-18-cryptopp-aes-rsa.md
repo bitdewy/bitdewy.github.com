@@ -1,0 +1,147 @@
+---
+layout: post
+title: "crypto++ 试用"
+date: 2013-11-18 00:04
+comments: true
+categories: [C++, cryptography]
+---
+
+由于某些需求, 需要研究一下加密解密的相关内容, 于是找到了 crypto++, 常见的加密算法, 这里面差不多都有了, 但是想用的话, 还是需要先补一下密码学相关的基础知识.
+
+
+##对等加密
+
+对等加密 (Reciprocal cipher) 又称为对称密钥加密 (Symmetric-key algorithm), 对称加密, 私钥加密, 共享密钥加密, 是密码学中的一类加密算法. 该类密码的加密算法是它自己本身的逆反函数, 所以其解密算法等同于加密算法, 也就是说, 要还原对等加密的密文, 套用加密同样的算法即可得到明文. 换句话说, 若参数 (或密钥) 合适的话, 两次连续的对等加密运算后会回复原始文字. 在数学上, 这有时称之为对合. 在实际应用中, 体现为加密和解密使用同一个密钥, 或者知道一方密钥能够轻易计算出另一方密钥.
+
+常见的对称加密算法有 DES, 3DES, AES, Blowfish, IDEA, RC4, RC5, RC6.
+
+在对称钥匙密码学中, 加密和解密使用相同的钥匙, 也许对不同的信息使用不同的钥匙, 但都面临钥匙管理的难题. 由于每对通讯方都必须使用异于他组的钥匙, 当网络成员的数量增加时, 钥匙数量成二次方增加. 更尴尬的难题是: 当安全的通道不存在于双方时, 如何建立一个共有的钥匙以利安全的通讯? 如果有通道可以安全地建立钥匙, 何不使用现有的通道. 这个 "鸡生蛋, 蛋生鸡" 的矛盾是长年以来密码学无法在真实世界应用的阻碍.
+
+
+##公开密钥加密
+
+公开密钥加密 (英语: Public-key cryptography, 也称为非对称(密钥)加密), 该思想最早由雷夫·莫寇 (Ralph C. Merkle) 在 1974 年提出, 之后在 1976 年. 狄菲 (Whitfield Diffie) 与赫尔曼 (Martin Hellman) 两位学者以单向函数与单向暗门函数为基础, 为发讯与收讯的两方创建密钥.
+
+非对称密钥, 是指一对加密密钥与解密密钥, 这两个密钥是数学相关, 用某用户密钥加密后所得的信息, 只能用该用户的解密密钥才能解密. 如果知道了其中一个, 并不能计算出另外一个. 因此如果公开了一对密钥中的一个, 并不会危害到另外一个的秘密性质. 称公开的密钥为公钥; 不公开的密钥为私钥.
+
+<!-- more -->
+如果加密密钥是公开的, 这用于客户给私钥所有者上传加密的数据, 这被称作为公开密钥加密 (狭义). 例如, 网络银行的客户发给银行网站的账户操作的加密数据.
+
+如果解密密钥是公开的, 用私钥加密的信息, 可以用公钥对其解密, 用于客户验证持有私钥一方发布的数据或文件是完整准确的, 接收者由此可知这条信息确实来自于拥有私钥的某人, 这被称作数字签名, 公钥的形式就是数字证书. 例如, 从网上下载的安装程序, 一般都带有程序制作者的数字签名, 可以证明该程序的确是该作者 (公司) 发布的而不是第三方伪造的且未被篡改过 (身份认证/验证).
+
+常见的公钥加密算法有: RSA, ElGamal, 背包算法, Rabin (RSA的特例), 迪菲－赫尔曼密钥交换协议中的公钥加密算法, 椭圆曲线加密算法 (英语: Elliptic Curve Cryptography, ECC). 使用最广泛的是 RSA 算法 (由发明者 Rivest, Shmir 和 Adleman 姓氏首字母缩写而来) 是著名的公开金钥加密算法, ElGamal 是另一种常用的非对称加密算法。
+
+与对称密钥加密相比, 优点在于无需共享的通用密钥, 解密的私钥不发往任何用户. 即使公钥在网上被截获, 如果没有与其匹配的私钥, 也无法解密, 所截获的公钥是没有任何用处的.
+
+由于公开密钥加密能加密的数据与密钥长度相关, 所以通常不会直接使用公开密钥加密的方式来加密数据, 在数字签名中, RSA 是用来加密/解密原始数据的散列值的(如 MD5, SHA1). 而在加密数据时, 公开密钥加密是用来加密对等加密的密钥的. 下面来看 crypto++ 中具体的加密算法的应用.
+
+
+##AES
+
+AES, 高级加密标准 (Advanced Encryption Standard，AES), 在密码学中又称 Rijndael 加密法, 是美国联邦政府采用的一种区块加密标准. 这个标准用来替代原先的 DES, 已经被多方分析且广为全世界所使用. 经过五年的甄选流程, 高级加密标准由美国国家标准与技术研究院 (NIST) 于 2001 年 11 月 26 日发布于 FIPS PUB 197, 并在 2002 年 5 月 26 日成为有效的标准. 2006 年, 高级加密标准已然成为对称密钥加密中最流行的算法之一. 
+
+分组加密 (Block cipher, 又称分块加密), 是一种对称密钥算法. 它将明文分成多个等长的模块 (block), 使用确定的算法和对称密钥对每组分别加密解密. 
+
+分组加密就要涉及到块密码的工作模式, AES 有 5 种块密码的工作模式, 分别是: 电子密码本 (ECB), 密码块链接 (CBC), 密文反馈 (CFB), 输出反馈 (OFB), 计数器模式(CTR), 各种优缺点详见[块密码的工作模式](http://zh.wikipedia.org/wiki/块密码的工作模式).
+
+下面是利用 crypto++ 实现 CBC 模式的 AES 加密/解密测试程序
+
+```cpp
+#include <iostream>
+#include "aes.h"
+#include "modes.h"
+#include "filters.h"
+
+int main(int argc, char* argv[]) {
+  using namespace CryptoPP;
+  byte key[AES::DEFAULT_KEYLENGTH];
+  byte iv[AES::BLOCKSIZE];
+  memset(key, 0, AES::DEFAULT_KEYLENGTH);
+  memset(iv, 0, AES::BLOCKSIZE);
+
+  std::string origin = "abcdefghijklmnopqrstuvwxyz";
+  std::string ciphertext;
+  std::string decrypted;
+
+  std::cout << origin << "\n\n";
+
+  AES::Encryption aes_encryption(key, AES::DEFAULT_KEYLENGTH);
+  CBC_Mode_ExternalCipher::Encryption cbc_encryption(aes_encryption, iv);
+
+  StreamTransformationFilter encryptor(cbc_encryption, new StringSink(ciphertext));
+  encryptor.Put(reinterpret_cast<const unsigned char*>(origin.c_str()), origin.length());
+  encryptor.MessageEnd();
+
+  for (size_t i = 0; i < ciphertext.size(); i++) {
+    std::cout << std::hex << (0xFF & static_cast<byte>(ciphertext[i])) << " ";
+  }
+  std::cout << "\n\n";
+
+  AES::Decryption aes_decryption(key, AES::DEFAULT_KEYLENGTH);
+  CBC_Mode_ExternalCipher::Decryption cbc_decryption(aes_decryption, iv);
+
+  StreamTransformationFilter decryptor(cbc_decryption, new StringSink(decrypted));
+  decryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()), ciphertext.size());
+  decryptor.MessageEnd();
+
+  std::cout << decrypted << "\n\n";
+
+  return 0;
+}
+```
+
+##RSA
+
+RSA 加密算法是一种非对称加密算法. 在公开密钥加密和电子商业中 RSA 被广泛使用. RSA 是 1977 年由罗纳德·李维斯特 (Ron Rivest), 阿迪·萨莫尔 (Adi Shamir) 和伦纳德·阿德曼 (Leonard Adleman) 一起提出的. 当时他们三人都在麻省理工学院工作. RSA 就是他们三人姓氏开头字母拼在一起组成的.
+
+1973 年, 在英国政府通讯总部工作的数学家克利福德·柯克斯 (Clifford Cocks) 在一个内部文件中提出了一个相同的算法, 但他的发现被列入机密, 一直到1997年才被发表.
+
+对极大整数做因数分解的难度决定了 RSA 算法的可靠性. 换言之, 对一极大整数做因数分解愈困难, RSA 算法愈可靠. 尽管如此, 只有一些 RSA 算法的变种被证明为其安全性依赖于因数分解. 假如有人找到一种快速因数分解的算法的话, 那么用 RSA 加密的信息的可靠性就肯定会极度下降. 但找到这样的算法的可能性是非常小的. 今天只有短的 RSA 钥匙才可能被强力方式解破. 到 2008 年为止, 世界上还没有任何可靠的攻击 RSA 算法的方式. 只要其钥匙的长度足够长, 用 RSA 加密的信息实际上是不能被解破的.
+
+下面是利用 crypto++ 实现的 RSA 测试程序
+
+```cpp
+#include <iostream>
+#include "osrng.h"
+#include "rsa.h"
+
+int main(int argc, char* argv[]) {
+  using namespace CryptoPP;
+  AutoSeededRandomPool r;
+  InvertibleRSAFunction params;
+  params.GenerateRandomWithKeySize(r, 1024);
+
+  std::string origin = "abcdefghijklmnopqrstuvwxyz";
+  std::string ciphertext;
+  std::string decrypted;
+
+  std::cout << origin << "\n\n";
+
+  RSA::PrivateKey private_key(params);
+  RSA::PublicKey public_key(params);
+
+  RSAES_OAEP_SHA_Encryptor e(public_key);
+  StringSource(origin, true, new CryptoPP::PK_EncryptorFilter(r, e, new CryptoPP::StringSink(ciphertext)));
+
+  for (size_t i = 0; i < ciphertext.size(); i++) {
+    std::cout << std::hex << (0xFF & static_cast<byte>(ciphertext[i])) << " ";
+  }
+  std::cout << "\n\n";
+
+  RSAES_OAEP_SHA_Decryptor d(private_key);
+  StringSource(ciphertext, true, new CryptoPP::PK_DecryptorFilter(r, d, new CryptoPP::StringSink(decrypted)));
+
+  std::cout << decrypted << "\n\n";
+
+  return 0;
+}
+```
+
+##参考
+
+- [Crypto++ HomePage](http://www.cryptopp.com/)
+- [AES](http://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+- [Block cipher mode of operation](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
+- [RSA](http://en.wikipedia.org/wiki/RSA_%28cryptosystem%29)
+- [RSA 算法原理(一)](http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html)
+- [RSA 算法原理(二)](http://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html)
