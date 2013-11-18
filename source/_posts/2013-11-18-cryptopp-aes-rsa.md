@@ -51,17 +51,20 @@ AES, 高级加密标准 (Advanced Encryption Standard，AES), 在密码学中又
 #include "aes.h"
 #include "modes.h"
 #include "filters.h"
+#include "osrng.h"
+#include "hex.h"
 
 int main(int argc, char* argv[]) {
   using namespace CryptoPP;
+  AutoSeededRandomPool r;
+
   byte key[AES::DEFAULT_KEYLENGTH];
   byte iv[AES::BLOCKSIZE];
-  memset(key, 0, AES::DEFAULT_KEYLENGTH);
-  memset(iv, 0, AES::BLOCKSIZE);
+  r.GenerateBlock(key, AES::DEFAULT_KEYLENGTH);
+  r.GenerateBlock(iv, AES::BLOCKSIZE);
 
   std::string origin = "abcdefghijklmnopqrstuvwxyz";
   std::string ciphertext;
-  std::string decrypted;
 
   std::cout << origin << "\n\n";
 
@@ -72,16 +75,42 @@ int main(int argc, char* argv[]) {
   encryptor.Put(reinterpret_cast<const unsigned char*>(origin.c_str()), origin.length());
   encryptor.MessageEnd();
 
-  for (size_t i = 0; i < ciphertext.size(); i++) {
-    std::cout << std::hex << (0xFF & static_cast<byte>(ciphertext[i])) << " ";
+  std::string encoded;
+  HexEncoder encoder;
+
+  encoder.Put((byte*)ciphertext.data(), ciphertext.size());
+  encoder.MessageEnd();
+
+  word64 encoder_size = encoder.MaxRetrievable();
+  if(encoder_size && encoder_size <= SIZE_MAX) {
+      encoded.resize(encoder_size);
+      encoder.Get((byte*)encoded.data(), encoded.size());
   }
-  std::cout << "\n\n";
+
+  std::cout << encoded << "\n\n";
+
+  // send encoded to server
+
+  std::string decoded;
+  HexDecoder decoder;
+
+  decoder.Put((byte*)encoded.data(), encoded.size());
+  decoder.MessageEnd();
+
+  word64 decoder_size = decoder.MaxRetrievable();
+  if(decoder_size && decoder_size <= SIZE_MAX) {
+      decoded.resize(decoder_size);
+      decoder.Get((byte*)decoded.data(), decoded.size());
+  }
+
+  std::cout << decoded << "\n\n";
 
   AES::Decryption aes_decryption(key, AES::DEFAULT_KEYLENGTH);
   CBC_Mode_ExternalCipher::Decryption cbc_decryption(aes_decryption, iv);
 
+  std::string decrypted;
   StreamTransformationFilter decryptor(cbc_decryption, new StringSink(decrypted));
-  decryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()), ciphertext.size());
+  decryptor.Put(reinterpret_cast<const unsigned char*>(decoded.c_str()), decoded.size());
   decryptor.MessageEnd();
 
   std::cout << decrypted << "\n\n";
@@ -102,6 +131,7 @@ RSA 加密算法是一种非对称加密算法. 在公开密钥加密和电子�
 
 ```cpp
 #include <iostream>
+#include "hex.h"
 #include "osrng.h"
 #include "rsa.h"
 
@@ -113,7 +143,6 @@ int main(int argc, char* argv[]) {
 
   std::string origin = "abcdefghijklmnopqrstuvwxyz";
   std::string ciphertext;
-  std::string decrypted;
 
   std::cout << origin << "\n\n";
 
@@ -123,13 +152,39 @@ int main(int argc, char* argv[]) {
   RSAES_OAEP_SHA_Encryptor e(public_key);
   StringSource(origin, true, new CryptoPP::PK_EncryptorFilter(r, e, new CryptoPP::StringSink(ciphertext)));
 
-  for (size_t i = 0; i < ciphertext.size(); i++) {
-    std::cout << std::hex << (0xFF & static_cast<byte>(ciphertext[i])) << " ";
-  }
-  std::cout << "\n\n";
+   std::string encoded;
+  HexEncoder encoder;
 
+  encoder.Put((byte*)ciphertext.data(), ciphertext.size());
+  encoder.MessageEnd();
+
+  word64 encoder_size = encoder.MaxRetrievable();
+  if(encoder_size && encoder_size <= SIZE_MAX) {
+      encoded.resize(encoder_size);
+      encoder.Get((byte*)encoded.data(), encoded.size());
+  }
+
+  std::cout << encoded << "\n\n";
+
+  // send encoded to server
+
+  std::string decoded;
+  HexDecoder decoder;
+
+  decoder.Put((byte*)encoded.data(), encoded.size());
+  decoder.MessageEnd();
+
+  word64 decoder_size = decoder.MaxRetrievable();
+  if(decoder_size && decoder_size <= SIZE_MAX) {
+      decoded.resize(decoder_size);
+      decoder.Get((byte*)decoded.data(), decoded.size());
+  }
+
+  std::cout << decoded << "\n\n";
+
+  std::string decrypted;
   RSAES_OAEP_SHA_Decryptor d(private_key);
-  StringSource(ciphertext, true, new CryptoPP::PK_DecryptorFilter(r, d, new CryptoPP::StringSink(decrypted)));
+  StringSource(decoded, true, new CryptoPP::PK_DecryptorFilter(r, d, new CryptoPP::StringSink(decrypted)));
 
   std::cout << decrypted << "\n\n";
 
