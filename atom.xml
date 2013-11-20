@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-18T03:40:40+08:00</updated>
+  <updated>2013-11-21T00:16:42+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -98,21 +98,53 @@
 <span class='line-number'>39</span>
 <span class='line-number'>40</span>
 <span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
 </span><span class='line'><span class="cp">#include &quot;aes.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;modes.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;filters.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;hex.h&quot;</span>
 </span><span class='line'>
 </span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">using</span> <span class="k">namespace</span> <span class="n">CryptoPP</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">AutoSeededRandomPool</span> <span class="n">r</span><span class="p">;</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="n">byte</span> <span class="n">key</span><span class="p">[</span><span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">];</span>
 </span><span class='line'>  <span class="n">byte</span> <span class="n">iv</span><span class="p">[</span><span class="n">AES</span><span class="o">::</span><span class="n">BLOCKSIZE</span><span class="p">];</span>
-</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">BLOCKSIZE</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">r</span><span class="p">.</span><span class="n">GenerateBlock</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">r</span><span class="p">.</span><span class="n">GenerateBlock</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">BLOCKSIZE</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">origin</span> <span class="o">=</span> <span class="s">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ciphertext</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">origin</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>
@@ -123,16 +155,42 @@
 </span><span class='line'>  <span class="n">encryptor</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">origin</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span> <span class="n">origin</span><span class="p">.</span><span class="n">length</span><span class="p">());</span>
 </span><span class='line'>  <span class="n">encryptor</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mh">0xFF</span> <span class="o">&amp;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">encoded</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">HexEncoder</span> <span class="n">encoder</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">encoder</span><span class="p">.</span><span class="n">Put</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">ciphertext</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">encoder</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">word64</span> <span class="n">encoder_size</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">.</span><span class="n">MaxRetrievable</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">encoder_size</span> <span class="o">&amp;&amp;</span> <span class="n">encoder_size</span> <span class="o">&lt;=</span> <span class="n">SIZE_MAX</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">encoded</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">encoder_size</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">encoder</span><span class="p">.</span><span class="n">Get</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">encoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">encoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
 </span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">encoded</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// send encoded to server</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decoded</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">HexDecoder</span> <span class="n">decoder</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">decoder</span><span class="p">.</span><span class="n">Put</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">encoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">encoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">decoder</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">word64</span> <span class="n">decoder_size</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">.</span><span class="n">MaxRetrievable</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">decoder_size</span> <span class="o">&amp;&amp;</span> <span class="n">decoder_size</span> <span class="o">&lt;=</span> <span class="n">SIZE_MAX</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">decoded</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">decoder_size</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">decoder</span><span class="p">.</span><span class="n">Get</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">decoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decoded</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">AES</span><span class="o">::</span><span class="n">Decryption</span> <span class="n">aes_decryption</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AES</span><span class="o">::</span><span class="n">DEFAULT_KEYLENGTH</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">CBC_Mode_ExternalCipher</span><span class="o">::</span><span class="n">Decryption</span> <span class="n">cbc_decryption</span><span class="p">(</span><span class="n">aes_decryption</span><span class="p">,</span> <span class="n">iv</span><span class="p">);</span>
 </span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">StreamTransformationFilter</span> <span class="n">decryptor</span><span class="p">(</span><span class="n">cbc_decryption</span><span class="p">,</span> <span class="k">new</span> <span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">));</span>
-</span><span class='line'>  <span class="n">decryptor</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">decryptor</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">decoded</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span> <span class="n">decoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
 </span><span class='line'>  <span class="n">decryptor</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
@@ -186,7 +244,34 @@
 <span class='line-number'>32</span>
 <span class='line-number'>33</span>
 <span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &quot;hex.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;osrng.h&quot;</span>
 </span><span class='line'><span class="cp">#include &quot;rsa.h&quot;</span>
 </span><span class='line'>
@@ -198,7 +283,6 @@
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">origin</span> <span class="o">=</span> <span class="s">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ciphertext</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">origin</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>
@@ -208,13 +292,39 @@
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Encryptor</span> <span class="n">e</span><span class="p">(</span><span class="n">public_key</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_EncryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)));</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mh">0xFF</span> <span class="o">&amp;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">encoded</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">HexEncoder</span> <span class="n">encoder</span><span class="p">;</span>
 </span><span class='line'>
+</span><span class='line'>  <span class="n">encoder</span><span class="p">.</span><span class="n">Put</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">ciphertext</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">ciphertext</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">encoder</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">word64</span> <span class="n">encoder_size</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">.</span><span class="n">MaxRetrievable</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">encoder_size</span> <span class="o">&amp;&amp;</span> <span class="n">encoder_size</span> <span class="o">&lt;=</span> <span class="n">SIZE_MAX</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">encoded</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">encoder_size</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">encoder</span><span class="p">.</span><span class="n">Get</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">encoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">encoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">encoded</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// send encoded to server</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decoded</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">HexDecoder</span> <span class="n">decoder</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">decoder</span><span class="p">.</span><span class="n">Put</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">encoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">encoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">decoder</span><span class="p">.</span><span class="n">MessageEnd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">word64</span> <span class="n">decoder_size</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">.</span><span class="n">MaxRetrievable</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">decoder_size</span> <span class="o">&amp;&amp;</span> <span class="n">decoder_size</span> <span class="o">&lt;=</span> <span class="n">SIZE_MAX</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">decoded</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">decoder_size</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">decoder</span><span class="p">.</span><span class="n">Get</span><span class="p">((</span><span class="n">byte</span><span class="o">*</span><span class="p">)</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">decoded</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decoded</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">decrypted</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">RSAES_OAEP_SHA_Decryptor</span> <span class="n">d</span><span class="p">(</span><span class="n">private_key</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
+</span><span class='line'>  <span class="n">StringSource</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">PK_DecryptorFilter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">new</span> <span class="n">CryptoPP</span><span class="o">::</span><span class="n">StringSink</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)));</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">decrypted</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">;</span>
 </span><span class='line'>

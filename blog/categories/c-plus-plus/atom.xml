@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-18T03:40:40+08:00</updated>
+  <updated>2013-11-21T00:16:42+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -67,16 +67,21 @@
 
 <h1>include &ldquo;filters.h&rdquo;</h1>
 
+<h1>include &ldquo;osrng.h&rdquo;</h1>
+
+<h1>include &ldquo;hex.h&rdquo;</h1>
+
 <p>int main(int argc, char* argv[]) {
   using namespace CryptoPP;
-  byte key[AES::DEFAULT_KEYLENGTH];
+  AutoSeededRandomPool r;</p>
+
+<p>  byte key[AES::DEFAULT_KEYLENGTH];
   byte iv[AES::BLOCKSIZE];
-  memset(key, 0, AES::DEFAULT_KEYLENGTH);
-  memset(iv, 0, AES::BLOCKSIZE);</p>
+  r.GenerateBlock(key, AES::DEFAULT_KEYLENGTH);
+  r.GenerateBlock(iv, AES::BLOCKSIZE);</p>
 
 <p>  std::string origin = &ldquo;abcdefghijklmnopqrstuvwxyz&rdquo;;
-  std::string ciphertext;
-  std::string decrypted;</p>
+  std::string ciphertext;</p>
 
 <p>  std::cout &lt;&lt; origin &lt;&lt; &ldquo;\n\n&rdquo;;</p>
 
@@ -87,19 +92,48 @@
   encryptor.Put(reinterpret_cast<const unsigned char*>(origin.c_str()), origin.length());
   encryptor.MessageEnd();</p>
 
-<p>  for (size_t i = 0; i &lt; ciphertext.size(); i++) {</p>
+<p>  std::string encoded;
+  HexEncoder encoder;</p>
 
-<pre><code>std::cout &lt;&lt; std::hex &lt;&lt; (0xFF &amp; static_cast&lt;byte&gt;(ciphertext[i])) &lt;&lt; " ";
+<p>  encoder.Put((byte*)ciphertext.data(), ciphertext.size());
+  encoder.MessageEnd();</p>
+
+<p>  word64 encoder_size = encoder.MaxRetrievable();
+  if(encoder_size &amp;&amp; encoder_size &lt;= SIZE_MAX) {</p>
+
+<pre><code>  encoded.resize(encoder_size);
+  encoder.Get((byte*)encoded.data(), encoded.size());
 </code></pre>
 
-<p>  }
-  std::cout &lt;&lt; &ldquo;\n\n&rdquo;;</p>
+<p>  }</p>
+
+<p>  std::cout &lt;&lt; encoded &lt;&lt; &ldquo;\n\n&rdquo;;</p>
+
+<p>  // send encoded to server</p>
+
+<p>  std::string decoded;
+  HexDecoder decoder;</p>
+
+<p>  decoder.Put((byte*)encoded.data(), encoded.size());
+  decoder.MessageEnd();</p>
+
+<p>  word64 decoder_size = decoder.MaxRetrievable();
+  if(decoder_size &amp;&amp; decoder_size &lt;= SIZE_MAX) {</p>
+
+<pre><code>  decoded.resize(decoder_size);
+  decoder.Get((byte*)decoded.data(), decoded.size());
+</code></pre>
+
+<p>  }</p>
+
+<p>  std::cout &lt;&lt; decoded &lt;&lt; &ldquo;\n\n&rdquo;;</p>
 
 <p>  AES::Decryption aes_decryption(key, AES::DEFAULT_KEYLENGTH);
   CBC_Mode_ExternalCipher::Decryption cbc_decryption(aes_decryption, iv);</p>
 
-<p>  StreamTransformationFilter decryptor(cbc_decryption, new StringSink(decrypted));
-  decryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()), ciphertext.size());
+<p>  std::string decrypted;
+  StreamTransformationFilter decryptor(cbc_decryption, new StringSink(decrypted));
+  decryptor.Put(reinterpret_cast<const unsigned char*>(decoded.c_str()), decoded.size());
   decryptor.MessageEnd();</p>
 
 <p>  std::cout &lt;&lt; decrypted &lt;&lt; &ldquo;\n\n&rdquo;;</p>
@@ -122,6 +156,8 @@
 
 <h1>include <iostream></h1>
 
+<h1>include &ldquo;hex.h&rdquo;</h1>
+
 <h1>include &ldquo;osrng.h&rdquo;</h1>
 
 <h1>include &ldquo;rsa.h&rdquo;</h1>
@@ -133,8 +169,7 @@
   params.GenerateRandomWithKeySize(r, 1024);</p>
 
 <p>  std::string origin = &ldquo;abcdefghijklmnopqrstuvwxyz&rdquo;;
-  std::string ciphertext;
-  std::string decrypted;</p>
+  std::string ciphertext;</p>
 
 <p>  std::cout &lt;&lt; origin &lt;&lt; &ldquo;\n\n&rdquo;;</p>
 
@@ -144,16 +179,45 @@
 <p>  RSAES_OAEP_SHA_Encryptor e(public_key);
   StringSource(origin, true, new CryptoPP::PK_EncryptorFilter(r, e, new CryptoPP::StringSink(ciphertext)));</p>
 
-<p>  for (size_t i = 0; i &lt; ciphertext.size(); i++) {</p>
+<p>   std::string encoded;
+  HexEncoder encoder;</p>
 
-<pre><code>std::cout &lt;&lt; std::hex &lt;&lt; (0xFF &amp; static_cast&lt;byte&gt;(ciphertext[i])) &lt;&lt; " ";
+<p>  encoder.Put((byte*)ciphertext.data(), ciphertext.size());
+  encoder.MessageEnd();</p>
+
+<p>  word64 encoder_size = encoder.MaxRetrievable();
+  if(encoder_size &amp;&amp; encoder_size &lt;= SIZE_MAX) {</p>
+
+<pre><code>  encoded.resize(encoder_size);
+  encoder.Get((byte*)encoded.data(), encoded.size());
 </code></pre>
 
-<p>  }
-  std::cout &lt;&lt; &ldquo;\n\n&rdquo;;</p>
+<p>  }</p>
 
-<p>  RSAES_OAEP_SHA_Decryptor d(private_key);
-  StringSource(ciphertext, true, new CryptoPP::PK_DecryptorFilter(r, d, new CryptoPP::StringSink(decrypted)));</p>
+<p>  std::cout &lt;&lt; encoded &lt;&lt; &ldquo;\n\n&rdquo;;</p>
+
+<p>  // send encoded to server</p>
+
+<p>  std::string decoded;
+  HexDecoder decoder;</p>
+
+<p>  decoder.Put((byte*)encoded.data(), encoded.size());
+  decoder.MessageEnd();</p>
+
+<p>  word64 decoder_size = decoder.MaxRetrievable();
+  if(decoder_size &amp;&amp; decoder_size &lt;= SIZE_MAX) {</p>
+
+<pre><code>  decoded.resize(decoder_size);
+  decoder.Get((byte*)decoded.data(), decoded.size());
+</code></pre>
+
+<p>  }</p>
+
+<p>  std::cout &lt;&lt; decoded &lt;&lt; &ldquo;\n\n&rdquo;;</p>
+
+<p>  std::string decrypted;
+  RSAES_OAEP_SHA_Decryptor d(private_key);
+  StringSource(decoded, true, new CryptoPP::PK_DecryptorFilter(r, d, new CryptoPP::StringSink(decrypted)));</p>
 
 <p>  std::cout &lt;&lt; decrypted &lt;&lt; &ldquo;\n\n&rdquo;;</p>
 
