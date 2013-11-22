@@ -4,7 +4,7 @@
   <title><![CDATA[Category: boost | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/boost/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-21T00:16:42+08:00</updated>
+  <updated>2013-11-23T02:23:31+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -114,13 +114,43 @@ public:
 </code></pre>
 
 <p>{
-  typedef std::tuple&lt;std::shared_ptr<Wheel>, std::shared_ptr<Engine>, std::shared_ptr<Body> > Elements;
-public:
+  typedef std::tuple&lt;std::shared_ptr<Wheel>, std::shared_ptr<Engine>, std::shared_ptr<Body> > Elements;</p>
+
+<p>  template &lt;std::size_t> class int_ {};</p>
+
+<p>  template <typename Tuple, std::size_t pos>
+  void visit(const std::shared_ptr<CarElementVisitor>&amp; visitor, const Tuple&amp; t, int_<pos>)
+  {</p>
+
+<pre><code>visitor-&gt;visit(std::get&lt;std::tuple_size&lt;Tuple&gt;::value - pos&gt;(t));
+visit(visitor, t, int_&lt;pos - 1&gt;());
+</code></pre>
+
+<p>  }</p>
+
+<p>  template <typename Tuple>
+  void visit(const std::shared_ptr<CarElementVisitor>&amp; visitor, const Tuple&amp; t, int_<1>)
+  {</p>
+
+<pre><code>visitor-&gt;visit(std::get&lt;std::tuple_size&lt;Tuple&gt;::value - 1&gt;(t));
+</code></pre>
+
+<p>  }</p>
+
+<p>  template &lt;typename&hellip; Args>
+  void visit(const std::shared_ptr<CarElementVisitor>&amp; visitor, const std::tuple<Args ...>&amp; t)
+  {</p>
+
+<pre><code>visit(visitor, t, int_&lt;sizeof...(Args)&gt;());
+</code></pre>
+
+<p>  }</p>
+
+<p>public:
   Car()
   {</p>
 
-<pre><code>elements_ = std::make_tuple(
-  std::make_shared&lt;Wheel&gt;(), std::make_shared&lt;Engine&gt;(), std::make_shared&lt;Body&gt;());
+<pre><code>elements_ = std::make_tuple(std::make_shared&lt;Wheel&gt;(), std::make_shared&lt;Engine&gt;(), std::make_shared&lt;Body&gt;());
 </code></pre>
 
 <p>  }</p>
@@ -128,16 +158,15 @@ public:
 <p>  virtual void accept(const std::shared_ptr<CarElementVisitor>&amp; visitor)
   {</p>
 
-<pre><code>visitor-&gt;visit(std::get&lt;0&gt;(elements_));
-visitor-&gt;visit(std::get&lt;1&gt;(elements_));
-visitor-&gt;visit(std::get&lt;2&gt;(elements_));
+<pre><code>visit(visitor, elements_);
 visitor-&gt;visit(shared_from_this());
 </code></pre>
 
 <p>  }</p>
 
-<p>private:
-  Elements elements_;
+<p>private:</p>
+
+<p>  Elements elements_;
 };</p>
 
 <p>class PrintVisitor : public CarElementVisitor
@@ -149,22 +178,25 @@ public:
 <pre><code>std::cout &lt;&lt; "void PrintVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Engine>&amp; engine) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Engine>&amp; engine) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void PrintVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Body>&amp; body) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Body>&amp; body) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void PrintVisitor::visit(std::shared_ptr&lt;Body&gt; body) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Car>&amp; car) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Car>&amp; car) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void PrintVisitor::visit(std::shared_ptr&lt;Car&gt; car) const" &lt;&lt; std::endl;
@@ -182,22 +214,25 @@ public:
 <pre><code>std::cout &lt;&lt; "void OtherVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Engine>&amp; engine) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Engine>&amp; engine) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void OtherVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Body>&amp; body) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Body>&amp; body) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void OtherVisitor::visit(std::shared_ptr&lt;Body&gt; body) const" &lt;&lt; std::endl;
 </code></pre>
 
-<p>  }
-  virtual void visit(const std::shared_ptr<Car>&amp; car) const
+<p>  }</p>
+
+<p>  virtual void visit(const std::shared_ptr<Car>&amp; car) const
   {</p>
 
 <pre><code>std::cout &lt;&lt; "void OtherVisitor::visit(std::shared_ptr&lt;Car&gt; car) const" &lt;&lt; std::endl;
@@ -315,7 +350,7 @@ std::cout &lt;&lt; "void OtherStaticVisitor::operator()(const Car&amp;) const" &
   CarElement x = Car();
   PrintVisitor print_visitor;
   OtherVisitor other_visitor;
- boost::apply_visitor(print_visitor, x);
+  boost::apply_visitor(print_visitor, x);
   boost::apply_visitor(other_visitor, x);</p>
 
 <p>  return 0;

@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-21T00:16:42+08:00</updated>
+  <updated>2013-11-23T02:23:31+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -1774,6 +1774,32 @@
 <span class='line-number'>125</span>
 <span class='line-number'>126</span>
 <span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
 </pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;memory&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
 </span><span class='line'><span class="cp">#include &lt;tuple&gt;</span>
@@ -1833,22 +1859,42 @@
 </span><span class='line'>            <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'>  <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">Elements</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">int_</span> <span class="p">{};</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">pos</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">pos</span><span class="o">&gt;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="n">pos</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Tuple</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">t</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Args</span><span class="p">)</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'><span class="k">public</span><span class="o">:</span>
 </span><span class='line'>  <span class="n">Car</span><span class="p">()</span>
 </span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">elements_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'>    <span class="n">elements_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span><span class="p">());</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span>
 </span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">elements_</span><span class="p">));</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">elements_</span><span class="p">));</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">elements_</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">elements_</span><span class="p">);</span>
 </span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">shared_from_this</span><span class="p">());</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="n">Elements</span> <span class="n">elements_</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
@@ -1859,14 +1905,17 @@
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Body&gt; body) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Car&gt; car) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
@@ -1880,14 +1929,17 @@
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Body&gt; body) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
 </span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
 </span><span class='line'>  <span class="p">{</span>
 </span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Car&gt; car) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
@@ -2049,7 +2101,7 @@
 </span><span class='line'>  <span class="n">CarElement</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Car</span><span class="p">();</span>
 </span><span class='line'>  <span class="n">PrintVisitor</span> <span class="n">print_visitor</span><span class="p">;</span>
 </span><span class='line'>  <span class="n">OtherVisitor</span> <span class="n">other_visitor</span><span class="p">;</span>
-</span><span class='line'> <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">print_visitor</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">print_visitor</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
 </span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">other_visitor</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
