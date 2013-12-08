@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-30T16:00:10+08:00</updated>
+  <updated>2013-12-09T02:28:26+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,164 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 std::tuple 和它的应用]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple/"/>
+    <updated>2013-12-08T17:36:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple</id>
+    <content type="html"><![CDATA[<p>模板类 <code>std::tuple</code> 是一个固定大小, 存储元素类型不同的集合. 它是 <code>std::pair</code> 的泛化版本.</p>
+
+<p>一个 tuple 可以显示的声明它每个元素的类型, 也可以用 <code>std::make_tuple</code> 模板函数来实现自动类型推导. 可以用 <code>std::get</code> 指定索引来访问 tuple 中的元素. 如下:</p>
+
+<p>```cpp
+std::tuple&lt;string, int> t2(&ldquo;bitdewy&rdquo;, 123);</p>
+
+<p>auto t = std::make_tuple(string(&ldquo;bitdewy&rdquo;), 10, 1.23);  // t will be of type tuple&lt;string, int, double>
+std::string s = std::get<0>(t);
+int x = std::get<1>(t);
+double d = std::get<2>(t);
+```</p>
+
+<p>当编译期我们需要一个存放不同类型数据的集合, 但又不想定义一个具名的类时 tuple 是非常有用的. 例如 <code>std::function</code> 和 <code>std::bind</code> 就使用 tuple 来存放参数(我们都知道 <code>std::bind</code> 从第二个参数开始, 就是函数的参数了, 参数个数是不定的, 类型也是不定的, 这太适合用 <code>tuple</code> 来定义以及存储函数参数列表了). 尤其是 C++11 开始支持变长模板参数了, 这样一来 tuple 就变得更方便了.</p>
+
+<h2>std::tie</h2>
+
+<p>很多时候我们都希望函数能够返回两个或者更多个值, <code>std::tie</code> 可以帮助我们解决这个问题. <code>std::tie</code> 会构造一个每个元素都是左值引用的 <code>std::tuple</code>. 所以当一个函数返回一个 <code>std::tuple</code> 时, 我们可以使用 <code>std::tie</code> 构造一个 <code>std::tuple</code> 来接收这些返回值. 同时, 如果我们的类的每个元素都支持比较的话, 我们还可以直接使用它来构造一个 <code>std::tuple</code> 来使用 <code>std::tuple</code> 的比较函数. 如下:</p>
+
+<!-- more -->
+
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <string></h1>
+
+<h1>include <set></h1>
+
+<h1>include <tuple></h1>
+
+<p>struct S {</p>
+
+<pre><code>int n;
+std::string s;
+float d;
+bool operator&lt;(const S&amp; rhs) const {
+    return std::tie(n, s, d) &lt; std::tie(rhs.n, rhs.s, rhs.d);
+}
+</code></pre>
+
+<p>};</p>
+
+<p>int main() {</p>
+
+<pre><code>std::set&lt;S&gt; set_of_s; // S is LessThanComparable
+
+S value{ 42, "Test", 3.14 };
+std::set&lt;S&gt;::iterator iter;
+bool inserted;
+
+// unpacks the return value of insert into iter and inserted
+std::tie(iter, inserted) = set_of_s.insert(value);
+
+if (inserted) {
+    std::cout &lt;&lt; "Value was inserted successfully\n";
+}
+return 0;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>tuple_visitor</h2>
+
+<p>visitor 模式是 GoF 书中描述的 23 种设计模式中最难懂的一个. 这个模式甚至让 <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">Scott Meyers</a> 都困惑了一阵, 显然这个模式的名字没有取好, 而且例子中继承过来继承过去的绕了很多道弯很容易就让你搞不清楚它到底是在做什么的了.</p>
+
+<p>回顾一下我们熟悉的虚函数, 本质上虚函数的作用是<strong>在不改变行为的基础上可以任意扩展类型</strong>, 也就是说我们可以在不更改原有代码的情况下, 将新的类型插入到我们原有的系统中而不需要更改原有系统的代码.</p>
+
+<p>而 visitor 模式只是从另一个角度进行了解耦, 本质上 visitor 模式的作用是<strong>在不改变类型的基础上可以任意扩展对类型的操作</strong>.</p>
+
+<p>不明白上面两句话的可以看看这两篇<a href="http://www.cnblogs.com/geniusvczh/archive/2013/05/25/3098496.html">如何设计一门语言（五）——面向对象和消息发送</a>, <a href="http://www.cnblogs.com/geniusvczh/p/3416833.html">如何设计一门语言（十二）——设计可扩展的类型</a>文章.</p>
+
+<p>之前介绍过 <a href="http://bitdewy.github.io/blog/2013/07/15/static-visitor/">boost.variant.static_visitor</a>, 没有了一个一个的继承,写起来比原始的 visitor 模式简单很多, 如果写过 parser 生成过 AST 然后对它操作的话, 那么你可能对 visitor 有更深刻的理解, 本质上它就是函数式语言中含有<strong>模式匹配</strong>的递归函数.</p>
+
+<p>模式匹配不是什么新玩意儿, 事实上, 它甚至和函数式编程的关系都不大. 把产生模式匹配归因于函数式编程的唯一的原因是函数式语言早就提供了模式匹配, 然而现在的命令式语言还大多做不到. C++ 中的模板特化实际上就是一种模式匹配(类型模式). 比如 <code>std::enable_if</code> 里面经常要用到的 type traits. 下面是一个最简单的模式匹配的例子:</p>
+
+<p>```cpp
+template <int N>
+struct Factorial {
+  static const int value = N * Factorial<N - 1>::value;
+};</p>
+
+<p>// Base case via template specialization:</p>
+
+<p>template &lt;>
+struct Factorial<0> {
+  static const int value = 1;
+};
+```</p>
+
+<p>这可能是每一个介绍模板元编程都要使用的一个例子, 它利用模式匹配成功的消灭了分支, 进行了编译期的运算, 当然这是个只能演示而没有什么实际意义的代码. 但是表达了模式匹配的意义,</p>
+
+<p>回到正题, 继续我们的 visitor, 有时候我们有遍历 <code>tuple</code> 中存储元素的需求, 最简单的比如按顺序打印, 也许还有其他的针对每个元素的操作, 理论上这和 visitor 模式是类似的. 简单的实现如下:</p>
+
+<p>```cpp</p>
+
+<h1>include <tuple></h1>
+
+<h1>include <iostream></h1>
+
+<p>template&lt;std::size_t> struct int_{};</p>
+
+<p>template <typename Functor, typename Tuple>
+void tuple_visitor_impl(Functor&amp;&amp; functor, const Tuple&amp; t, int_<1>) {
+  functor(std::get&lt;std::tuple_size<Tuple>::value &ndash; 1>(t));
+}</p>
+
+<p>template <typename Functor, typename Tuple, size_t Pos>
+void tuple_visitor_impl(Functor&amp;&amp; functor, const Tuple&amp; t, int<em><Pos>) {
+  functor(std::get&lt;std::tuple_size<Tuple>::value &ndash; Pos>(t));
+  tuple_visitor_impl(std::forward&lt;Functor&amp;&amp;>(functor), t, int</em><Pos - 1>());
+}</p>
+
+<p>template <typename Functor, typename... Args>
+void tuple_visitor(Functor&amp;&amp; functor, const std::tuple&lt;Args&hellip;>&amp; t) {
+  tuple_visitor_impl(std::forward&lt;Functor&amp;&amp;>(functor), t, int_&lt;sizeof&hellip;(Args)>());
+}</p>
+
+<p>struct F {
+  template <typename T>
+  void operator()(T&amp;&amp; t) { std::cout &lt;&lt; &ldquo;unexpect type: &rdquo; &lt;&lt; typeid(std::forward&lt;T&amp;&amp;>(t)).name() &lt;&lt; std::endl; }
+  void operator()(int i) { std::cout &lt;&lt; &ldquo;void F::operator()(int): &rdquo; &lt;&lt; i &lt;&lt; std::endl; }
+  void operator()(double d) { std::cout &lt;&lt; &ldquo;void F::operator()(double): &rdquo; &lt;&lt; d &lt;&lt; std::endl; }
+  void operator()(const std::string&amp; s) { std::cout &lt;&lt; &ldquo;void F::operator()(const std::string&amp;): &rdquo; &lt;&lt; s &lt;&lt; std::endl; }</p>
+
+<p>};</p>
+
+<p>int main() {
+  auto t = std::make_tuple(10, std::string(&ldquo;Test&rdquo;), 3.14);
+  F f;
+  tuple_visitor(f, t);
+  return 0;
+}
+```</p>
+
+<p>当然 F 中要有针对每个类型的 <code>operator()</code>, 这样才能保证每个类型的 <code>tuple</code> 元素都能得到正确的处理, 当然由于我们有泛型版本的 <code>operator()</code> 所以任何类型都能正确接收, 只是行为不正确而已, 上面的代码中是打印出了数据类型, 更好的做法可能是抛出一个异常. 例子中的 <code>operator()</code> 都是重载, 实际上改为特化会更具通用性, 因为一旦改为特化, 那么 <code>struct F</code> 就可以变成框架内的细节, 可以做一些额外的工作. 当用户想要使用 <code>tuple_visitor</code> 的时候, 只需要针对 <code>tuple</code> 中的元素类型, 特化自己的 <code>F::operator()</code> 就可以了.</p>
+
+<h2>tuple_expander</h2>
+
+<p>还记得最上面介绍 <code>tuple</code> 的时候说的, <code>std::bind</code> 是用 <code>tuple</code> 来存储函数参数的吗? 那么由参数构造一个 <code>tuple</code> 是很显而易见的, 那么如何展开一个 <code>tuple</code> 呢?
+这里有一个实现, 可以作为参考. <a href="https://github.com/bitdewy/snippet/blob/master/utility/expander.hpp">snippet/utility/expander.hpp</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li>cppreference.com <a href="http://en.cppreference.com/w/cpp/utility/tuple">std::tuple</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[crypto++ 试用]]></title>
@@ -534,102 +692,6 @@ class Queue
 
 <ul>
 <li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用 condition variable 实现生产者 消费者模型]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond/"/>
-    <updated>2013-07-22T00:05:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond</id>
-    <content type="html"><![CDATA[<h2>什么是生产者-消费者问题?</h2>
-
-<p>生产者消费者问题 (英语: Producer-consumer problem), 也称有限缓冲问题 (英语: Bounded-buffer problem), 是一个多线程同步问题的经典案例. 该问题描述了两个共享固定大小缓冲区的线程 —— 即所谓的 “生产者” 和 “消费者” —— 在实际运行时会发生的问题. 生产者的主要作用是生成一定量的数据放到缓冲区中, 然后重复此过程. 与此同时, 消费者也在缓冲区消耗这些数据. 该问题的关键就是要保证生产者不会在缓冲区满时加入数据, 消费者也不会在缓冲区中空时消耗数据.</p>
-
-<p>要解决该问题, 就必须让生产者在缓冲区满时休眠 (要么干脆就放弃数据), 等到下次消费者消耗缓冲区中的数据的时候, 生产者才能被唤醒, 开始往缓冲区添加数据. 同样, 也可以让消费者在缓冲区空时进入休眠, 等到生产者往缓冲区添加数据之后, 再唤醒消费者. 通常采用进程间通信的方法解决该问题, 常用的方法有信号量等. 如果解决方法不够完善, 则容易出现死锁的情况. 出现死锁时, 两个线程都会陷入休眠, 等待对方唤醒自己. 该问题也能被推广到多个生产者和消费者的情形.</p>
-
-<!-- more -->
-
-
-<h2>使用 condition variable 实现生产者-消费者模型</h2>
-
-<p>```cpp</p>
-
-<h1>include &lt;condition_variable></h1>
-
-<h1>include <future></h1>
-
-<h1>include <iostream></h1>
-
-<h1>include <mutex></h1>
-
-<h1>include <sstream></h1>
-
-<h1>include <vector></h1>
-
-<p>std::mutex buffer_mutex;
-std::condition_variable buffer_not_empty;
-std::condition_variable buffer_not_full;</p>
-
-<p>std::vector<int> buffer;</p>
-
-<p>const std::size_t kBufferMaxSize = 20;</p>
-
-<p>void print(std::ostream&amp;&amp; s)
-{
-  std::cout &lt;&lt; s.rdbuf(); std::cout.flush(); s.clear();
-}</p>
-
-<p>void send(int i)
-{
-  std::unique_lock&lt;std::mutex> lk(buffer_mutex);
-  buffer_not_full.wait(lk, [&amp;]{ return buffer.size() &lt; kBufferMaxSize; });
-  buffer.push_back(i);
-  print(std::stringstream() &lt;&lt; &ldquo;produce: &rdquo; &lt;&lt; i &lt;&lt; &ldquo;\n&rdquo;);
-  buffer_not_empty.notify_all();
-}</p>
-
-<p>void receive()
-{
-  std::unique_lock&lt;std::mutex> lk(buffer_mutex);
-  buffer_not_empty.wait(lk, [&amp;]{ return !buffer.empty(); });
-  int i = buffer.back();
-  buffer.pop_back();
-  print(std::stringstream() &lt;&lt; &ldquo;consume: &rdquo; &lt;&lt; i &lt;&lt; &ldquo;\n&rdquo;);
-  buffer_not_full.notify_all();
-}</p>
-
-<p>int main(int argc, char* argv[])
-{
-  auto future_producer = std::async(std::launch::async, []{</p>
-
-<pre><code>for (int i = 0;; ++i) {
-  send(i);
-}
-</code></pre>
-
-<p>  });
-  auto future_consumer = std::async(std::launch::async, []{</p>
-
-<pre><code>while (true) {
-  receive();
-}
-</code></pre>
-
-<p>  });
-  future_producer.wait();
-  future_consumer.wait();
-  return 0;
-}
-```</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">wikipedia: Producer–consumer problem</a></li>
-<li><a href="http://en.cppreference.com/w/cpp/thread/condition_variable">cppreference.com: std::condition_variable</a></li>
 </ul>
 
 ]]></content>

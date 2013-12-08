@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-30T16:00:10+08:00</updated>
+  <updated>2013-12-09T02:28:26+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,234 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 std::tuple 和它的应用]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple/"/>
+    <updated>2013-12-08T17:36:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple</id>
+    <content type="html"><![CDATA[<p>模板类 <code>std::tuple</code> 是一个固定大小, 存储元素类型不同的集合. 它是 <code>std::pair</code> 的泛化版本.</p>
+
+<p>一个 tuple 可以显示的声明它每个元素的类型, 也可以用 <code>std::make_tuple</code> 模板函数来实现自动类型推导. 可以用 <code>std::get</code> 指定索引来访问 tuple 中的元素. 如下:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">t2</span><span class="p">(</span><span class="s">&quot;bitdewy&quot;</span><span class="p">,</span> <span class="mi">123</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;bitdewy&quot;</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">1.23</span><span class="p">);</span>   <span class="c1">// t will be of type tuple&lt;string, int, double&gt;</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span><span class='line'><span class="kt">double</span> <span class="n">d</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当编译期我们需要一个存放不同类型数据的集合, 但又不想定义一个具名的类时 tuple 是非常有用的. 例如 <code>std::function</code> 和 <code>std::bind</code> 就使用 tuple 来存放参数(我们都知道 <code>std::bind</code> 从第二个参数开始, 就是函数的参数了, 参数个数是不定的, 类型也是不定的, 这太适合用 <code>tuple</code> 来定义以及存储函数参数列表了). 尤其是 C++11 开始支持变长模板参数了, 这样一来 tuple 就变得更方便了.</p>
+
+<h2>std::tie</h2>
+
+<p>很多时候我们都希望函数能够返回两个或者更多个值, <code>std::tie</code> 可以帮助我们解决这个问题. <code>std::tie</code> 会构造一个每个元素都是左值引用的 <code>std::tuple</code>. 所以当一个函数返回一个 <code>std::tuple</code> 时, 我们可以使用 <code>std::tie</code> 构造一个 <code>std::tuple</code> 来接收这些返回值. 同时, 如果我们的类的每个元素都支持比较的话, 我们还可以直接使用它来构造一个 <code>std::tuple</code> 来使用 <code>std::tuple</code> 的比较函数. 如下:</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;tuple&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">S</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">float</span> <span class="n">d</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">S</span><span class="o">&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">tie</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">tie</span><span class="p">(</span><span class="n">rhs</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">rhs</span><span class="p">.</span><span class="n">s</span><span class="p">,</span> <span class="n">rhs</span><span class="p">.</span><span class="n">d</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span> <span class="n">set_of_s</span><span class="p">;</span> <span class="c1">// S is LessThanComparable</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">S</span> <span class="n">value</span><span class="p">{</span> <span class="mi">42</span><span class="p">,</span> <span class="s">&quot;Test&quot;</span><span class="p">,</span> <span class="mf">3.14</span> <span class="p">};</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">iter</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">bool</span> <span class="n">inserted</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// unpacks the return value of insert into iter and inserted</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">tie</span><span class="p">(</span><span class="n">iter</span><span class="p">,</span> <span class="n">inserted</span><span class="p">)</span> <span class="o">=</span> <span class="n">set_of_s</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">inserted</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Value was inserted successfully</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>tuple_visitor</h2>
+
+<p>visitor 模式是 GoF 书中描述的 23 种设计模式中最难懂的一个. 这个模式甚至让 <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">Scott Meyers</a> 都困惑了一阵, 显然这个模式的名字没有取好, 而且例子中继承过来继承过去的绕了很多道弯很容易就让你搞不清楚它到底是在做什么的了.</p>
+
+<p>回顾一下我们熟悉的虚函数, 本质上虚函数的作用是<strong>在不改变行为的基础上可以任意扩展类型</strong>, 也就是说我们可以在不更改原有代码的情况下, 将新的类型插入到我们原有的系统中而不需要更改原有系统的代码.</p>
+
+<p>而 visitor 模式只是从另一个角度进行了解耦, 本质上 visitor 模式的作用是<strong>在不改变类型的基础上可以任意扩展对类型的操作</strong>.</p>
+
+<p>不明白上面两句话的可以看看这两篇<a href="http://www.cnblogs.com/geniusvczh/archive/2013/05/25/3098496.html">如何设计一门语言（五）——面向对象和消息发送</a>, <a href="http://www.cnblogs.com/geniusvczh/p/3416833.html">如何设计一门语言（十二）——设计可扩展的类型</a>文章.</p>
+
+<p>之前介绍过 <a href="http://bitdewy.github.io/blog/2013/07/15/static-visitor/">boost.variant.static_visitor</a>, 没有了一个一个的继承,写起来比原始的 visitor 模式简单很多, 如果写过 parser 生成过 AST 然后对它操作的话, 那么你可能对 visitor 有更深刻的理解, 本质上它就是函数式语言中含有<strong>模式匹配</strong>的递归函数.</p>
+
+<p>模式匹配不是什么新玩意儿, 事实上, 它甚至和函数式编程的关系都不大. 把产生模式匹配归因于函数式编程的唯一的原因是函数式语言早就提供了模式匹配, 然而现在的命令式语言还大多做不到. C++ 中的模板特化实际上就是一种模式匹配(类型模式). 比如 <code>std::enable_if</code> 里面经常要用到的 type traits. 下面是一个最简单的模式匹配的例子:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">N</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">Factorial</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="n">Factorial</span><span class="o">&lt;</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Base case via template specialization:</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">Factorial</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这可能是每一个介绍模板元编程都要使用的一个例子, 它利用模式匹配成功的消灭了分支, 进行了编译期的运算, 当然这是个只能演示而没有什么实际意义的代码. 但是表达了模式匹配的意义,</p>
+
+<p>回到正题, 继续我们的 visitor, 有时候我们有遍历 <code>tuple</code> 中存储元素的需求, 最简单的比如按顺序打印, 也许还有其他的针对每个元素的操作, 理论上这和 visitor 模式是类似的. 简单的实现如下:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;tuple&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="n">int_</span><span class="p">{};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Tuple</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">Functor</span><span class="o">&amp;&amp;</span> <span class="n">functor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">functor</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">Pos</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">Functor</span><span class="o">&amp;&amp;</span> <span class="n">functor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">Pos</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">functor</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="n">Pos</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+</span><span class='line'>  <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Functor</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">functor</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">Pos</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Functor</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">tuple_visitor</span><span class="p">(</span><span class="n">Functor</span><span class="o">&amp;&amp;</span> <span class="n">functor</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Args</span><span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">tuple_visitor_impl</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Functor</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">functor</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Args</span><span class="p">)</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">F</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;unexpect type: &quot;</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">)).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void F::operator()(int): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">double</span> <span class="n">d</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void F::operator()(double): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void F::operator()(const std::string&amp;): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">s</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;Test&quot;</span><span class="p">),</span> <span class="mf">3.14</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">F</span> <span class="n">f</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tuple_visitor</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然 F 中要有针对每个类型的 <code>operator()</code>, 这样才能保证每个类型的 <code>tuple</code> 元素都能得到正确的处理, 当然由于我们有泛型版本的 <code>operator()</code> 所以任何类型都能正确接收, 只是行为不正确而已, 上面的代码中是打印出了数据类型, 更好的做法可能是抛出一个异常. 例子中的 <code>operator()</code> 都是重载, 实际上改为特化会更具通用性, 因为一旦改为特化, 那么 <code>struct F</code> 就可以变成框架内的细节, 可以做一些额外的工作. 当用户想要使用 <code>tuple_visitor</code> 的时候, 只需要针对 <code>tuple</code> 中的元素类型, 特化自己的 <code>F::operator()</code> 就可以了.</p>
+
+<h2>tuple_expander</h2>
+
+<p>还记得最上面介绍 <code>tuple</code> 的时候说的, <code>std::bind</code> 是用 <code>tuple</code> 来存储函数参数的吗? 那么由参数构造一个 <code>tuple</code> 是很显而易见的, 那么如何展开一个 <code>tuple</code> 呢?
+这里有一个实现, 可以作为参考. <a href="https://github.com/bitdewy/snippet/blob/master/utility/expander.hpp">snippet/utility/expander.hpp</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li>cppreference.com <a href="http://en.cppreference.com/w/cpp/utility/tuple">std::tuple</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[crypto++ 试用]]></title>
@@ -3552,236 +3780,6 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 <p>但是, 这个仅仅是在极端情况下, 因为默认构造函数以及拷贝构造函数已经很特别, 并且能与括号 <code>{ }</code> 很好的工作, 现在一个好的类的设计会避免用到 <code>()</code> 来提供用户定义的构造函数, 因为下面的设计准则:</p>
 
 <blockquote><p><strong>准则</strong>: 当你设计一个类时, 避免提供一个与 <code>initializer_list</code> 构造函数会产生二义性的构造函数, 这样用户就不需要使用 <code>()</code> 来访问会被隐藏掉的构造函数.</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用静态多态辅助动态多态]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/04/09/staitc-and-dynamic-polymorphism/"/>
-    <updated>2013-04-09T23:13:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/04/09/staitc-and-dynamic-polymorphism</id>
-    <content type="html"><![CDATA[<h2>静态多态 (编译期多态) 与动态多态 (运行期多态)</h2>
-
-<p>关键字: 重载/模版和虚函数</p>
-
-<p>类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
-编译期多态 (重载/模版), 运行期多态 (虚函数)</p>
-
-<p>应用形式上:
-静多态是发散式的, 让相同的实现代码应用于不同的场合.
-动多态是收敛式的, 让不同的实现代码应用于相同的场合.</p>
-
-<p>思维方式上:
-静多态是泛型式编程风格, 它看重的是算法的普适性.
-动多态是对象式编程风格, 它看重的是接口和实现的分离度.</p>
-
-<h2>std::shared_ptr 中的 deleter 是如何工作的?</h2>
-
-<p>标准库中的引用计数智能指针 shared_ptr 很有趣——你可以向其构造器传递一个函数或者仿函数 (function object, 或 functor), 当引用计数归零的时候, 它将在被引用对象上调用删除器 (deleter). 乍一看, 似乎没啥了不起啊, 但请看代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">shared_ptr</span> <span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="p">,</span> <span class="k">typename</span> <span class="n">D</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="k">explicit</span> <span class="n">shared_ptr</span><span class="p">(</span><span class="n">U</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">D</span> <span class="n">deleter</span><span class="p">);</span>
-</span><span class='line'>  <span class="c1">//...</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<p>注意 <code>shared_ptr&lt;T&gt;</code> 必然在析构时调用类型为 D 的删除器, 然而它根本不知道 D 为何物. 这个对象不能包含类型为 D 的数据成员, 也不能指向类型为 D 的对象, 因为声明其数据成员时, D 对它而言还是未知的. 那么, shared_ptr 对象如何跟踪删除器 (它在构造阶段传入: 当 T 对象将被销毁时, 还得使用它) 呢? 更通俗地说, 构造器如何将未知类型的信息传递给它正在构造的对象, 而这个对象本身对信息类型完全无知? 答案很简单: 让此对象包含一个指向已知类型基类的指针 (标准库中叫它 sp_counted_base), 然后让构造器以 D 为参数实例化一个派生于上述基类的模板 (标准库中叫 sp_counted_impl_p 和 sp_counted_impl_pd), 最后用声明于基类, 实现于派生类的虚函数 (标准库中使用 dispose) 去调用删除器. 关于这个问题, Scott Meyers 在 06 年 9 月份的一篇文章中已经有阐述, 详见: <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a>.</p>
-
-<h2>结合静态多态和动态多态实现类型无关的容器</h2>
-
-<p>使用 std::shared_ptr 中 deleter 的实现方式, 可以实现类型无关的容器. 代码主干如下:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">any</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="n">any</span><span class="p">()</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="n">nullptr</span><span class="p">)</span> <span class="p">{}</span>
-</span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">ValueType</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">any</span><span class="p">(</span><span class="k">const</span> <span class="n">ValueType</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="k">new</span> <span class="n">holder</span><span class="o">&lt;</span><span class="n">ValueType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="p">{}</span>
-</span><span class='line'>  <span class="n">any</span><span class="p">(</span><span class="k">const</span> <span class="n">any</span><span class="o">&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="o">:</span> <span class="n">content</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="n">content</span> <span class="o">?</span> <span class="n">other</span><span class="p">.</span><span class="n">content</span><span class="o">-&gt;</span><span class="n">clone</span><span class="p">()</span> <span class="o">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{}</span>
-</span><span class='line'>  <span class="o">~</span><span class="n">any</span><span class="p">()</span> <span class="p">{</span> <span class="k">delete</span> <span class="n">content</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">any</span><span class="o">&amp;</span> <span class="n">swap</span><span class="p">(</span><span class="n">any</span><span class="o">&amp;</span> <span class="n">rhs</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">swap</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">rhs</span><span class="p">.</span><span class="n">content</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">ValueType</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">any</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">ValueType</span><span class="o">&amp;</span> <span class="n">rhs</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">any</span><span class="p">(</span><span class="n">rhs</span><span class="p">).</span><span class="n">swap</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="n">any</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">any</span> <span class="n">rhs</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">rhs</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="kt">bool</span> <span class="n">empty</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="o">!</span><span class="n">content</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">type_info</span><span class="o">&amp;</span> <span class="n">type</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">content</span> <span class="o">?</span> <span class="n">content</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">:</span> <span class="k">typeid</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">placeholder</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>  <span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="o">~</span><span class="n">placeholder</span><span class="p">()</span> <span class="p">{}</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">type_info</span><span class="o">&amp;</span> <span class="n">type</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="n">placeholder</span><span class="o">*</span> <span class="n">clone</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">ValueType</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">holder</span> <span class="o">:</span> <span class="k">public</span> <span class="n">placeholder</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>  <span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">holder</span><span class="p">(</span><span class="k">const</span> <span class="n">ValueType</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="o">:</span> <span class="n">held</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">{}</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">type_info</span><span class="o">&amp;</span> <span class="n">type</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="k">typeid</span><span class="p">(</span><span class="n">ValueType</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="n">placeholder</span><span class="o">*</span> <span class="n">clone</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="k">new</span> <span class="n">holder</span><span class="p">(</span><span class="n">held</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>    <span class="n">ValueType</span> <span class="n">held</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">holder</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">holder</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="n">placeholder</span><span class="o">*</span> <span class="n">content</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在上面的代码中, any 类持有一个 placeholder 的基类指针, 在构造 any 对象时, 通过 any 的模板构造函数, 根据具体类型创建具体的 placeholder 子类类型, any 类提供 type() 接口, 用于查询 any 类中存储的实际类型.boost::any 中有类似的实现.</p>
-
-<p>使用方式如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">bitdewy</span><span class="o">::</span><span class="n">any</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">any_array</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">any_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">any_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">any_array</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">.1</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">for_each</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">begin</span><span class="p">(</span><span class="n">any_array</span><span class="p">),</span>
-</span><span class='line'>                <span class="n">std</span><span class="o">::</span><span class="n">end</span><span class="p">(</span><span class="n">any_array</span><span class="p">),</span>
-</span><span class='line'>                <span class="p">[](</span><span class="k">const</span> <span class="n">bitdewy</span><span class="o">::</span><span class="n">any</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="k">typeid</span><span class="p">(</span><span class="kt">int</span><span class="p">))</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">bitdewy</span><span class="o">::</span><span class="n">any_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="k">typeid</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">))</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">bitdewy</span><span class="o">::</span><span class="n">any_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="k">typeid</span><span class="p">(</span><span class="kt">double</span><span class="p">))</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">bitdewy</span><span class="o">::</span><span class="n">any_cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="c1">//LOG ...</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>参考</h3>
-
-<ul>
-<li><a href="http://svn.boost.org/svn/boost/trunk/boost/any.hpp">boost::any</a></li>
-<li><a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">My Most Important C++ Aha! Moments</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

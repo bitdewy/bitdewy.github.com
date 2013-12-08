@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++11 | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus-11/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-11-30T16:00:10+08:00</updated>
+  <updated>2013-12-09T02:28:26+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,164 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[C++11 std::tuple 和它的应用]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple/"/>
+    <updated>2013-12-08T17:36:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/12/08/cpp11-tuple</id>
+    <content type="html"><![CDATA[<p>模板类 <code>std::tuple</code> 是一个固定大小, 存储元素类型不同的集合. 它是 <code>std::pair</code> 的泛化版本.</p>
+
+<p>一个 tuple 可以显示的声明它每个元素的类型, 也可以用 <code>std::make_tuple</code> 模板函数来实现自动类型推导. 可以用 <code>std::get</code> 指定索引来访问 tuple 中的元素. 如下:</p>
+
+<p>```cpp
+std::tuple&lt;string, int> t2(&ldquo;bitdewy&rdquo;, 123);</p>
+
+<p>auto t = std::make_tuple(string(&ldquo;bitdewy&rdquo;), 10, 1.23);  // t will be of type tuple&lt;string, int, double>
+std::string s = std::get<0>(t);
+int x = std::get<1>(t);
+double d = std::get<2>(t);
+```</p>
+
+<p>当编译期我们需要一个存放不同类型数据的集合, 但又不想定义一个具名的类时 tuple 是非常有用的. 例如 <code>std::function</code> 和 <code>std::bind</code> 就使用 tuple 来存放参数(我们都知道 <code>std::bind</code> 从第二个参数开始, 就是函数的参数了, 参数个数是不定的, 类型也是不定的, 这太适合用 <code>tuple</code> 来定义以及存储函数参数列表了). 尤其是 C++11 开始支持变长模板参数了, 这样一来 tuple 就变得更方便了.</p>
+
+<h2>std::tie</h2>
+
+<p>很多时候我们都希望函数能够返回两个或者更多个值, <code>std::tie</code> 可以帮助我们解决这个问题. <code>std::tie</code> 会构造一个每个元素都是左值引用的 <code>std::tuple</code>. 所以当一个函数返回一个 <code>std::tuple</code> 时, 我们可以使用 <code>std::tie</code> 构造一个 <code>std::tuple</code> 来接收这些返回值. 同时, 如果我们的类的每个元素都支持比较的话, 我们还可以直接使用它来构造一个 <code>std::tuple</code> 来使用 <code>std::tuple</code> 的比较函数. 如下:</p>
+
+<!-- more -->
+
+
+<p>```cpp</p>
+
+<h1>include <iostream></h1>
+
+<h1>include <string></h1>
+
+<h1>include <set></h1>
+
+<h1>include <tuple></h1>
+
+<p>struct S {</p>
+
+<pre><code>int n;
+std::string s;
+float d;
+bool operator&lt;(const S&amp; rhs) const {
+    return std::tie(n, s, d) &lt; std::tie(rhs.n, rhs.s, rhs.d);
+}
+</code></pre>
+
+<p>};</p>
+
+<p>int main() {</p>
+
+<pre><code>std::set&lt;S&gt; set_of_s; // S is LessThanComparable
+
+S value{ 42, "Test", 3.14 };
+std::set&lt;S&gt;::iterator iter;
+bool inserted;
+
+// unpacks the return value of insert into iter and inserted
+std::tie(iter, inserted) = set_of_s.insert(value);
+
+if (inserted) {
+    std::cout &lt;&lt; "Value was inserted successfully\n";
+}
+return 0;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>tuple_visitor</h2>
+
+<p>visitor 模式是 GoF 书中描述的 23 种设计模式中最难懂的一个. 这个模式甚至让 <a href="http://www.artima.com/cppsource/top_cpp_aha_moments.html">Scott Meyers</a> 都困惑了一阵, 显然这个模式的名字没有取好, 而且例子中继承过来继承过去的绕了很多道弯很容易就让你搞不清楚它到底是在做什么的了.</p>
+
+<p>回顾一下我们熟悉的虚函数, 本质上虚函数的作用是<strong>在不改变行为的基础上可以任意扩展类型</strong>, 也就是说我们可以在不更改原有代码的情况下, 将新的类型插入到我们原有的系统中而不需要更改原有系统的代码.</p>
+
+<p>而 visitor 模式只是从另一个角度进行了解耦, 本质上 visitor 模式的作用是<strong>在不改变类型的基础上可以任意扩展对类型的操作</strong>.</p>
+
+<p>不明白上面两句话的可以看看这两篇<a href="http://www.cnblogs.com/geniusvczh/archive/2013/05/25/3098496.html">如何设计一门语言（五）——面向对象和消息发送</a>, <a href="http://www.cnblogs.com/geniusvczh/p/3416833.html">如何设计一门语言（十二）——设计可扩展的类型</a>文章.</p>
+
+<p>之前介绍过 <a href="http://bitdewy.github.io/blog/2013/07/15/static-visitor/">boost.variant.static_visitor</a>, 没有了一个一个的继承,写起来比原始的 visitor 模式简单很多, 如果写过 parser 生成过 AST 然后对它操作的话, 那么你可能对 visitor 有更深刻的理解, 本质上它就是函数式语言中含有<strong>模式匹配</strong>的递归函数.</p>
+
+<p>模式匹配不是什么新玩意儿, 事实上, 它甚至和函数式编程的关系都不大. 把产生模式匹配归因于函数式编程的唯一的原因是函数式语言早就提供了模式匹配, 然而现在的命令式语言还大多做不到. C++ 中的模板特化实际上就是一种模式匹配(类型模式). 比如 <code>std::enable_if</code> 里面经常要用到的 type traits. 下面是一个最简单的模式匹配的例子:</p>
+
+<p>```cpp
+template <int N>
+struct Factorial {
+  static const int value = N * Factorial<N - 1>::value;
+};</p>
+
+<p>// Base case via template specialization:</p>
+
+<p>template &lt;>
+struct Factorial<0> {
+  static const int value = 1;
+};
+```</p>
+
+<p>这可能是每一个介绍模板元编程都要使用的一个例子, 它利用模式匹配成功的消灭了分支, 进行了编译期的运算, 当然这是个只能演示而没有什么实际意义的代码. 但是表达了模式匹配的意义,</p>
+
+<p>回到正题, 继续我们的 visitor, 有时候我们有遍历 <code>tuple</code> 中存储元素的需求, 最简单的比如按顺序打印, 也许还有其他的针对每个元素的操作, 理论上这和 visitor 模式是类似的. 简单的实现如下:</p>
+
+<p>```cpp</p>
+
+<h1>include <tuple></h1>
+
+<h1>include <iostream></h1>
+
+<p>template&lt;std::size_t> struct int_{};</p>
+
+<p>template <typename Functor, typename Tuple>
+void tuple_visitor_impl(Functor&amp;&amp; functor, const Tuple&amp; t, int_<1>) {
+  functor(std::get&lt;std::tuple_size<Tuple>::value &ndash; 1>(t));
+}</p>
+
+<p>template <typename Functor, typename Tuple, size_t Pos>
+void tuple_visitor_impl(Functor&amp;&amp; functor, const Tuple&amp; t, int<em><Pos>) {
+  functor(std::get&lt;std::tuple_size<Tuple>::value &ndash; Pos>(t));
+  tuple_visitor_impl(std::forward&lt;Functor&amp;&amp;>(functor), t, int</em><Pos - 1>());
+}</p>
+
+<p>template <typename Functor, typename... Args>
+void tuple_visitor(Functor&amp;&amp; functor, const std::tuple&lt;Args&hellip;>&amp; t) {
+  tuple_visitor_impl(std::forward&lt;Functor&amp;&amp;>(functor), t, int_&lt;sizeof&hellip;(Args)>());
+}</p>
+
+<p>struct F {
+  template <typename T>
+  void operator()(T&amp;&amp; t) { std::cout &lt;&lt; &ldquo;unexpect type: &rdquo; &lt;&lt; typeid(std::forward&lt;T&amp;&amp;>(t)).name() &lt;&lt; std::endl; }
+  void operator()(int i) { std::cout &lt;&lt; &ldquo;void F::operator()(int): &rdquo; &lt;&lt; i &lt;&lt; std::endl; }
+  void operator()(double d) { std::cout &lt;&lt; &ldquo;void F::operator()(double): &rdquo; &lt;&lt; d &lt;&lt; std::endl; }
+  void operator()(const std::string&amp; s) { std::cout &lt;&lt; &ldquo;void F::operator()(const std::string&amp;): &rdquo; &lt;&lt; s &lt;&lt; std::endl; }</p>
+
+<p>};</p>
+
+<p>int main() {
+  auto t = std::make_tuple(10, std::string(&ldquo;Test&rdquo;), 3.14);
+  F f;
+  tuple_visitor(f, t);
+  return 0;
+}
+```</p>
+
+<p>当然 F 中要有针对每个类型的 <code>operator()</code>, 这样才能保证每个类型的 <code>tuple</code> 元素都能得到正确的处理, 当然由于我们有泛型版本的 <code>operator()</code> 所以任何类型都能正确接收, 只是行为不正确而已, 上面的代码中是打印出了数据类型, 更好的做法可能是抛出一个异常. 例子中的 <code>operator()</code> 都是重载, 实际上改为特化会更具通用性, 因为一旦改为特化, 那么 <code>struct F</code> 就可以变成框架内的细节, 可以做一些额外的工作. 当用户想要使用 <code>tuple_visitor</code> 的时候, 只需要针对 <code>tuple</code> 中的元素类型, 特化自己的 <code>F::operator()</code> 就可以了.</p>
+
+<h2>tuple_expander</h2>
+
+<p>还记得最上面介绍 <code>tuple</code> 的时候说的, <code>std::bind</code> 是用 <code>tuple</code> 来存储函数参数的吗? 那么由参数构造一个 <code>tuple</code> 是很显而易见的, 那么如何展开一个 <code>tuple</code> 呢?
+这里有一个实现, 可以作为参考. <a href="https://github.com/bitdewy/snippet/blob/master/utility/expander.hpp">snippet/utility/expander.hpp</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li>cppreference.com <a href="http://en.cppreference.com/w/cpp/utility/tuple">std::tuple</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
@@ -622,85 +780,6 @@ std::cout &lt;&lt; "Done!\nResults are: "
 <ul>
 <li><a href="http://en.cppreference.com/w/cpp/thread">Cppreference：Thread support library</a></li>
 <li><a href="http://en.wikipedia.org/wiki/Futures_and_promises">wikipedia: futures and promises</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 关键字 using]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using/"/>
-    <updated>2013-05-21T00:45:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/05/21/cpp11-keywords-using</id>
-    <content type="html"><![CDATA[<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
-
-<h2>使用小技巧来声明函数指针</h2>
-
-<p>在 c++03 中, 函数指针要这么写:</p>
-
-<p><code>cpp
-typedef void (*FunctionPtr)();
-</code></p>
-
-<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
-
-<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
-
-<p><code>cpp
-using FunctionPtr = void (*)();
-</code></p>
-
-<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
-
-<p>```cpp</p>
-
-<h1>include &lt;type_traits></h1>
-
-<p>using FunctionPtr = std::add_pointer&lt;void()>::type;
-```</p>
-
-<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
-
-<!-- more -->
-
-
-<h2>模板别名</h2>
-
-<p>在进入这个主题之前, 应该先弄清楚“模板类”和“类模板”本质上的不同. class template (类模板，是模板)是用来产生 template class (模板类, 是类型)的.
-在标准 C++, typedef 可定义模板类一个新的类型名称, 但是不能够使用 typedef 来定义模板的别名. 举例来说:</p>
-
-<p><code>cpp
-template&lt; typename first, typename second, int third&gt;
-class SomeType;
-template&lt; typename second&gt;
-typedef SomeType&lt;OtherType, second, 5&gt; TypedefName; // 在C++03是不合法的
-</code></p>
-
-<p>这不能够通过编译.
-为了定义模板的别名, C++11 增加了以下的语法:</p>
-
-<p><code>cpp
-template&lt; typename first, typename second, int third&gt;
-class SomeType;
-template&lt; typename second&gt;
-using TypedefName = SomeType&lt;OtherType, second, 5&gt;;
-</code></p>
-
-<p>using 紧跟着的标识, 用来表示后面的模板类型. 标准制定时尝试过使用旧的关键字 typedef 来实现该功能, 但是无法得到一个完整连贯的解决方案, 因此引入了新的关键字. (严格说来 using 并不是一个新的关键字, 在使用 namespace 时, 我们就已经见过它了, 但在 C++11 中它又有了新的语义.）</p>
-
-<p>除了模板别名之外, using 关键字还可以用在一般的类型中, 就想文章一开始的地方一样:</p>
-
-<p><code>cpp
-typedef void (*PFD)(double);            // 传统语法
-using PFD = void (*)(double);           // 新增与否
-</code></p>
-
-<h2>参考</h2>
-
-<ul>
-<li>C++ standard  14.6.7 Template aliases;  7.1.3 The typedef specifier</li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1489.pdf">Templates aliases for C++</a></li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf">Templates Aliases (Revision 3)</a></li>
 </ul>
 
 ]]></content>
