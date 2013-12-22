@@ -7,10 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="静态多态 (编译期多态) 与动态多态 (运行期多态) 关键字: 重载/模版和虚函数 类型: 编译期多态 (静态多态, 早绑定) 和运行期多态 (晚绑定)
-编译期多态 (重载/模版), 运行期多态 (虚函数) 应用形式上:
-静多态是发散式的, 让相同的实现代码应用于不同的场合.
-动多态是收敛式的 &hellip;">
+	<meta name="description" content="原文在这里 GotW #1 Solution: Variable Initialization – or Is It? 第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化. JG 问题 1. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -101,6 +98,102 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/12/gotw1/">
+		
+			[译] GotW #1 Solution: Variable Initialization – or Is It?</a>
+	</h2>
+	<div class="entry-content">
+		<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
+
+<p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
+
+<h2>JG 问题</h2>
+
+<p>1. 下面的代码有什么不同?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">;</span>                   <span class="c1">// (a)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">();</span>                 <span class="c1">// (b)</span>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{};</span>                 <span class="c1">// (c)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                <span class="c1">// (d)</span>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{</span><span class="n">x</span><span class="p">};</span>                <span class="c1">// (e)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>               <span class="c1">// (f)</span>
+</span><span class='line'><span class="n">widget</span> <span class="n">w</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">};</span>             <span class="c1">// (g)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">auto</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>                 <span class="c1">// (h)</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">w</span> <span class="o">=</span> <span class="n">widget</span><span class="p">{</span><span class="n">x</span><span class="p">};</span>         <span class="c1">// (i)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Guru 问题</h2>
+
+<p>2. 下面的每一行代码做了什么?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span> <span class="p">);</span>   <span class="c1">// (a)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v2</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span> <span class="p">};</span>   <span class="c1">// (b)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3. 除了上面的情况以外, 使用 <code>{ }</code> 初始化对象还有什么其他的好处?</p>
+
+<p>4. 什么时候使用 <code>( )</code> 以及 <code>{ }</code> 来初始化对象? 为什么?</p>
+
+
+		
+		<a href="/blog/2013/05/12/gotw1/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-12T02:55:00+08:00" pubdate data-updated="true">May 12<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/05/12/gotw1/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -721,56 +814,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2012/12/09/com-and-reference-counting/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/09/qt-xcode-hello/">
-		
-			Xcode 配置 Qt 开发环境手记</a>
-	</h2>
-	<div class="entry-content">
-		<p>首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。</p>
-
-<p>其次，准备好 Xcode 先。正文开始：</p>
-
-<h2>安装Qt library</h2>
-
-<p>Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点<a href="http://qt-project.org/downloads">这里</a>，MAC 版的 release 和 debug 库是分开的，可以自由选择。一路安装，下一步就 OK。</p>
-
-
-		
-		<a href="/blog/2012/12/09/qt-xcode-hello/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-09T13:10:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/qt/'>Qt</a>, <a class='category' href='/blog/categories/xcode/'>Xcode</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/12/09/qt-xcode-hello/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

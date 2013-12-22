@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: FP | Bitdewy]]></title>
+  <link href="http://bitdewy.github.com/blog/categories/fp/atom.xml" rel="self"/>
+  <link href="http://bitdewy.github.com/"/>
+  <updated>2013-12-23T04:13:18+08:00</updated>
+  <id>http://bitdewy.github.com/</id>
+  <author>
+    <name><![CDATA[bitdewy]]></name>
+    <email><![CDATA[bitdewy@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[异步编程和延续传递风格]]></title>
+    <link href="http://bitdewy.github.com/blog/2013/12/23/cps-async/"/>
+    <updated>2013-12-23T00:51:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2013/12/23/cps-async</id>
+    <content type="html"><![CDATA[<h2>什么是延续传递风格(Continuation-passing Style)?</h2>
+
+<p>Continuation-passing style(CPS) 是指将控制流 (Control flow) 显式的当做参数传递的编程风格. 函数的返回不在通过 return 语句, 而是将返回值当做参数, 调用控制流. 延续传递风格的函数都会有一个额外的参数k, 显式的表示了continuation (可以理解成控制流的流向, what comes next). 当延续传递风格函数需要返回的时候, 调用k, 并将返回值作为k的参数.</p>
+
+<p>延续传递风格的函数都有一个额外的参数 k, 表示控制流. 函数需要返回, 必须显式的调用 k.
+在函数的末尾调用了另外一个函数, 这种调用称为尾调用, tail call. 相应的在尾部递归调用, 称之为尾递归, tail recursion. 延续传递风格的所有函数都是尾调用.</p>
+
+<p>看一个实际的例子, 假设我们有一个函数 <code>show</code> 可以用来打印一些东西, 通常的做法是我们调用一个函数然后存储或者修改它的返回值, 然后把它传给下一个函数,</p>
+
+<p>```cpp
+auto show = <a href="const%20auto&amp;%20v"></a> { std::cout &lt;&lt; v &lt;&lt; &ldquo;\n&rdquo;; };</p>
+
+<p>auto make_one = <a href=""></a> { return 1; };</p>
+
+<p>// prints 1
+show(make_one());
+```</p>
+
+<p>在延续传递风格中, 函数需要增加一个参数用来处理函数返回的结果, 它是这个函数处理完之后需要的后续处理,</p>
+
+<p>```cpp
+auto one_cont = <a href="auto&amp;&amp;%20k"></a> { return k(1); };</p>
+
+<p>// Also prints 1
+one_cont(show);
+```</p>
+
+<p>使用延续传递风格最初主要用于编译高级语言时一种中间代码表示, 有了这种中间代码, 编译器的复杂度大大降低. 各种的控制流都能变为 CPS. 有很多办法可以将非 CPS 代码自动转换为 CPS 的代码. 有兴趣可以去研究下 <a href="http://book.douban.com/subject/1762126/">Compiling with Continuations</a> 这本书.</p>
+
+<!-- more -->
+
+
+<h2>函数式编程与延续传递风格</h2>
+
+<p>函数式编程的控制流就是靠 CPS 实现的.</p>
+
+<p>数学上的 “函数” 简而言之是 “集到集的映射”, 而指令式编程语言的 “函数” 与之有大不同. 数学关心返回集是什么, 而指令式编程语言根本不在乎有没有值返回, 它关心的是过程控制权的返回.其实, 指令式编程语言中 “函数” 本质是 “子过程”.</p>
+
+<p>指令式编程语言本质上是 “子过程” 的 “函数” 是有状态的, 这就决定了它永远无法消除副作用 (side-effect), 这是多线程应用的巨大隐患. 而 CPS (函数式编程)在异步编程里, 分布式编程里大显身手.指令式编程语言对程序员的洗脑使计算机专业的学生的思维背离了人类应有的数学性和抽象性. 太多的人专注于前置自增与后置自增的区别, 专注于常指针与指针常量的区别, 专注于是用 if-else 还是用 switch-case 的问题, 等等. 这些本不应该是让程序员费心的问题却牵扯了程序员太多的心力. 虽然 C++ 引入了 lambda, 但依然把上述的问题留了下来.</p>
+
+<h2>异步编程与延续传递风格</h2>
+
+<p>多线程异步调用是 CPS 一展身手的地方. 闭包封闭处理过程, 却对线程开放. 闭包安排好线程间数据处理的顺序, 于是线程间便不用轮询等待, 就可以分步按序完成一系列操作. 目前比较火的 node.js 最大的优点就是 non-blocking programming. 在 node.js中, 所有原本可能阻塞的操作全部都接受一个 callback, 当请求完成的时候调用 callback. 这种通过 callback 进行异步编程的风格是不完全的 CPS, callback 可以看成 continuation.</p>
+
+<p>当然 javascript 这种 callback 机制有一个很大的问题就是容易陷入 callback hell, 现在已经有很多异步的库可以帮助程序员远离 callback hell, 据说 coffeescript 也在这方面提供了支持.</p>
+
+<p>在 C++11 引入 lambda 之后我们也可以这么干, 但我们有更好用的, 那就是 <code>std::future</code> 以及 <code>std::promise</code> 了 (不过 <code>future.then</code> 可能要等到 C++17 才能成为标准), 之所以说更好用是因为 promise 以一种全新的方式对问题建模, 它的作用不仅是给基于 callback 的异步实现找一个语法更清晰的写法. 它要比语法层面的变化更深入, 实际上是在语义层上改变了解决问题的方式. 有兴趣可以看看这篇 <a href="http://blog.jcoglan.com/2011/03/11/promises-are-the-monad-of-asynchronous-programming/">Promises are the monad of asynchronous programming</a>. 关于什么是 monad 可以看看这篇 <a href="http://zhuoqiang.me/what-is-monad.html">Monad 最简介绍</a>, 总之基于 callback 的函数接受一些输入和一个 callback, 然后用它的输出调用这个 callback 函数, 而基于 promise 的函数接受输入, 返回输出的 promise 值, 基于 callback 的函数返回的那些 null 值就是基于 callback 编程之所以艰难的源头, 基于 callback 的函数什么都不返回, 所以难以把它们组装到一起. 没有返回值的函数, 执行它仅仅是因为它的副作用&mdash;没有返回值或副作用的函数就是个黑洞. 所以用 callback 编程天生就是指令式的, 是编写以副作用为主的过程的执行顺序, 而不是像函数应用那样把输入映射到输出. 是手工编排控制流, 而不是通过定义值之间的关系来解决问题. 因此使编写正确的并发程序变得艰难.</p>
+
+<p>而基于 promise 的函数与之相反, 你总能把函数的结果当作一个与时间无关的值. 在调用基于 callback 的函数时, 在你调用这个函数和它的 callback 被调用之间要经过一段时间, 而在这段时间里, 程序中的任何地方都找不到表示结果的值. 所以尽管 <code>then()</code> 这个方法的名字让人觉得它跟某种顺序化的操作有关, 并且那确实是它所承担的职责的副产品, 但你真的可以把它当作 unwrap 来看待. promise 是一个存放未知值的容器, 而 then 的任务就是把这个值从 promise 中提取出来, 把它交给另一个函数, 从 monad 的角度来看就是 bind 函数. 总之它才是更函数式的解决方案.</p>
+
+<p>但是, 当到处充斥着 <code>.then()</code> 的时候我们的脑细胞肯定会死的非常快, 之前在这篇 <a href="http://bitdewy.github.io/blog/2013/08/20/async-and-await/">异步编程 async &amp; await</a> 中提到过, Sutter 在 <a href="http://channel9.msdn.com/Events/Build/2013/2-306">The future of C++</a>中提到了类似的问题, 我们可能会写出这样的代码, 貌似也进入了 callback hell 类似的情景,</p>
+
+<p>```cpp
+task&lt;std::string> read(std::string file, std::string suffix) {
+   return open(file)
+   .then(<a href="std::istream%20fi">=</a> {</p>
+
+<pre><code>  auto ret = std::make_shared&lt;std::string&gt;();
+  auto next =
+     std::make_shared&lt;std::function&lt;task()&gt;&gt;(
+  [=]{
+     fi.read()
+     .then([=](std::string chunk) {
+        if( chunk.size() ) {
+           *ret += chunk + suffix;
+           return (*next)();
+        }
+        return *ret;
+     });
+  });
+  return (*next)();
+</code></pre>
+
+<p>   });
+}
+```</p>
+
+<p>好在我们有解决方案, 像写同步代码一样来写异步代码,</p>
+
+<p>```cpp
+task&lt;std::string> read( std::string file, std::string suffix ) <strong>async {
+   std::istream fi = </strong>await open(file);
+   std::string ret, chunk;
+   while((chunk = __await fi.read()).size())</p>
+
+<pre><code>  ret += chunk + suffix;
+</code></pre>
+
+<p>   return ret;
+}
+```</p>
+
+<p>这个 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a> 提案相信也会成为 C++17 的标准. 而本质上这只是把 CPS 变成了编译器要做的事情而已.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>wikipedia: <a href="http://en.wikipedia.org/wiki/Continuation-passing_style">Continuation-passing style</a></li>
+<li><a href="http://channel9.msdn.com/Events/Build/2013/2-306">The future of C++</a></li>
+<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

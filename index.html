@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="模板类 std::tuple 是一个固定大小, 存储元素类型不同的集合. 它是 std::pair 的泛化版本. 一个 tuple 可以显示的声明它每个元素的类型, 也可以用 std::make_tuple 模板函数来实现自动类型推导. 可以用 std::get 指定索引来访问 tuple &hellip;">
+	<meta name="description" content="什么是延续传递风格(Continuation-passing Style)? Continuation-passing style(CPS) 是指将控制流 (Control flow) 显式的当做参数传递的编程风格. 函数的返回不在通过 return 语句, 而是将返回值当做参数, 调用控制流 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,87 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/12/23/cps-async/">
+		
+			异步编程和延续传递风格</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是延续传递风格(Continuation-passing Style)?</h2>
+
+<p>Continuation-passing style(CPS) 是指将控制流 (Control flow) 显式的当做参数传递的编程风格. 函数的返回不在通过 return 语句, 而是将返回值当做参数, 调用控制流. 延续传递风格的函数都会有一个额外的参数k, 显式的表示了continuation (可以理解成控制流的流向, what comes next). 当延续传递风格函数需要返回的时候, 调用k, 并将返回值作为k的参数.</p>
+
+<p>延续传递风格的函数都有一个额外的参数 k, 表示控制流. 函数需要返回, 必须显式的调用 k.
+在函数的末尾调用了另外一个函数, 这种调用称为尾调用, tail call. 相应的在尾部递归调用, 称之为尾递归, tail recursion. 延续传递风格的所有函数都是尾调用.</p>
+
+<p>看一个实际的例子, 假设我们有一个函数 <code>show</code> 可以用来打印一些东西, 通常的做法是我们调用一个函数然后存储或者修改它的返回值, 然后把它传给下一个函数,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">show</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">auto</span> <span class="n">make_one</span> <span class="o">=</span> <span class="p">[]()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// prints 1</span>
+</span><span class='line'><span class="n">show</span><span class="p">(</span><span class="n">make_one</span><span class="p">());</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在延续传递风格中, 函数需要增加一个参数用来处理函数返回的结果, 它是这个函数处理完之后需要的后续处理,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">one_cont</span> <span class="o">=</span> <span class="p">[](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">k</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Also prints 1</span>
+</span><span class='line'><span class="n">one_cont</span><span class="p">(</span><span class="n">show</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用延续传递风格最初主要用于编译高级语言时一种中间代码表示, 有了这种中间代码, 编译器的复杂度大大降低. 各种的控制流都能变为 CPS. 有很多办法可以将非 CPS 代码自动转换为 CPS 的代码. 有兴趣可以去研究下 <a href="http://book.douban.com/subject/1762126/">Compiling with Continuations</a> 这本书.</p>
+
+
+		
+		<a href="/blog/2013/12/23/cps-async/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-23T00:51:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/fp/'>FP</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/12/23/cps-async/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -822,89 +903,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/08/05/io-model/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/07/30/type-selection/">
-		
-			类型选择</a>
-	</h2>
-	<div class="entry-content">
-		<h2>目的</h2>
-
-<p>在编译期间, 根据一些条件, 决定类型.</p>
-
-<h2>动机</h2>
-
-<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
-
-<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
-
-<h2>解决方案以及代码示例</h2>
-
-<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">IF</span>  <span class="c1">// primary template</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">typedef</span> <span class="n">R</span> <span class="n">type</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">typedef</span> <span class="n">L</span> <span class="n">type</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-		
-		<a href="/blog/2013/07/30/type-selection/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-30T18:26:00+08:00" pubdate data-updated="true">Jul 30<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/metaprogramming/'>metaprogramming</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/07/30/type-selection/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

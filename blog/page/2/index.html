@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="什么是生产者-消费者问题? 生产者消费者问题 (英语: Producer-consumer problem), 也称有限缓冲问题 (英语: Bounded-buffer problem), 是一个多线程同步问题的经典案例. 该问题描述了两个共享固定大小缓冲区的线程 —— 即所谓的 “生产者” 和 &hellip;">
+	<meta name="description" content="目的 在编译期间, 根据一些条件, 决定类型. 动机 在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型. 例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,89 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/07/30/type-selection/">
+		
+			类型选择</a>
+	</h2>
+	<div class="entry-content">
+		<h2>目的</h2>
+
+<p>在编译期间, 根据一些条件, 决定类型.</p>
+
+<h2>动机</h2>
+
+<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
+
+<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
+
+<h2>解决方案以及代码示例</h2>
+
+<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">IF</span>  <span class="c1">// primary template</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="n">R</span> <span class="n">type</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">typedef</span> <span class="n">L</span> <span class="n">type</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
+</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2013/07/30/type-selection/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-30T18:26:00+08:00" pubdate data-updated="true">Jul 30<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/metaprogramming/'>metaprogramming</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/07/30/type-selection/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -742,102 +825,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/05/21/cpp11-keywords-using/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/05/12/gotw1/">
-		
-			[译] GotW #1 Solution: Variable Initialization – or Is It?</a>
-	</h2>
-	<div class="entry-content">
-		<p>原文在这里 <a href="http://herbsutter.com/2013/05/09/gotw-1-solution/">GotW #1 Solution: Variable Initialization – or Is It?</a></p>
-
-<p><em>第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化.</em></p>
-
-<h2>JG 问题</h2>
-
-<p>1. 下面的代码有什么不同?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">;</span>                   <span class="c1">// (a)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">();</span>                 <span class="c1">// (b)</span>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{};</span>                 <span class="c1">// (c)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                <span class="c1">// (d)</span>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span><span class="p">{</span><span class="n">x</span><span class="p">};</span>                <span class="c1">// (e)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>               <span class="c1">// (f)</span>
-</span><span class='line'><span class="n">widget</span> <span class="n">w</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">};</span>             <span class="c1">// (g)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">auto</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>                 <span class="c1">// (h)</span>
-</span><span class='line'><span class="k">auto</span> <span class="n">w</span> <span class="o">=</span> <span class="n">widget</span><span class="p">{</span><span class="n">x</span><span class="p">};</span>         <span class="c1">// (i)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Guru 问题</h2>
-
-<p>2. 下面的每一行代码做了什么?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span> <span class="p">);</span>   <span class="c1">// (a)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v2</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span> <span class="p">};</span>   <span class="c1">// (b)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>3. 除了上面的情况以外, 使用 <code>{ }</code> 初始化对象还有什么其他的好处?</p>
-
-<p>4. 什么时候使用 <code>( )</code> 以及 <code>{ }</code> 来初始化对象? 为什么?</p>
-
-
-		
-		<a href="/blog/2013/05/12/gotw1/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-12T02:55:00+08:00" pubdate data-updated="true">May 12<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/05/12/gotw1/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
