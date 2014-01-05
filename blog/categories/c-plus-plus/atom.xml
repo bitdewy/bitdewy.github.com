@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2013-12-23T04:13:18+08:00</updated>
+  <updated>2014-01-06T02:23:25+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,188 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[当 Windows API 遇上 RAII]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/01/06/windows-api-raii/"/>
+    <updated>2014-01-06T00:18:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/01/06/windows-api-raii</id>
+    <content type="html"><![CDATA[<h2>什么是 RAII (Resource Acquisition Is Initialization) ?</h2>
+
+<p>RAII (Resource Acquisition Is Initialization), 也称为"资源获取就是初始化", 是 C++ 语言的一种管理资源, 避免泄漏的惯用法. C++ 标准保证任何情况下, 已构造的对象最终会销毁, 即它的析构函数最终会被调用. 简单的说, RAII 的做法是使用一个对象, 在其构造时获取资源, 在对象生命期控制对资源的访问使之始终保持有效, 最后在对象析构的时候释放资源.</p>
+
+<p>RAII 是保证代码异常安全的重要基础设施. RAII 的使用场景有很多, 如: C++11 中的智能指针, scope lock, scope exit 等等. (早在2000年，<a href="http://erdani.com/">Andrei Alexandrescu</a> 就在DDJ杂志上发表了一篇文章，提出了这个叫做 <a href="http://www.drdobbs.com/cpp/generic-change-the-way-you-write-excepti/184403758">ScopeGuard</a> 的设施)</p>
+
+<h2>当 Windows API 遇上 RAII</h2>
+
+<p>Windows API 大多是 C 语言风格的函数和句柄, 或者是 COM 风格的接口, 这些用起来都不太方便, 需要进行一定的封装. 至于为什么要封装就不用多说了, 如果你想要异常安全, 想要不必在每个分支中都写清理代码的话, 你一定知道利用 RAII 封装的意义.</p>
+
+<p>ATL 中有对 COM 接口的封装, 智能指针 <code>CComPtr</code>, <code>CComQIPtr</code> 解决了一遍遍的手工 <code>Release</code> 以及 <code>QueryInterface</code>. 但对于普通的 C 语言风格的函数和句柄呢? 难道还要一遍遍的 <code>CloseHandle</code> , <code>ReleaseDC</code>, <code>GlobalUnlock</code> 麽? 弱爆了.</p>
+
+<p>借助 <code>ScopeGuard</code> 和 lambda 表达式(⊙_⊙)？ 可以是可以, 但是并不是所有的资源获取都会成功, 那么每次都要产生一个具名的 <code>ScopeGuard</code>, 在申请失败的时候调用 <code>Dismiss</code>, 取消清理的动作嘛? 像这样:</p>
+
+<p>```cpp
+Acquire Resource1
+ScopeGuard release1([&amp;] { /<em> Release Resource1 </em>/ })
+if (!Resource1) {</p>
+
+<pre><code>release1.Dismiss();
+// throw exception or return or...
+</code></pre>
+
+<p>}</p>
+
+<p>Acquire Resource2
+ScopeGuard release2([&amp;] { /<em> Release Resource2 </em>/ })
+if (!Resource2) {</p>
+
+<pre><code>release2.Dismiss();
+// throw exception or return or...
+</code></pre>
+
+<p>}
+```</p>
+
+<!-- more -->
+
+
+<p>这样如果连续申请多个资源 <code>ScopeGuard</code> 对象命名都会成为问题. 又或者是先判断资源是否申请成功, 然后再使用匿名的 <code>ScopeGuard</code> 来保证正确释放资源? 像这样:</p>
+
+<p>```cpp
+Acquire Resource1
+if (!Resource1) {</p>
+
+<pre><code>// throw exception or return or...
+</code></pre>
+
+<p>}
+ON_SCOPE_EXIT([&amp;] { /<em> Release Resource1 </em>/ })</p>
+
+<p>Acquire Resource2
+if (!Resource2) {</p>
+
+<pre><code>// throw exception or return or...
+</code></pre>
+
+<p>}
+ON_SCOPE_EXIT([&amp;] { /<em> Release Resource2 </em>/ })</p>
+
+<p>```</p>
+
+<p>这样好是好, 可是割裂了申请与释放的代码, 而且每申请一个资源就要至少写上 3 行或以上结构类似代码(可以考虑宏了) ?</p>
+
+<p>当然, 我们是有追求的, 我们还需要更厉害的设施. 也许 <code>unique_ptr</code> 可以给我提供一些思路. 我们需要一个基本的类型, 也许是 <code>HANDLE</code>, 也许是 <code>HINTERNET</code> 等等, 同时我们还需要一个清理函数. 再加上一个资源是否可用的接口即可. 为了避免过多的模板参数, 我们把清理函数以及不可用资源封装到 <code>Traits</code> 类中, 下面是一个例子, 可以很好的完成我们的需求. 另外仿照 <code>unique_ptr</code> 加了一些 move 语义, 转移构造等东西. 下面的代码只实现了 <code>HANDLE</code> 的特化版本, 相信 <code>HINTERNET</code> 的版本, 大家写起来应该也是毫无压力了. 只需要写 <code>Traits</code> 类即可.</p>
+
+<p>```cpp
+template <typename T, typename Traits>
+class unique_handle {
+  struct bool_struct { int member; };
+  using bool_type = int bool_struct::*;</p>
+
+<p>public:
+  explicit unique_handle(T value = Traits::invalid())</p>
+
+<pre><code>: value_(value) {}
+</code></pre>
+
+<p>  unique_handle(unique_handle&amp;&amp; other)</p>
+
+<pre><code>: value_(other.release()) {}
+</code></pre>
+
+<p>  unique_handle&amp; operator=(unique_handle&amp;&amp; other) {</p>
+
+<pre><code>reset(other.release());
+return *this;
+</code></pre>
+
+<p>  }
+  ~unique_handle() { close(); }
+  T get() { return value_; }
+  bool reset(T value = Traits::invalid()) {</p>
+
+<pre><code>if (value_ != value) {
+  close();
+  value_ = value;
+}
+return *this;
+</code></pre>
+
+<p>  }
+  T release() {</p>
+
+<pre><code>auto value = value_;
+value_ = Traits::invalid();
+return value;
+</code></pre>
+
+<p>  }
+  operator bool_type() {</p>
+
+<pre><code>return Traits::invalid() != value_ ? &amp;bool_struct::member : nullptr;
+</code></pre>
+
+<p>  }
+private:
+  unique_handle(const unique_handle&amp;);
+  unique_handle&amp; operator=(const unique_handle&amp;);
+  bool operator==(const unique_handle&amp;);
+  bool operator!=(const unique_handle&amp;);
+  void close() {</p>
+
+<pre><code>if (*this) {
+  Traits::close(value_);
+}
+</code></pre>
+
+<p>  }
+  T value_;
+};</p>
+
+<p>struct handle_traits {
+  static HANDLE invalid() {</p>
+
+<pre><code>return nullptr;
+</code></pre>
+
+<p>  }
+  static void close(HANDLE handle) {</p>
+
+<pre><code>CloseHandle(handle);
+</code></pre>
+
+<p>  }
+};</p>
+
+<p>typedef unique_handle&lt;HANDLE, handle_traits> handle;
+```</p>
+
+<p>使用起来应该是这样的:</p>
+
+<p>```cpp
+unique_handle&lt;SOCKET, socket_traits> socket;
+unique_handle&lt;HANDLE, handle_traits> event;</p>
+
+<p>if (socket &amp;&amp; event) {} // Are both valid?
+if (!event) {} // Is event invalid?
+int i = socket; // Compiler error!
+if (socket == event) {} // Compiler error!
+```</p>
+
+<p><code>int i = socket;</code> 这一句很有意思, 我们为了让它能够编译失败, 费了不少功夫. 内部类 <code>bool_struct</code> 就是完全为它而准备. 这也是为什么我们不直接提供 <code>operator bool</code> 的原因. 私有化 <code>operator==</code> 和 <code>operator!=</code> 是为了禁止两个资源进行比较. 而使用内部类成员指针就是为了提供 <code>operator bool</code> 类似功能的同时, 避免它能够提升为 <code>int</code> 等类型. 当然如果我们直接提供一个 <code>is_valid</code> 成员函数, 而不提供隐身转换, 那么就不会有这么多的问题了.</p>
+
+<p>看起来还差错误处理的内容, 不过都到这个份上了, 错误处理就不是问题了吧. 我们可以写各种 <code>check</code> 函数的重载版本, 当 <code>check</code> 失败时抛出异常. 这样就大功告成了.</p>
+
+<h2>参考</h2>
+
+<ul>
+<li>wikipedia: <a href="http://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization">Resource Acquisition Is Initialization</a></li>
+<li><a href="http://mindhacks.cn/2012/08/27/modern-cpp-practices/">C++11（及现代C++风格）和快速迭代式开发</a></li>
+<li><a href="http://msdn.microsoft.com/en-us/magazine/hh288076.aspx">C++ and the Windows API</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[C++11 std::tuple 和它的应用]]></title>
@@ -616,82 +798,6 @@ total += 1;
 <ul>
 <li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
 <li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[类型选择]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/30/type-selection/"/>
-    <updated>2013-07-30T18:26:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/30/type-selection</id>
-    <content type="html"><![CDATA[<h2>目的</h2>
-
-<p>在编译期间, 根据一些条件, 决定类型.</p>
-
-<h2>动机</h2>
-
-<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
-
-<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
-
-<h2>解决方案以及代码示例</h2>
-
-<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
-
-<p><code>cpp
-template &lt;bool, class L, class R&gt;
-struct IF  // primary template
-{
-  typedef R type;
-};
-template &lt;class L, class R&gt;
-struct IF&lt;true, L, R&gt; // partial specialization
-{
-  typedef L type;
-};
-IF&lt;false, int, long&gt;::type i; // is equivalent to long i;
-IF&lt;true,  int, long&gt;::type i; // is equivalent to int i;
-</code></p>
-
-<!-- more -->
-
-
-<p>下面就是使用类型选择实现的 Queue 类:</p>
-
-<p>```cpp
-template <class T, unsigned int CAPACITY>
-class Queue
-{
-  T array[CAPACITY];
-  typename IF&lt;(CAPACITY &lt;= 256),</p>
-
-<pre><code>  unsigned char,
-  typename IF&lt;(CAPACITY &lt;= 65536),
-              unsigned short,
-              unsigned int
-             &gt;::type
-&gt;::type size;
-</code></pre>
-
-<p>  // &hellip;
-};
-```</p>
-
-<p>模板类 Queue 声明了一个类型为 T 的数组, 数据成员 size 的类型由两个 IF 模板的结果来决定. 注意, 这些比较不是在运行时而是在编译期.</p>
-
-<h2>已知的应用</h2>
-
-<ul>
-<li><a href="http://www.boost.org/doc/libs/1_54_0/libs/mpl/doc/index.html">Boost.MPL Library</a></li>
-</ul>
-
-
-<h2>参考</h2>
-
-<ul>
-<li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
 </ul>
 
 ]]></content>

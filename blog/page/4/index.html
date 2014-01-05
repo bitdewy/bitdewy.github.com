@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="首先，这是一个奇葩的需求，不要问为什么不用 Qt Creator，为什么不用 qmake + make，没有那么多为什么。 其次，准备好 Xcode 先。正文开始： 安装Qt library Qt5 已经发布 RC1 版本，不过还没到不影响正常使用的程度，所以还是先用 4.8.4，下载链接点这里 &hellip;">
+	<meta name="description" content="什么是 COM ？ Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 Component Object Model。 什么是 ABI ？ &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,70 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/09/com-and-reference-counting/">
+		
+			COM、ABI与引用计数</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是 COM ？</h2>
+
+<p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
+
+<h2>什么是 ABI ？</h2>
+
+<p>Application Binary Interface (ABI) 应用二进制接口，描述了应用程序和操作系统之间，一个应用和它的库之间，或者应用的组成部分之间的低层接口。</p>
+
+<p>ABI涵盖了各种细节，例如：</p>
+
+<ul>
+<li>数据类型、大小以及内存布局</li>
+<li>调用约定（控制着函数的参数如何传送以及如何接受返回值）</li>
+<li>系统调用的编码和一个应用如何向操作系统进行系统调用</li>
+<li>在一个完整的操作系统ABI中，目标文件、程序库的二进制格式等等。</li>
+</ul>
+
+
+<p>一个完整的ABI，像Intel二进制兼容标准(<a href="http://www.everything2.com/index.pl?node=iBCS">iBCS</a>)，允许支持它的操作系统上的程序不经修改在其他支持此ABI的操作体统上运行。</p>
+
+<p>其他的ABI标准化细节包括<a href="http://en.wikipedia.org/wiki/Name_mangling#Name_mangling_in_C.2B.2B">C++ name mangling</a>、异常传播，同一个平台上的编译器之间的调用约定，但是不包括跨平台的兼容性。详细内容请看 <a href="http://en.wikipedia.org/wiki/Application_binary_interface">Application binary interface</a></p>
+
+
+		
+		<a href="/blog/2012/12/09/com-and-reference-counting/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-09T18:18:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/com/'>COM</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/09/com-and-reference-counting/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -741,75 +805,6 @@
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/06/30/gotw100/">
-		
-			[译] GotW #100: Compilation Firewalls (Difficulty: 6/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>[这是 <a href="http://www.gotw.ca/gotw/024.htm">GotW #24</a> 的 C++11 更新版]</p>
-
-<p>原文在这里 <a href="http://herbsutter.com/gotw/_100/">GotW #100: Compilation Firewalls (Difficulty: 6/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. Pimpl 惯用法是什么？为什么要使用它？</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 怎样才是 Pimpl 惯用法在 C++11 中的最佳实现？</p>
-
-<p>3. 类中的那些部分应该放到 impl 对象中？一些可能的选择包括：</p>
-
-<ul>
-<li>所有私有数据（非函数）</li>
-<li>所有私有成员</li>
-<li>所有私有和保护成员</li>
-<li>所有私有非虚成员</li>
-<li>全部都放到 impl 对象中，然后实现公有接口，每个实现仅仅简单的做函数转发（handle/body 的变体）</li>
-</ul>
-
-
-<p>它们的每一个的缺点和优点是什么？你怎么选择？</p>
-
-<p>4. impl 对象是否需要一个指向公开对象的反向指针？如果需要的话，它的最佳实现是什么？如果不需要的话，为什么？</p>
-
-
-		
-		<a href="/blog/2012/06/30/gotw100/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-06-30T01:20:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/06/30/gotw100/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
         <a href="/blog/page/3/" class="prev">Prev</a>
@@ -819,7 +814,7 @@
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2013
+	<footer id="footer" class="inner">Copyright &copy; 2014
 
     bitdewy
 
