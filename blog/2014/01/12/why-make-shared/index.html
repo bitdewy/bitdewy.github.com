@@ -1,0 +1,294 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>why make_shared ? - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="C++11 中引入了智能指针, 同时还有一个模板函数 std::make_shared 可以返回一个指定类型的 std::shared_ptr, 那与 std::shared_ptr 的构造函数相比它能给我们带来什么好处呢 ? 优点 效率更高 shared_ptr 需要维护引用计数的信息, 强引用 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Why Make_shared ?</h2>
+	<div class="entry-content"><p>C++11 中引入了智能指针, 同时还有一个模板函数 <code>std::make_shared</code> 可以返回一个指定类型的 <code>std::shared_ptr</code>, 那与 <code>std::shared_ptr</code> 的构造函数相比它能给我们带来什么好处呢 ?</p>
+
+<h2>优点</h2>
+
+<h3>效率更高</h3>
+
+<p><code>shared_ptr</code> 需要维护引用计数的信息,</p>
+
+<ul>
+<li>强引用, 用来记录当前有多少个存活的 shared_ptrs 正持有该对象. 共享的对象会在最后一个强引用离开的时候销毁( 也可能释放).</li>
+<li>弱引用, 用来记录当前有多少个正在观察该对象的 weak_ptrs. 当最后一个弱引用离开的时候, 共享的内部信息控制块会被销毁和释放 (共享的对象也会被释放, 如果还没有释放的话).</li>
+</ul>
+
+
+<p>如果你通过使用原始的 new 表达式分配对象, 然后传递给 shared_ptr (也就是使用 shared_ptr 的构造函数) 的话, shared_ptr 的实现没有办法选择, 而只能单独的分配控制块:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="n">shared_ptr</span> <span class="n">sp1</span><span class="p">{</span> <span class="n">p</span> <span class="p">},</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
+
+<p>如果选择使用 <code>make_shared</code> 的话, 情况就会变成下面这样:</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">sp1</span> <span class="o">=</span> <span class="n">make_shared</span><span class="p">(),</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://y6yska.bay.livefilestore.com/y1p-Y0XAkcMZMrSdxkTa85nShcDkVKvqhMTFVGSDc0jURLybPXTGHPdWv9CZGgcGmvZwQQvd6Y1Qdg/sharedptr2.png" alt="" /></p>
+
+<p>内存分配的动作, 可以一次性完成. 这减少了内存分配的次数, 而内存分配是代价很高的操作.</p>
+
+<p>关于两种方式的性能测试可以看这里 <a href="http://tech-foo.blogspot.hk/2012/04/experimenting-with-c-stdmakeshared.html">Experimenting with C++ std::make_shared</a></p>
+
+<h3>异常安全</h3>
+
+<p>看看下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">F</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Lhs</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)),</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Rhs</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">)));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>C++ 是不保证参数求值顺序, 以及内部表达式的求值顺序的, 所以可能的执行顺序如下:</p>
+
+<ol>
+<li>new Lhs(&ldquo;foo&rdquo;))</li>
+<li>new Rhs(&ldquo;bar&rdquo;))</li>
+<li>std::shared_ptr<Lhs></li>
+<li>std::shared_ptr<Rhs></li>
+</ol>
+
+
+<p>好了, 现在我们假设在第 2 步的时候, 抛出了一个异常 (比如 out of memory, 总之, Rhs 的构造函数异常了), 那么第一步申请的 Lhs 对象内存泄露了. 这个问题的核心在于, shared_ptr 没有立即获得裸指针.</p>
+
+<p>我们可以用如下方式来修复这个问题.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">lhs</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Lhs</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Rhs</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然, 推荐的做法是使用 <code>std::make_shared</code> 来代替:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>缺点</h2>
+
+<h3>构造函数是保护或私有时,无法使用 make_shared</h3>
+
+<p><code>make_shared</code> 虽好, 但也存在一些问题, 比如, 当我想要创建的对象没有公有的构造函数时, <code>make_shared</code> 就无法使用了, 当然我们可以使用一些小技巧来解决这个问题, 比如这里 <a href="http://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const?rq=1">How do I call ::std::make_shared on a class with only protected or private constructors?</a></p>
+
+<h3>对象的内存可能无法及时回收</h3>
+
+<p><code>make_shared</code> 只分配一次内存, 这看起来很好. 减少了内存分配的开销. 问题来了, <code>weak_ptr</code> 会保持控制块(强引用, 以及弱引用的信息)的生命周期, 而因此连带着保持了对象分配的内存, 只有最后一个 <code>weak_ptr</code> 离开作用域时, 内存才会被释放. 原本强引用减为 0 时就可以释放的内存, 现在变为了强引用, 若引用都减为 0 时才能释放, 意外的延迟了内存释放的时间. 这对于内存要求高的场景来说, 是一个需要注意的问题. 关于这个问题可以看这里 <a href="http://lanzkron.wordpress.com/2012/04/22/make_shared-almost-a-silver-bullet/">make_shared, almost a silver bullet</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://herbsutter.com/2013/05/29/gotw-89-solution-smart-pointers/">GotW #89 Solution: Smart Pointers</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/memory/shared_ptr/make_shared">cppreference.com &ndash; std::make_shared</a></li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-12T21:01:00+08:00" pubdate data-updated="true">Jan 12<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+	</div>
+	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.com/blog/2014/01/12/why-make-shared/';
+        var disqus_url = 'http://bitdewy.github.com/blog/2014/01/12/why-make-shared/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

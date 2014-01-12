@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-01-06T02:23:25+08:00</updated>
+  <updated>2014-01-13T02:03:48+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,117 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[why make_shared ?]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/01/12/why-make-shared/"/>
+    <updated>2014-01-12T21:01:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/01/12/why-make-shared</id>
+    <content type="html"><![CDATA[<p>C++11 中引入了智能指针, 同时还有一个模板函数 <code>std::make_shared</code> 可以返回一个指定类型的 <code>std::shared_ptr</code>, 那与 <code>std::shared_ptr</code> 的构造函数相比它能给我们带来什么好处呢 ?</p>
+
+<h2>优点</h2>
+
+<h3>效率更高</h3>
+
+<p><code>shared_ptr</code> 需要维护引用计数的信息,</p>
+
+<ul>
+<li>强引用, 用来记录当前有多少个存活的 shared_ptrs 正持有该对象. 共享的对象会在最后一个强引用离开的时候销毁( 也可能释放).</li>
+<li>弱引用, 用来记录当前有多少个正在观察该对象的 weak_ptrs. 当最后一个弱引用离开的时候, 共享的内部信息控制块会被销毁和释放 (共享的对象也会被释放, 如果还没有释放的话).</li>
+</ul>
+
+
+<p>如果你通过使用原始的 new 表达式分配对象, 然后传递给 shared_ptr (也就是使用 shared_ptr 的构造函数) 的话, shared_ptr 的实现没有办法选择, 而只能单独的分配控制块:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="n">shared_ptr</span> <span class="n">sp1</span><span class="p">{</span> <span class="n">p</span> <span class="p">},</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
+
+<p>如果选择使用 <code>make_shared</code> 的话, 情况就会变成下面这样:</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">sp1</span> <span class="o">=</span> <span class="n">make_shared</span><span class="p">(),</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://y6yska.bay.livefilestore.com/y1p-Y0XAkcMZMrSdxkTa85nShcDkVKvqhMTFVGSDc0jURLybPXTGHPdWv9CZGgcGmvZwQQvd6Y1Qdg/sharedptr2.png" alt="" /></p>
+
+<p>内存分配的动作, 可以一次性完成. 这减少了内存分配的次数, 而内存分配是代价很高的操作.</p>
+
+<p>关于两种方式的性能测试可以看这里 <a href="http://tech-foo.blogspot.hk/2012/04/experimenting-with-c-stdmakeshared.html">Experimenting with C++ std::make_shared</a></p>
+
+<h3>异常安全</h3>
+
+<p>看看下面的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">F</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;&amp;</span> <span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Lhs</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)),</span>
+</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Rhs</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">)));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>C++ 是不保证参数求值顺序, 以及内部表达式的求值顺序的, 所以可能的执行顺序如下:</p>
+
+<ol>
+<li>new Lhs(&ldquo;foo&rdquo;))</li>
+<li>new Rhs(&ldquo;bar&rdquo;))</li>
+<li>std::shared_ptr<Lhs></li>
+<li>std::shared_ptr<Rhs></li>
+</ol>
+
+
+<p>好了, 现在我们假设在第 2 步的时候, 抛出了一个异常 (比如 out of memory, 总之, Rhs 的构造函数异常了), 那么第一步申请的 Lhs 对象内存泄露了. 这个问题的核心在于, shared_ptr 没有立即获得裸指针.</p>
+
+<p>我们可以用如下方式来修复这个问题.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">lhs</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Lhs</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">Rhs</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然, 推荐的做法是使用 <code>std::make_shared</code> 来代替:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">F</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Lhs</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>缺点</h2>
+
+<h3>构造函数是保护或私有时,无法使用 make_shared</h3>
+
+<p><code>make_shared</code> 虽好, 但也存在一些问题, 比如, 当我想要创建的对象没有公有的构造函数时, <code>make_shared</code> 就无法使用了, 当然我们可以使用一些小技巧来解决这个问题, 比如这里 <a href="http://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const?rq=1">How do I call ::std::make_shared on a class with only protected or private constructors?</a></p>
+
+<h3>对象的内存可能无法及时回收</h3>
+
+<p><code>make_shared</code> 只分配一次内存, 这看起来很好. 减少了内存分配的开销. 问题来了, <code>weak_ptr</code> 会保持控制块(强引用, 以及弱引用的信息)的生命周期, 而因此连带着保持了对象分配的内存, 只有最后一个 <code>weak_ptr</code> 离开作用域时, 内存才会被释放. 原本强引用减为 0 时就可以释放的内存, 现在变为了强引用, 若引用都减为 0 时才能释放, 意外的延迟了内存释放的时间. 这对于内存要求高的场景来说, 是一个需要注意的问题. 关于这个问题可以看这里 <a href="http://lanzkron.wordpress.com/2012/04/22/make_shared-almost-a-silver-bullet/">make_shared, almost a silver bullet</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://herbsutter.com/2013/05/29/gotw-89-solution-smart-pointers/">GotW #89 Solution: Smart Pointers</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/memory/shared_ptr/make_shared">cppreference.com &ndash; std::make_shared</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[当 Windows API 遇上 RAII]]></title>
@@ -3559,148 +3670,6 @@ optional 采用了指针语义来访问内部保存的元素, 这使得 optional
 <li><a href="http://en.cppreference.com/w/cpp/utility/optional">cppreference.com: optional</a></li>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">A proposal to add a utility class to represent optional objects (Revision 4)</a></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[模板方法模式]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/05/28/template-method-pattern/"/>
-    <updated>2013-05-28T01:26:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/05/28/template-method-pattern</id>
-    <content type="html"><![CDATA[<h2>意图</h2>
-
-<ol>
-<li>定义一个操作中的算法骨架, 将一些步骤延迟到子类中定义. 模板方法模式, 可以让子类不改变算法的结构重新定义算法的某些步骤.</li>
-<li>基类声明算法的“占位符”, 子类来实现这个“占位符”.</li>
-</ol>
-
-
-<h2>讨论</h2>
-
-<p>组件设计者决定哪些算法的步骤是不变的? 哪些是会变化的? 不变的步骤在抽象类中直接实现, 可能变化的步骤给出默认的实现, 或者完全不实现. 变化的部分代表“hooks”, 或占位符. 可以在使用组件时, 在派生类中实现.</p>
-
-<p>组件设计者设计算法的步骤, 步骤的顺序, 但同时允许用户来扩展或替换算法中的某些步骤.</p>
-
-<p>模板方法模式在框架中的使用非常广泛. 每个框架都会实现框架的主要结构, 然后定义一系列的“占位符”给用户, 让用户有机会来自定义一些操作.这么做时, 框架就变成了核心部分, 用户自定义的操作就会变得容易. 这使得控制结构发生反转, 这个方式有一个很好的名字, “好莱坞原则”——“不要给我们打电话, 我们会打电话给你.”</p>
-
-<!-- more  -->
-
-
-<h2>结构</h2>
-
-<p><img src="https://qhphgq.bay.livefilestore.com/y2pBx_PXPtSilwtV5sYskGDPJkXjmpbdLnwAeT9H_7drKPs4-4_-pm3OfDw58eFEjaFRaa2LSKhbnJODUkyO8CpuQRq8iF306c3KF6Ix_M1zWA/image002.gif" alt="" /></p>
-
-<p>template_method() 的实现如下: 调用 step_one(), 调用 step_two(), 然后调用 step_three(). step_two() 是一个 “hook” 方法——一个占位符. 它在基类中声明, 然后在派生类中实现. 框架中使用模板方法模式非常的频繁. 所有可重用的代码都定义在框架的基类中, 框架的用户可以通过派生类来定制一些想要的行为.</p>
-
-<p><img src="https://qhphgq.bay.livefilestore.com/y2pMCc56J8x2oBUDmOTnSI3RIm-N5Gtpyj355-us-8Rj6CwVbNzQfiEJyprTSAXmCS8rG0MbCE-qwP-Y65dPUdVWyXU8V2FC4IWhzy_2WBvDZA/image003.gif" alt="" /></p>
-
-<h2>做法</h2>
-
-<ol>
-<li>检测算法, 决定哪些步骤是标准的通用的, 哪些是特有的.</li>
-<li>定义一个抽象类, 用来实现依赖的反转.</li>
-<li>将算法的壳以及所有的标准（公共）的步骤移到基类中.</li>
-<li>在基类中给那些需要不同实现的步骤定义一个占位符或者“hook”方法, 这些方法可以有默认实现, 也可以完全没有. (C++中的纯虚函数, Java中的抽象方法）</li>
-<li>在模板方法中调用这些“占位符”.</li>
-<li>所有现有的类都继承于现在的抽象类.</li>
-<li>将基类中已经实现的现有的类中的细节全部移除.</li>
-<li>那些不同的部分仍然留在这些派生类中，用来实现每个派生类中不同的操作.</li>
-</ol>
-
-
-<h2>经验</h2>
-
-<p>除了粒度的区别之外, 策略模式与模板方法模式非常类似.
-模板方法使用继承来改变算法的某个部分, 而策略模式改变整个算法.
-策略模式改变单个对象的逻辑. 模板方法修改了整个类的逻辑.
-工厂方法模式是一个特化的模板方法模式.</p>
-
-<h2>例子</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Base</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kt">void</span> <span class="n">a</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;a  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="kt">void</span> <span class="n">c</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;c  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="kt">void</span> <span class="n">e</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;e  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// 2. Steps requiring peculiar implementations are &quot;placeholders&quot; in base class</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="c1">// 1. Standardize the skeleton of an algorithm in a base class &quot;template method&quot;</span>
-</span><span class='line'>    <span class="kt">void</span> <span class="n">execute</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">a</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">ph1</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">c</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">ph2</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">e</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">One</span><span class="o">:</span> <span class="k">public</span> <span class="n">Base</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// 3. Derived classes implement placeholder methods</span>
-</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;b  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;d  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Two</span><span class="o">:</span> <span class="k">public</span> <span class="n">Base</span> <span class="p">{</span>
-</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph1</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;2  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="cm">/*virtual*/</span><span class="kt">void</span> <span class="n">ph2</span><span class="p">()</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;4  &quot;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">Base</span><span class="o">*</span> <span class="n">array</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">One</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">Two</span><span class="p">()</span> <span class="p">};</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>

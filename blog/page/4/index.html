@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="什么是 COM ？ Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 Component Object Model。 什么是 ABI ？ &hellip;">
+	<meta name="description" content="不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 CMake 来生成 vcproj，这样维护起来更方便。 什么是 CMake？ &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,72 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/15/cmake-lua5-dot-2/">
+		
+			CMake Lua 5.2</a>
+	</h2>
+	<div class="entry-content">
+		<p>不知道从什么时候开始，lua 源码不再提供 visual studio 工程文件了。windows 用户只能自己动手了，无奈 visual studio 版本太多，工程文件也不是人能读懂，简直不可维护。所以下面用 <a href="http://www.cmake.org/">CMake</a> 来生成 vcproj，这样维护起来更方便。</p>
+
+<h2>什么是 CMake？</h2>
+
+<p><a href="http://www.cmake.org/">CMake</a> 是个开源的跨平台自动化建构系统，它用组态档控制建构过程（build process）的方式和 Unix 的 Make 相似，只是 <a href="http://www.cmake.org/">CMake</a> 的组态档取名为 CMakeLists.txt。<a href="http://www.cmake.org/">CMake</a> 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 <a href="http://www.cmake.org/">CMake</a> 和 SCons 等其他类似系统的区别之处。</p>
+
+<p>有了 <a href="http://www.cmake.org/">CMake</a> 就不用在 vcproj 的各个版本之前来回的切换了，每次用 <a href="http://www.cmake.org/">CMake</a> 生成相应的工程文件就一切 OK 了。</p>
+
+<h2>Windows 下用 CMake 安装 lua 5.2.1</h2>
+
+<h3>安装 CMake</h3>
+
+<p>从<a href="http://cmake.org/cmake/resources/software.html">官方下载</a>相应的安装包，安装完成后，别忘了把 <a href="http://www.cmake.org/">CMake</a> 加入 <code>PATH</code> 中。</p>
+
+<h3>使用 CMake 生成 vcproj</h3>
+
+<p>lua官方不提供带 CMake 的源码，会的朋友可以手工写几个 CMakeList.txt 就 OK，不会的直接下载 bitdewy 写好的 <a href="http://sdrv.ms/TTp5Y6">cmake-lua-5.2.1.tar.gz</a> 吧。解压后用 visual studio 的命令行进入 <code>lua-5.2.1/build</code> 目录，然后输入：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bat'><span class='line'>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="s2">&quot;C:\lua52&quot;</span> ..
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完成之后就可以打开 build 目录下的 lua.sln 文件直接编译了，编译 INSTALL 工程，会在上面设置的 <code>C:\lua52</code> 目录中安装 lua，luac，静态链接库，动态链接库，头文件、源代码以及文档，如果不想安装，不编译 INSTALL 工程就好。如果不设置安装目录，那么 windows 下默认的安装目录就是 <code>%ProgramFiles%</code> 。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-15T18:09:00+08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cmake/'>cmake</a>, <a class='category' href='/blog/categories/lua/'>lua</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/15/cmake-lua5-dot-2/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -714,93 +780,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2012/07/07/gotw102/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/07/02/gotw101/">
-		
-			[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
-
-<h2>Guru问题</h2>
-
-<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// in implementation file</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// :::</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span> <span class="c1">// or =default</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
-
-
-		
-		<a href="/blog/2012/07/02/gotw101/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-02T02:38:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/07/02/gotw101/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

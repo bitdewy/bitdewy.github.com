@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-01-06T02:23:25+08:00</updated>
+  <updated>2014-01-13T02:03:48+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[why make_shared ?]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/01/12/why-make-shared/"/>
+    <updated>2014-01-12T21:01:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/01/12/why-make-shared</id>
+    <content type="html"><![CDATA[<p>C++11 中引入了智能指针, 同时还有一个模板函数 <code>std::make_shared</code> 可以返回一个指定类型的 <code>std::shared_ptr</code>, 那与 <code>std::shared_ptr</code> 的构造函数相比它能给我们带来什么好处呢 ?</p>
+
+<h2>优点</h2>
+
+<h3>效率更高</h3>
+
+<p><code>shared_ptr</code> 需要维护引用计数的信息,</p>
+
+<ul>
+<li>强引用, 用来记录当前有多少个存活的 shared_ptrs 正持有该对象. 共享的对象会在最后一个强引用离开的时候销毁( 也可能释放).</li>
+<li>弱引用, 用来记录当前有多少个正在观察该对象的 weak_ptrs. 当最后一个弱引用离开的时候, 共享的内部信息控制块会被销毁和释放 (共享的对象也会被释放, 如果还没有释放的话).</li>
+</ul>
+
+
+<p>如果你通过使用原始的 new 表达式分配对象, 然后传递给 shared_ptr (也就是使用 shared_ptr 的构造函数) 的话, shared_ptr 的实现没有办法选择, 而只能单独的分配控制块:</p>
+
+<p><code>cpp
+auto p = new widget();
+shared_ptr sp1{ p }, sp2{ sp1 };
+</code>
+<img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
+
+<p>如果选择使用 <code>make_shared</code> 的话, 情况就会变成下面这样:</p>
+
+<!-- more -->
+
+
+<p><code>cpp
+auto sp1 = make_shared(), sp2{ sp1 };
+</code></p>
+
+<p><img src="http://y6yska.bay.livefilestore.com/y1p-Y0XAkcMZMrSdxkTa85nShcDkVKvqhMTFVGSDc0jURLybPXTGHPdWv9CZGgcGmvZwQQvd6Y1Qdg/sharedptr2.png" alt="" /></p>
+
+<p>内存分配的动作, 可以一次性完成. 这减少了内存分配的次数, 而内存分配是代价很高的操作.</p>
+
+<p>关于两种方式的性能测试可以看这里 <a href="http://tech-foo.blogspot.hk/2012/04/experimenting-with-c-stdmakeshared.html">Experimenting with C++ std::make_shared</a></p>
+
+<h3>异常安全</h3>
+
+<p>看看下面的代码:
+```cpp
+void F(const std::shared_ptr<Lhs>&amp; lhs, const std::shared_ptr<Rhs>&amp; rhs) { /<em> &hellip; </em>/ }</p>
+
+<p>F(std::shared_ptr<Lhs>(new Lhs(&ldquo;foo&rdquo;)),
+  std::shared_ptr<Rhs>(new Rhs(&ldquo;bar&rdquo;)));
+```</p>
+
+<p>C++ 是不保证参数求值顺序, 以及内部表达式的求值顺序的, 所以可能的执行顺序如下:</p>
+
+<ol>
+<li>new Lhs(&ldquo;foo&rdquo;))</li>
+<li>new Rhs(&ldquo;bar&rdquo;))</li>
+<li>std::shared_ptr<Lhs></li>
+<li>std::shared_ptr<Rhs></li>
+</ol>
+
+
+<p>好了, 现在我们假设在第 2 步的时候, 抛出了一个异常 (比如 out of memory, 总之, Rhs 的构造函数异常了), 那么第一步申请的 Lhs 对象内存泄露了. 这个问题的核心在于, shared_ptr 没有立即获得裸指针.</p>
+
+<p>我们可以用如下方式来修复这个问题.</p>
+
+<p><code>cpp
+auto lhs = std::shared_ptr&lt;Lhs&gt;(new Lhs("foo"));
+auto rhs = std::shared_ptr&lt;Rhs&gt;(new Rhs("bar"));
+F(lhs, rhs);
+</code></p>
+
+<p>当然, 推荐的做法是使用 <code>std::make_shared</code> 来代替:</p>
+
+<p><code>cpp
+F(std::make_shared&lt;Lhs&gt;("foo"), std::make_shared&lt;Rhs&gt;("bar"));
+</code></p>
+
+<h2>缺点</h2>
+
+<h3>构造函数是保护或私有时,无法使用 make_shared</h3>
+
+<p><code>make_shared</code> 虽好, 但也存在一些问题, 比如, 当我想要创建的对象没有公有的构造函数时, <code>make_shared</code> 就无法使用了, 当然我们可以使用一些小技巧来解决这个问题, 比如这里 <a href="http://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const?rq=1">How do I call ::std::make_shared on a class with only protected or private constructors?</a></p>
+
+<h3>对象的内存可能无法及时回收</h3>
+
+<p><code>make_shared</code> 只分配一次内存, 这看起来很好. 减少了内存分配的开销. 问题来了, <code>weak_ptr</code> 会保持控制块(强引用, 以及弱引用的信息)的生命周期, 而因此连带着保持了对象分配的内存, 只有最后一个 <code>weak_ptr</code> 离开作用域时, 内存才会被释放. 原本强引用减为 0 时就可以释放的内存, 现在变为了强引用, 若引用都减为 0 时才能释放, 意外的延迟了内存释放的时间. 这对于内存要求高的场景来说, 是一个需要注意的问题. 关于这个问题可以看这里 <a href="http://lanzkron.wordpress.com/2012/04/22/make_shared-almost-a-silver-bullet/">make_shared, almost a silver bullet</a></p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://herbsutter.com/2013/05/29/gotw-89-solution-smart-pointers/">GotW #89 Solution: Smart Pointers</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/memory/shared_ptr/make_shared">cppreference.com &ndash; std::make_shared</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[当 Windows API 遇上 RAII]]></title>
@@ -668,138 +766,6 @@ return c;
 <p>类 GetRandomN 有一个构造函数, 以及一个模版的类型隐式转换函数. 初始化的时候, 会产生一个 GetRandomN 类的临时对象, 当赋值给 STL 容器类型时, 编译器会去尝试将对象隐式转换. 而隐式转换的途径就是取寻找隐式转换函数, 这样就完成了返回值自动推导. 有了返回值类型自动推导, 我们就不必手写返回值类型参数了. 唔… 再注意一点, 为了支持 <code>std::set</code> 我们将原始的 <code>push_back</code> 函数改为了 <code>insert</code>.</p>
 
 <p><em>注: 在 C++11 引入 <code>nullptr</code> 之前, 手工实现一个 <code>nullptr</code> 的惯用法就使用了返回值类型推导.</em></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11中的原子操作 (atomic operation)]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/09/02/atomic-operation/"/>
-    <updated>2013-09-02T23:34:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/09/02/atomic-operation</id>
-    <content type="html"><![CDATA[<p>所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, 但是原子操作更加接近底层, 因而效率更高.</p>
-
-<p>在以往的 C++ 标准中并没有对原子操作进行规定, 我们往往是使用汇编语言, 或者是借助第三方的线程库, 例如 intel 的 pthread 来实现. 在新标准 C++11, 引入了原子操作的概念, 并通过这个新的头文件提供了多种原子操作数据类型, 例如, atomic_bool, atomic_int 等等, 如果我们在多个线程中对这些类型的共享资源进行操作, 编译器将保证这些操作都是原子性的, 也就是说, 确保任意时刻只有一个线程对这个资源进行访问, 编译器将保证, 多个线程访问这个共享资源的正确性. 从而避免了锁的使用, 提高了效率.</p>
-
-<p>我们还是来看一个实际的例子. 假若我们要设计一个广告点击统计程序, 在服务器程序中, 使用多个线程模拟多个用户对广告的点击:</p>
-
-<p>```cpp</p>
-
-<h1>include <iostream></h1>
-
-<h1>include <thread></h1>
-
-<h1>include &lt;time.h></h1>
-
-<p>// 全局的结果数据
-long total = 0;
-// 点击函数
-void click()
-{
-  for(int i = 0; i &lt; 10000; ++i) {</p>
-
-<pre><code>// 对全局数据进行无锁访问
-total += 1;
-</code></pre>
-
-<p>  }
-}</p>
-
-<p>int main(int argc, char* argv[])
-{
-  // 计时开始
-  clock_t start = clock();
-  // 创建100个线程模拟点击统计
-  std::thread threads[100];
-  for(int i = 0; i &lt; 100; ++i) {</p>
-
-<pre><code>std::thread t(&amp;click);
-threads[i].swap(t);
-</code></pre>
-
-<p>  }
-  for(int i=0; i&lt;100; ++i) {</p>
-
-<pre><code>threads[i].join();
-</code></pre>
-
-<p>  }
-  // 计时结束
-  clock_t finish = clock();
-  // 输出结果
-  std::cout &lt;&lt; &ldquo;result:&rdquo; &lt;&lt; total &lt;&lt; std::endl;
-  std::cout &lt;&lt; &ldquo;duration:&rdquo; &lt;&lt; finish -start &lt;&lt; &ldquo;ms&rdquo; &lt;&lt; std::endl;
-  return 0;
-}
-```</p>
-
-<!-- more -->
-
-
-<p>执行结果如下:</p>
-
-<blockquote><p>result: 955700</p>
-
-<p>duration: 49ms</p></blockquote>
-
-<p>从执行的结果来看, 这样的方法虽然非常快, 但是结果不正确.</p>
-
-<p>很自然地, 我们会想到使用互斥对象来对全局共享资源的访问进行保护, 于是有了下面的实现:</p>
-
-<p>```cpp
-///
-std::mutex m;
-// 点击函数
-void click()
-{
-  for(int i = 0; i &lt; 10000; ++i) {</p>
-
-<pre><code>// 对全局数据进行无锁访问
-std::unique_lock&lt;std::mutex&gt; lk(m);
-total += 1;
-</code></pre>
-
-<p>  }
-}
-///
-```</p>
-
-<p>运行结果如下:</p>
-
-<blockquote><p>result: 1000000</p>
-
-<p>duration: 32350ms</p></blockquote>
-
-<p>互斥对象的使用, 保证了同一时刻只有唯一的一个线程对这个共享进行访问, 从执行的结果来看, 互斥对象保证了结果的正确性, 但是也有非常大的性能损失, 从刚才的 49ms 变成了现在的 32350ms. 这 TMD 差距也太大了.(感觉有些异常，差距没理由这么大的, 可能是线程太多, CPU 光忙着线程切换了 = =!)</p>
-
-<p>如果是在 C++11 之前, 我们的解决方案也就到此为止了. 但是, C++ 对性能的追求是永无止境的, 他总是想尽一切办法榨干 CPU 的性能. 在 C++11 中, 实现了原子操作的数据类型 (atomic_bool, atomic_int, atomic_long 等等), 对于这些原子数据类型的共享资源的访问, 无需借助 mutex 等锁机制, 也能够实现对共享资源的正确访问.</p>
-
-<p>将原本的 long 类型改为 std::atomic_long 类型即可</p>
-
-<p>```cpp
-//long total = 0;</p>
-
-<p>std::atomic_long total;
-```</p>
-
-<p>运行结果如下:</p>
-
-<blockquote><p>result: 1000000</p>
-
-<p>duration: 117ms</p></blockquote>
-
-<p>结果正确, 时间上仅仅是不采用任何保护机制时的 3 倍左右, 和使用 mutex 做同步的版本不知差了几个数量级了.</p>
-
-<p>原子操作的实现跟普通数据类型类似, 但是它能够在保证结果正确的前提下, 提供比 mutex 等锁机制更好的性能, 如果我们要访问的共享资源可以用原子数据类型表示, 那么在多线程程序中使用这种新的等价数据类型, 是一个不错的选择.</p>
-
-<p>但值得注意的是, <code>std::atomic</code> 只能作用于基本类型以及 POD 类型上.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
-<li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
