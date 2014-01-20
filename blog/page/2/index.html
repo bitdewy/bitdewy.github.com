@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="目的 控制访问一个类内部实现细节的粒度. 动机 C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口 &hellip;">
+	<meta name="description" content="使用异步编程 使用异步编程, 可以避免性能瓶颈和增强应用程序的总体响应能力. 但是编写异步程序在以前技术上比较复杂, 使得它们难以编写, 调试以及维护. 在 .NET Framework 4.5 中, 引入了简化的异步编程方式, 编译器帮我们实现了之前需要实现的异步操作, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,119 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/20/async-and-await/">
+		
+			异步编程 Async & Await</a>
+	</h2>
+	<div class="entry-content">
+		<h2>使用异步编程</h2>
+
+<p>使用异步编程, 可以避免性能瓶颈和增强应用程序的总体响应能力. 但是编写异步程序在以前技术上比较复杂, 使得它们难以编写, 调试以及维护.</p>
+
+<p>在 .NET Framework 4.5 中, 引入了简化的异步编程方式, 编译器帮我们实现了之前需要实现的异步操作, 程序员只需要关注自己的代码逻辑即可. 程序员可以更专注到业务逻辑当中.</p>
+
+<h2>async &amp; await</h2>
+
+<p>在 C# 中, 关键字 async 和 await 是异步编程的核心, 当使用这两个关键字的时候, 我们可以直接创建一个异步函数, 就像创建一个同步函数一样简单. 看下面的例子, 所有的东西看起来都是那么的熟悉.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Three things to note in the signature: </span>
+</span><span class='line'><span class="c1">//  - The method has an async modifier.  </span>
+</span><span class='line'><span class="c1">//  - The return type is Task or Task&lt;T&gt;. (See &quot;Return Types&quot; section.)</span>
+</span><span class='line'><span class="c1">//    Here, it is Task&lt;int&gt; because the return statement returns an integer. </span>
+</span><span class='line'><span class="c1">//  - The method name ends in &quot;Async.&quot;</span>
+</span><span class='line'><span class="n">async</span> <span class="n">Task</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">AccessTheWebAsync</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// You need to add a reference to System.Net.Http to declare client.</span>
+</span><span class='line'>    <span class="n">HttpClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpClient</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// GetStringAsync returns a Task&lt;string&gt;. That means that when you await the </span>
+</span><span class='line'>    <span class="c1">// task you&#39;ll get a string (urlContents).</span>
+</span><span class='line'>    <span class="n">Task</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getStringTask</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">GetStringAsync</span><span class="p">(</span><span class="s">&quot;http://msdn.microsoft.com&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// You can do work here that doesn&#39;t rely on the string from GetStringAsync.</span>
+</span><span class='line'>    <span class="n">DoIndependentWork</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// The await operator suspends AccessTheWebAsync. </span>
+</span><span class='line'>    <span class="c1">//  - AccessTheWebAsync can&#39;t continue until getStringTask is complete. </span>
+</span><span class='line'>    <span class="c1">//  - Meanwhile, control returns to the caller of AccessTheWebAsync. </span>
+</span><span class='line'>    <span class="c1">//  - Control resumes here when getStringTask is complete.  </span>
+</span><span class='line'>    <span class="c1">//  - The await operator then retrieves the string result from getStringTask. </span>
+</span><span class='line'>    <span class="n">string</span> <span class="n">urlContents</span> <span class="o">=</span> <span class="n">await</span> <span class="n">getStringTask</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// The return statement specifies an integer result. </span>
+</span><span class='line'>    <span class="c1">// Any methods that are awaiting AccessTheWebAsync retrieve the length value. </span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">urlContents</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2013/08/20/async-and-await/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-20T01:17:00+08:00" pubdate data-updated="true">Aug 20<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/async/'>async</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/08/20/async-and-await/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -774,61 +887,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/06/14/cpp11-multithread-promise-future/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/06/04/cpp14-optional/">
-		
-			C++14 std::optional<T></a>
-	</h2>
-	<div class="entry-content">
-		<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
-
-<h2>“无意义”的值</h2>
-
-<p>函数并不总能返回有效的返回值, 很多时候函数可能返回&#8221;无意义&#8221;的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
-表示返回值无意义最常用的做法是增加一个&#8221;哨兵&#8221;的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的&#8221;哨兵&#8221;.</p>
-
-<h2>std::optional<T></h2>
-
-<p>optional 库使用&#8221;容器&#8221;语义, 包装了&#8221;可能产生无效值&#8221;的对象, 实现了&#8221;未初始化&#8221;的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
-
-<p>optional 使用&#8221;容器&#8221;语义, 为这种&#8221;无效值&#8221;的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了&#8221;未初始化&#8221;的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
-
-
-		
-		<a href="/blog/2013/06/04/cpp14-optional/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-04T01:54:00+08:00" pubdate data-updated="true">Jun 4<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-14/'>C++14</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/06/04/cpp14-optional/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

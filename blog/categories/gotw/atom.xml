@@ -4,7 +4,7 @@
   <title><![CDATA[Category: GotW | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/gotw/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-01-13T02:03:48+08:00</updated>
+  <updated>2014-01-21T01:28:20+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,282 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[译]GotW #95 Solution: Thread Safety and Synchronization]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/01/19/gotw-95/"/>
+    <updated>2014-01-19T23:54:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/01/19/gotw-95</id>
+    <content type="html"><![CDATA[<p><em>原文地址: <a href="http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/">GotW #95 Solution: Thread Safety and Synchronization</a></em></p>
+
+<p><em>这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言</em></p>
+
+<h1>问题</h1>
+
+<h2>JG 问题</h2>
+
+<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
+
+<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
+
+<h2>Guru 问题</h2>
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong>
+```cpp
+// thread 1 (performs no additional synchronization)
+code_that_reads_from( some_obj );  // passes some_obj by const &amp;</p>
+
+<p>// thread 2 (performs no additional synchronization)
+code_that_modifies( some_obj );    // passes some_obj by non-const &amp;
+```</p>
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>a) <code>int</code></li>
+<li>b) <code>string</code></li>
+<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
+<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
+<li>e) <code>mutex</code></li>
+<li>f) <code>condition_variable</code></li>
+<li>g) <code>atomic&lt;unsigned&gt;</code></li>
+</ul>
+
+
+<p><strong>提示: 虽然有 7 个类型, 但实际上答案只有两种.</strong></p>
+
+<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
+
+<ul>
+<li>a) 一般的外部同步的职责是什么?</li>
+<li>b) 什么是"基本的线程安全保障"?</li>
+<li>c) 哪些内部同步是在共享变量的实现中需要做的?</li>
+</ul>
+
+
+<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
+
+<!-- more -->
+
+
+<h1>解决方案</h1>
+
+<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
+
+<p>当两个线程同时访问一个共享变量时, 并且至少有一个是 non-const 操作(写操作)时会发生竞态条件(race condition). 并发的 const 操作是允许的, 不会发生竞态条件.</p>
+
+<p>如果发生了竞态条件, 那么你的程序会产生未定义行为 (undefined behavior).</p>
+
+<p><em>准则: 针对共享变量的只读 (const) 操作, 在没有外部同步的情况下也是安全的.</em></p>
+
+<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
+
+<p>正确同步的程序指的是没有竞态条件的程序.</p>
+
+<p>共享变量通常的保护方式有:</p>
+
+<ul>
+<li>通常使用 <code>mutex</code> 或其他类似的东西;</li>
+<li>极少情况下使用 <code>atomic</code>;</li>
+<li>极少情况下确认是内部同步的类型, 下面会讲到.</li>
+</ul>
+
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong>
+```cpp
+// thread 1 (performs no additional synchronization)
+code_that_reads_from( some_obj );  // passes some_obj by const &amp;</p>
+
+<p>// thread 2 (performs no additional synchronization)
+code_that_modifies( some_obj );    // passes some_obj by non-const &amp;
+```</p>
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>a) <code>int</code></li>
+<li>b) <code>string</code></li>
+<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
+<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
+</ul>
+
+
+<p>不能. 代码中有一个线程对 some_obj 做读操作(const 操作), 而另一个线程对 <code>some_obj</code> 进行写操作. 如果这两个线程同时执行, 那么就有可能发生竞态条件.</p>
+
+<p>要正确同步, 需要对 <code>some_obj</code> 的访问进行同步, 比如使用 <code>mutex</code>:</p>
+
+<p>```cpp
+// thread 1
+{</p>
+
+<pre><code>lock_guard hold(mut_some_obj);     // acquire lock
+code_that_reads_from( some_obj );  // passes some_obj by const &amp;
+</code></pre>
+
+<p>}</p>
+
+<p>// thread 2
+{</p>
+
+<pre><code>lock_guard hold(mut_some_obj);     // acquire lock
+code_that_modifies( some_obj );    // passes some_obj by non-const &amp;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>几乎所有类型, 包括 <code>shared_ptr</code> 以及 <code>vector</code> 以及其他类型, 他们的线程安全级别与 <code>int</code> 是一样的. 它们没有特别的为并行设计. 无论 <code>some_obj</code> 是一个 <code>int</code>, <code>string</code>, 容器, 还是智能指针类型, 并发读 (const 操作) 不需要同步也是安全的, 但是共享变量是可写的, 因此使用该变量的代码需要同步访问.</p>
+
+<p>但是, 上面说的是 &ldquo;几乎所有类型&rdquo;, 指的是不包含内部同步的类, 那些类型设计的时候就是为了并发而来的.</p>
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong>
+```cpp
+// thread 1 (performs no additional synchronization)
+code_that_reads_from( some_obj );  // passes some_obj by const &amp;</p>
+
+<p>// thread 2 (performs no additional synchronization)
+code_that_modifies( some_obj );    // passes some_obj by non-const &amp;
+```</p>
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>e) <code>mutex</code></li>
+<li>f) <code>condition_variable</code></li>
+<li>g) <code>atomic&lt;unsigned&gt;</code></li>
+</ul>
+
+
+<p>对上面的三个类型来说, 代码是 OK 的, 因为他们本身就是内部同步的, 所有不需要在外部再做同步.</p>
+
+<p>实际上, 这些类型必须保证不需要外部同步时也是安全的, 因为这些同步原语, 是你用来保证其他变量同步的工具.</p>
+
+<p><em>准则: 只有当一个类型的目的是线程间通讯 (如: 消息队列) 或同步(如: mutex)时, 这个类型才需要是内部同步的</em></p>
+
+<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
+
+<p>a) 一般的外部同步的职责是什么?</p>
+
+<p>同步的职责很简单: 当有可写的共享变量时, 需要同步访问它. 典型的做法是使用 <code>mutex</code> 或类似的东西, 或者如果可行的话将该类型变为 <code>atomic</code>.</p>
+
+<p><em>准则: 如果代码中访问了可写的共享变量, 那么需要对他进行访问同步.</em></p>
+
+<p>b) 什么是"基本的线程安全保障"?</p>
+
+<p>如果要保证上面描述的东西是正确的, 那么对象本身必须有如下两个保证.</p>
+
+<p>首先, 并行访问两个实例对象必须是安全的. 比如, 类 <code>X</code> 有两个对象 <code>x1</code> 和 <code>x2</code>, 每个对象都仅在自己的线程中使用. 考虑下面的情形:</p>
+
+<p>```cpp
+// Case A: Using distinct objects</p>
+
+<p>// thread 1 (performs no additional synchronization)
+x1.something();                   // do something with x1</p>
+
+<p>// thread 2 (performs no additional synchronization)
+x2 = something_else;              // do something else with x2
+```</p>
+
+<p>这必须始终是正确同步的. 记住, 这里的 <code>x1</code> 和 <code>x2</code> 是两个对象, 而不是别名或类似的东西.</p>
+
+<p>另外, 并发的 const 操作, 也就是只读操作必须是安全的:</p>
+
+<p>```cpp
+// Case B: const access to the same object</p>
+
+<p>// thread 1 (performs no additional synchronization)
+x.something_const();              // read from x (const operation)</p>
+
+<p>// thread 2 (performs no additional synchronization)
+x.something_else_const();         // read from x (const operation)
+```</p>
+
+<p>上面的代码也是正确同步的. 没有外部同步时他们也能很好的工作. 这不是一个竞态条件. 因为这两个线程都仅仅是对共享变量进行读操作.</p>
+
+<p>这把我们带到了同时需要外部同步和内部同步的情形.</p>
+
+<p>c) 哪些内部同步是在共享变量的实现中需要做的?</p>
+
+<p>在某些类, 对象中表面上看起来他们是不同的, 但实际上仍然共享着某些状态, 而不需要调用者做任何事情来指定幕后的连接状态. 注意这不是前面准则的例外, 这是和前面一样的准则.</p>
+
+<p><em>准则: 如果代码中访问了可写的共享变量, 那么需要对他进行访问同步. 这始终是正确的. 如果可写的共享变量隐藏在类实现的内部, 那么仅仅对那部分共享变量的访问做同步即可.</em></p>
+
+<p>引用计数, 就是上面所描述的内部共享状态, 下面的两个例子是 <code>std::shared_ptr</code> 以及 copy-on-write. 下面来看 <code>shared_ptr</code> 的例子.</p>
+
+<p>像 <code>shared_ptr</code> 一样的带有引用计数的智能指针会在对象内部保存引用计数信息. 下面来看两个不同的 <code>shared_ptr</code> 对象 <code>sp1</code> 与 <code>sp2</code>, 每一个都仅在自己的线程中使用. 考虑下面的情形:</p>
+
+<p>```cpp
+// Case A: Using distinct objects</p>
+
+<p>// thread 1 (performs no additional synchronization)
+auto x = sp1;                      // read from sp1 (writes the count!)</p>
+
+<p>// thread 2 (performs no additional synchronization)
+sp2 = something_else;              // write to sp2 (writes the count!)
+```</p>
+
+<p>这个代码会正确同步, 而且完全不需要外部同步. 没错&hellip;</p>
+
+<p>但是, 如果 <code>sp1</code> 与 <code>sp2</code> 指向同一个对象, 共享引用计数信息时呢? 这时, 引用计数信息是一个可写的共享变量, 它必须同步访问来避免竞态条件, 但是这基本是无法在外部调用代码中完成的, 因为我们甚至都感知不到它存在共享的内容. 我们看不到引用计数的大小, 也不知道他的变量名, 也不知道还有谁正在共享.</p>
+
+<p>类似的, 我们看下面代码, 两个线程只从同一个变量 <code>sp</code> 中读取内容:</p>
+
+<p>```cpp
+// Case B: const access to the same object</p>
+
+<p>// thread 1 (performs no additional synchronization)
+auto sp3 = sp;                     // read from sp (writes the count!)</p>
+
+<p>// thread 2 (performs no additional synchronization)
+auto sp4 = sp;                     // read from sp (writes the count!)
+```</p>
+
+<p>代码不需要外部同步也可以正确同步. 这不是竞态条件, 因为这两个线程对 <code>sp</code> 都进行的是只读的 const 操作. 但在内部共享的引用计数是可写的, 它们需要正确同步来避免竞态条件, 像上面所说, 我们不可能在调用代码中保证它正确同步, 因为我们甚至不知道有共享的内容.</p>
+
+<p>因此要处理这种情形, 以 <code>shared_ptr</code> 的引用计数为例, 典型的做法是将引用计数变量更改为 mutable atomic 类型.</p>
+
+<p>为了完整, 我们再看需要外部同步的情形. 像上面说说的, 当多线程共享 <code>shared_ptr</code> 可写对象时, 仍然是需要外部同步的:</p>
+
+<p>```cpp
+// Case C: External synchronization still required as usual
+//         for non-const access to same visible shared object</p>
+
+<p>// thread 1
+{</p>
+
+<pre><code>lock_guard hold(mut_sp);           // acquire lock
+auto sp3 = sp;                     // read from sp
+</code></pre>
+
+<p>}</p>
+
+<p>// thread 2
+{</p>
+
+<pre><code>lock_guard hold(mut_sp);           // acquire lock
+sp = something_else;               // modify sp
+</code></pre>
+
+<p>}
+```</p>
+
+<p>所以, <code>shared_ptr</code> 不是内部同步的类型, 如果调用者需要在多个线程中共享该类型的可写变量, 那么必须像问题 3(d) 中那样, 在外部做同步访问.</p>
+
+<p>那么内部同步的目的是什么? 它仅仅做那些外部不可见, 外部无法做同步, 而内部需要共享的内容的同步. 这样一来外部就能使用通常的做法来保证正确同步了.</p>
+
+<p>对于 copy-on-write 来说, 情况和引用计数也类似.</p>
+
+<p><em>准则: 如果你设计一个类, 如果两个对象实例之间有外部看不到的 <code>mutable</code> 共享状态, 那么保证这个共享状态能够正确同步是你的职责, 因为这个共享状态对外部来说是未知的.</em></p>
+
+<p>为什么内部共享状态是 <code>mutable</code> 的, 请看 GotW #6a 和 #6b.</p>
+
+<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
+
+<p>只有一种类型需要完全的内部同步, 不需要外部的同步就能保证并发的安全, 那就是: 线程间同步和通讯的原语. 这包括标准库中的 <code>mutex</code>, <code>atomic</code>, 还有你可能自己会写的线程间通信的消息队列, 生产者/消费者的活动对象, 或者一个线程安全的计数器.</p>
+
+<p>如果你想知道是否还有其他的类型也应该做成内部同步的话, 请考虑: 只有那些你能明确知道,这个类型一旦创建,  那它就是要共享给多个线程来做可写访问的时候, 你猜需要让这个类型是内部同步的&hellip; 这个语义同时也意味着这个类型就是为了线程间通讯以及同步而设计的.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] GotW #1 Solution: Variable Initialization – or Is It?]]></title>
@@ -767,212 +1043,6 @@ std::unique_ptr<T> make_unique( Args&amp;&amp; &hellip;args )
 <h2>感谢</h2>
 
 <p>这个问题是在 comp.lang.c++.moderated 的讨论中提出的。解决方案中的观点是由 James Kanze, Steve Clamage, 和 Dave Abrahams 在该讨论以及其他讨论和私人邮件中提出的。同时也感谢 Clark Nelson，他起草了 C++11 中的“sequenced before” 的概念，并阐明了其中的疑问。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)]]></title>
-    <link href="http://bitdewy.github.com/blog/2012/07/02/gotw101/"/>
-    <updated>2012-07-02T02:38:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2012/07/02/gotw101</id>
-    <content type="html"><![CDATA[<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
-
-<h2>Guru问题</h2>
-
-<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
-
-<p>``` cpp
-// in header file
-class widget {
-public:</p>
-
-<pre><code>widget();
-~widget();
-</code></pre>
-
-<p>private:</p>
-
-<pre><code>class impl;
-unique_ptr&lt;impl&gt; pimpl;
-</code></pre>
-
-<p>};</p>
-
-<p>// in implementation file
-class widget::impl {</p>
-
-<pre><code>// :::
-</code></pre>
-
-<p>};</p>
-
-<p>widget::widget() : pimpl{ new impl{ /<em>&hellip;</em>/ } } { }
-widget::~widget() { } // or =default
-```</p>
-
-<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
-
-<!-- more -->
-
-
-<h2>解决方案</h2>
-
-<p>是的，我们有一些办法。可能最简单的办法之一是使用一个类似 unique_ptr 的 helper 类，但是我还是会把它叫做 pimpl 而不是 pimpl_ptr 因为他还要负责分配和释放 impl 对象。</p>
-
-<p>让我们朝着我们的目标前进，即简化 widget 的代码。由于 Pimpl 惯用法同时影响可见类的定义的头文件和隐藏私有部分的实现的头文件，我们把 Pimpl 也放到两个文件中。</p>
-
-<p>首先，我们引入一个 pimpl_h.h 然后添加 <code>pimpl&lt;myclass::impl&gt;</code> 类型的数据成员。然后在我们的实现文件中引入 pimpl_impl.h 然后定义我们的 impl 类。</p>
-
-<p>``` cpp
-// in header file</p>
-
-<h1>include &ldquo;pimpl_h.h&rdquo;</h1>
-
-<p>class widget {</p>
-
-<pre><code>class impl;
-pimpl&lt;impl&gt; m;
-// ...
-</code></pre>
-
-<p>};</p>
-
-<p>// in implementation file</p>
-
-<h1>include &ldquo;pimpl_impl.h&rdquo;</h1>
-
-<p>class widget::impl {</p>
-
-<pre><code>// ...
-</code></pre>
-
-<p>};
-```</p>
-
-<p>为什么这比手工实现的 Pimpl 惯用法更好？</p>
-
-<ul>
-<li>首先，代码变得简单了，因为我们头文件中减少了代码：在手工实现的版本中，你还需要声明构造函数，然后在实现文件中显式的分配 impl 对象。你应该还记得需要声明析构函数，然后在实现文件中显式的实现，<a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 中已经解释过这个晦涩的问题。</li>
-<li>第二，代码更健壮了：在手工实现的版本中，如果你忘了实现非内联的析构函数，Pimpl 类将能够独立的编译，但是如果调用者试图销毁这个对象时，将会的到一个有用的编译错误“无法生成析构函数，由于 impl 呃，你知道的，不是完整类型”，这可能会使代码调用者挠着头离开，然后找你检查一下这到底是什么问题。</li>
-</ul>
-
-
-<p>pimpl<T> 模板会完成这些工作，不过，我们还要再加点料：它在可见类和实现类之间而不知道任何一个的定义，并且它把所有东西都连接到一起，完成了那些可见类和实现类可能去要做的事。幸运的是，没有什么是 pimpl<T> 不能控制的。</p>
-
-<p>现在，我们来看看 pimpl_h.h 和 pimpl_impl.h 把我们的思绪连接起来。</p>
-
-<h4>pimpl_h.h : 可见类需要的东西</h4>
-
-<p>pimpl_h.h 提供不透明的 impl 和它的指针（在这里，我们使用 m 代替 pimpl）。它同时也声明两个构造函数和一个析构函数，这些将在 pimpl_impl.h 中以非内联的方式实现，并掌管 impl 对象的生命周期。</p>
-
-<p>``` cpp
-// pimpl_h.h</p>
-
-<h1>ifndef PIMPL_H_H</h1>
-
-<h1>define PIMPL_H_H</h1>
-
-<h1>include <memory></h1>
-
-<p>template<typename T>
-class pimpl {
-private:</p>
-
-<pre><code>std::unique_ptr&lt;T&gt; m;
-</code></pre>
-
-<p>public:</p>
-
-<pre><code>pimpl();
-template&lt;typename ...Args&gt; pimpl( Args&amp;&amp; ... );
-~pimpl();
-T* operator-&gt;();
-T&amp; operator*();
-</code></pre>
-
-<p>};</p>
-
-<h1>endif</h1>
-
-<p>```</p>
-
-<p>第二个构造函数提供了一种给 impl 对象传递初始化参数的方式。由于 pimpl 对 impl 一无所知，这时候完美转发立功了！这是一个有意思的惯用法，它会逐渐的被人所熟知：所有的参数用使用 (&amp;&amp;) 右值引用，然后传递参数时使用 std::forward，这些会在 pimpl_impl.h 中实现。</p>
-
-<h4>pimpl_impl.h:提供内部实现</h4>
-
-<p>pimpl_impl.h 提供创建和销毁 impl 对象的其他内部实现，就像上面说的，下面我们将看到完美转发的实现部分。</p>
-
-<p>首先，如果你知道非内联的完美转发模板声明语法，给你发一朵小红花。注意构造函数需要的模板不是一个，而是两个，一个是 pimpl 模板参数，另一个是构造函数的参数的模板参数。</p>
-
-<p>``` cpp
-// file pimpl_impl.h</p>
-
-<h1>ifndef PIMPL_IMPL_H</h1>
-
-<h1>define PIMPL_IMPL_H</h1>
-
-<h1>include <utility></h1>
-
-<p>template<typename T>
-pimpl<T>::pimpl() : m{ new T{} } { }</p>
-
-<p>template<typename T>
-template<typename ...Args>
-pimpl<T>::pimpl( Args&amp;&amp; &hellip;args )</p>
-
-<pre><code>: m{ new T{ std::forward&lt;Args&gt;(args)... } } { }
-</code></pre>
-
-<p>template<typename T>
-pimpl<T>::~pimpl() { }</p>
-
-<p>template<typename T>
-T* pimpl<T>::operator->() { return m.get(); }</p>
-
-<p>template<typename T>
-T&amp; pimpl<T>::operator<em>() { return </em>m.get(); }</p>
-
-<h1>endif</h1>
-
-<p>```</p>
-
-<p>每个构造函数都可以在不知道 impl 类型细节的时候创建出一个新的 impl 对象。类型只要调用者在其他地方定义就可以了。</p>
-
-<p>转发构造函数可以简单的转发参数，<code>pimpl&lt;widget&gt;::impl</code> 类型可以幸福的提供带着任何参数的构造函数，可见类 widget 的构造函数可以接受这些参数然后安全的正确的转发给 impl，而不需要 pimpl&lt;>。所有需要的“智慧”的东西都由标准中的&amp;&amp;右值引用和 <code>std::forward</code> 提供——这是避免左值需要了解太多右值业务的漂亮的标准实现，而且它能很好地工作。</p>
-
-<h2>注解</h2>
-
-<p>变长模板参数使得转发构造函数写起来比固定模板参数更容易。如果你使用的编译器支持右值语法但是还不支持变长模板参数，有仍然可以实现相同的效果，只是需要一些重复——决定你准备支持的参数个数，然后写一组模板构造函数的重载，来代替单个变长模板构造函数。前三个看起来可能是这个样子：</p>
-
-<p>``` cpp
-template<typename T>
-template<typename Arg1>
-pimpl<T>::pimpl( Arg1&amp;&amp; arg1 )</p>
-
-<pre><code>: m( new T( std::forward&lt;Arg1&gt;(arg1) ) ) { }
-</code></pre>
-
-<p>template<typename T>
-template<typename Arg1, typename Arg2>
-pimpl<T>::pimpl( Arg1&amp;&amp; arg1, Arg2&amp;&amp; arg2 )</p>
-
-<pre><code>: m( new T( std::forward&lt;Arg1&gt;(arg1), std::forward&lt;Arg2&gt;(arg2) ) ) { }
-</code></pre>
-
-<p>template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3>
-pimpl<T>::pimpl( Arg1&amp;&amp; arg1, Arg2&amp;&amp; arg2, Arg3&amp;&amp; arg3 )</p>
-
-<pre><code>: m( new T( std::forward&lt;Arg1&gt;(arg1), std::forward&lt;Arg2&gt;(arg2), std::forward&lt;Arg3&gt;(arg3) ) ) { }
-</code></pre>
-
-<p>```</p>
-
-<h2>更改记录</h2>
-
-<p>2011-12-06: 把 pimpl&lt;> 从一个基类更改为成员——我真的讨厌不必要的继承，你也应该是的。</p>
-
-<p>2011-12-13: 增加解释，为什么这比手工实现的 Pimpl 惯用法更好。</p>
 ]]></content>
   </entry>
   

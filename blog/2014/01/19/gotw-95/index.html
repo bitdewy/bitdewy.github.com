@@ -1,0 +1,520 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>[译]GotW #95 Solution: Thread Safety and Synchronization - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="原文地址: GotW #95 Solution: Thread Safety and Synchronization 这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言 问题 JG 问题 1) 竞态条件(race condition)指的是什么? &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">[译]GotW #95 Solution: Thread Safety and Synchronization</h2>
+	<div class="entry-content"><p><em>原文地址: <a href="http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/">GotW #95 Solution: Thread Safety and Synchronization</a></em></p>
+
+<p><em>这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言</em></p>
+
+<h1>问题</h1>
+
+<h2>JG 问题</h2>
+
+<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
+
+<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
+
+<h2>Guru 问题</h2>
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>a) <code>int</code></li>
+<li>b) <code>string</code></li>
+<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
+<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
+<li>e) <code>mutex</code></li>
+<li>f) <code>condition_variable</code></li>
+<li>g) <code>atomic&lt;unsigned&gt;</code></li>
+</ul>
+
+
+<p><strong>提示: 虽然有 7 个类型, 但实际上答案只有两种.</strong></p>
+
+<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
+
+<ul>
+<li>a) 一般的外部同步的职责是什么?</li>
+<li>b) 什么是&#8221;基本的线程安全保障&#8221;?</li>
+<li>c) 哪些内部同步是在共享变量的实现中需要做的?</li>
+</ul>
+
+
+<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
+
+<!-- more -->
+
+
+<h1>解决方案</h1>
+
+<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
+
+<p>当两个线程同时访问一个共享变量时, 并且至少有一个是 non-const 操作(写操作)时会发生竞态条件(race condition). 并发的 const 操作是允许的, 不会发生竞态条件.</p>
+
+<p>如果发生了竞态条件, 那么你的程序会产生未定义行为 (undefined behavior).</p>
+
+<p><em>准则: 针对共享变量的只读 (const) 操作, 在没有外部同步的情况下也是安全的.</em></p>
+
+<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
+
+<p>正确同步的程序指的是没有竞态条件的程序.</p>
+
+<p>共享变量通常的保护方式有:</p>
+
+<ul>
+<li>通常使用 <code>mutex</code> 或其他类似的东西;</li>
+<li>极少情况下使用 <code>atomic</code>;</li>
+<li>极少情况下确认是内部同步的类型, 下面会讲到.</li>
+</ul>
+
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>a) <code>int</code></li>
+<li>b) <code>string</code></li>
+<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
+<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
+</ul>
+
+
+<p>不能. 代码中有一个线程对 some_obj 做读操作(const 操作), 而另一个线程对 <code>some_obj</code> 进行写操作. 如果这两个线程同时执行, 那么就有可能发生竞态条件.</p>
+
+<p>要正确同步, 需要对 <code>some_obj</code> 的访问进行同步, 比如使用 <code>mutex</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span> <span class="n">hold</span><span class="p">(</span><span class="n">mut_some_obj</span><span class="p">);</span>     <span class="c1">// acquire lock</span>
+</span><span class='line'>    <span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span> <span class="n">hold</span><span class="p">(</span><span class="n">mut_some_obj</span><span class="p">);</span>     <span class="c1">// acquire lock</span>
+</span><span class='line'>    <span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>几乎所有类型, 包括 <code>shared_ptr</code> 以及 <code>vector</code> 以及其他类型, 他们的线程安全级别与 <code>int</code> 是一样的. 它们没有特别的为并行设计. 无论 <code>some_obj</code> 是一个 <code>int</code>, <code>string</code>, 容器, 还是智能指针类型, 并发读 (const 操作) 不需要同步也是安全的, 但是共享变量是可写的, 因此使用该变量的代码需要同步访问.</p>
+
+<p>但是, 上面说的是 &ldquo;几乎所有类型&rdquo;, 指的是不包含内部同步的类, 那些类型设计的时候就是为了并发而来的.</p>
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>e) <code>mutex</code></li>
+<li>f) <code>condition_variable</code></li>
+<li>g) <code>atomic&lt;unsigned&gt;</code></li>
+</ul>
+
+
+<p>对上面的三个类型来说, 代码是 OK 的, 因为他们本身就是内部同步的, 所有不需要在外部再做同步.</p>
+
+<p>实际上, 这些类型必须保证不需要外部同步时也是安全的, 因为这些同步原语, 是你用来保证其他变量同步的工具.</p>
+
+<p><em>准则: 只有当一个类型的目的是线程间通讯 (如: 消息队列) 或同步(如: mutex)时, 这个类型才需要是内部同步的</em></p>
+
+<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
+
+<p>a) 一般的外部同步的职责是什么?</p>
+
+<p>同步的职责很简单: 当有可写的共享变量时, 需要同步访问它. 典型的做法是使用 <code>mutex</code> 或类似的东西, 或者如果可行的话将该类型变为 <code>atomic</code>.</p>
+
+<p><em>准则: 如果代码中访问了可写的共享变量, 那么需要对他进行访问同步.</em></p>
+
+<p>b) 什么是&#8221;基本的线程安全保障&#8221;?</p>
+
+<p>如果要保证上面描述的东西是正确的, 那么对象本身必须有如下两个保证.</p>
+
+<p>首先, 并行访问两个实例对象必须是安全的. 比如, 类 <code>X</code> 有两个对象 <code>x1</code> 和 <code>x2</code>, 每个对象都仅在自己的线程中使用. 考虑下面的情形:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Case A: Using distinct objects</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">x1</span><span class="p">.</span><span class="n">something</span><span class="p">();</span>                   <span class="c1">// do something with x1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">x2</span> <span class="o">=</span> <span class="n">something_else</span><span class="p">;</span>              <span class="c1">// do something else with x2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这必须始终是正确同步的. 记住, 这里的 <code>x1</code> 和 <code>x2</code> 是两个对象, 而不是别名或类似的东西.</p>
+
+<p>另外, 并发的 const 操作, 也就是只读操作必须是安全的:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Case B: const access to the same object</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">something_const</span><span class="p">();</span>              <span class="c1">// read from x (const operation)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">something_else_const</span><span class="p">();</span>         <span class="c1">// read from x (const operation)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码也是正确同步的. 没有外部同步时他们也能很好的工作. 这不是一个竞态条件. 因为这两个线程都仅仅是对共享变量进行读操作.</p>
+
+<p>这把我们带到了同时需要外部同步和内部同步的情形.</p>
+
+<p>c) 哪些内部同步是在共享变量的实现中需要做的?</p>
+
+<p>在某些类, 对象中表面上看起来他们是不同的, 但实际上仍然共享着某些状态, 而不需要调用者做任何事情来指定幕后的连接状态. 注意这不是前面准则的例外, 这是和前面一样的准则.</p>
+
+<p><em>准则: 如果代码中访问了可写的共享变量, 那么需要对他进行访问同步. 这始终是正确的. 如果可写的共享变量隐藏在类实现的内部, 那么仅仅对那部分共享变量的访问做同步即可.</em></p>
+
+<p>引用计数, 就是上面所描述的内部共享状态, 下面的两个例子是 <code>std::shared_ptr</code> 以及 copy-on-write. 下面来看 <code>shared_ptr</code> 的例子.</p>
+
+<p>像 <code>shared_ptr</code> 一样的带有引用计数的智能指针会在对象内部保存引用计数信息. 下面来看两个不同的 <code>shared_ptr</code> 对象 <code>sp1</code> 与 <code>sp2</code>, 每一个都仅在自己的线程中使用. 考虑下面的情形:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Case A: Using distinct objects</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">sp1</span><span class="p">;</span>                      <span class="c1">// read from sp1 (writes the count!) </span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">sp2</span> <span class="o">=</span> <span class="n">something_else</span><span class="p">;</span>              <span class="c1">// write to sp2 (writes the count!)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个代码会正确同步, 而且完全不需要外部同步. 没错&hellip;</p>
+
+<p>但是, 如果 <code>sp1</code> 与 <code>sp2</code> 指向同一个对象, 共享引用计数信息时呢? 这时, 引用计数信息是一个可写的共享变量, 它必须同步访问来避免竞态条件, 但是这基本是无法在外部调用代码中完成的, 因为我们甚至都感知不到它存在共享的内容. 我们看不到引用计数的大小, 也不知道他的变量名, 也不知道还有谁正在共享.</p>
+
+<p>类似的, 我们看下面代码, 两个线程只从同一个变量 <code>sp</code> 中读取内容:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Case B: const access to the same object</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">sp3</span> <span class="o">=</span> <span class="n">sp</span><span class="p">;</span>                     <span class="c1">// read from sp (writes the count!)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">sp4</span> <span class="o">=</span> <span class="n">sp</span><span class="p">;</span>                     <span class="c1">// read from sp (writes the count!)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>代码不需要外部同步也可以正确同步. 这不是竞态条件, 因为这两个线程对 <code>sp</code> 都进行的是只读的 const 操作. 但在内部共享的引用计数是可写的, 它们需要正确同步来避免竞态条件, 像上面所说, 我们不可能在调用代码中保证它正确同步, 因为我们甚至不知道有共享的内容.</p>
+
+<p>因此要处理这种情形, 以 <code>shared_ptr</code> 的引用计数为例, 典型的做法是将引用计数变量更改为 mutable atomic 类型.</p>
+
+<p>为了完整, 我们再看需要外部同步的情形. 像上面说说的, 当多线程共享 <code>shared_ptr</code> 可写对象时, 仍然是需要外部同步的:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Case C: External synchronization still required as usual</span>
+</span><span class='line'><span class="c1">//         for non-const access to same visible shared object</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 1</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span> <span class="n">hold</span><span class="p">(</span><span class="n">mut_sp</span><span class="p">);</span>           <span class="c1">// acquire lock</span>
+</span><span class='line'>    <span class="k">auto</span> <span class="n">sp3</span> <span class="o">=</span> <span class="n">sp</span><span class="p">;</span>                     <span class="c1">// read from sp</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">lock_guard</span> <span class="n">hold</span><span class="p">(</span><span class="n">mut_sp</span><span class="p">);</span>           <span class="c1">// acquire lock</span>
+</span><span class='line'>    <span class="n">sp</span> <span class="o">=</span> <span class="n">something_else</span><span class="p">;</span>               <span class="c1">// modify sp</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以, <code>shared_ptr</code> 不是内部同步的类型, 如果调用者需要在多个线程中共享该类型的可写变量, 那么必须像问题 3(d) 中那样, 在外部做同步访问.</p>
+
+<p>那么内部同步的目的是什么? 它仅仅做那些外部不可见, 外部无法做同步, 而内部需要共享的内容的同步. 这样一来外部就能使用通常的做法来保证正确同步了.</p>
+
+<p>对于 copy-on-write 来说, 情况和引用计数也类似.</p>
+
+<p><em>准则: 如果你设计一个类, 如果两个对象实例之间有外部看不到的 <code>mutable</code> 共享状态, 那么保证这个共享状态能够正确同步是你的职责, 因为这个共享状态对外部来说是未知的.</em></p>
+
+<p>为什么内部共享状态是 <code>mutable</code> 的, 请看 GotW #6a 和 #6b.</p>
+
+<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
+
+<p>只有一种类型需要完全的内部同步, 不需要外部的同步就能保证并发的安全, 那就是: 线程间同步和通讯的原语. 这包括标准库中的 <code>mutex</code>, <code>atomic</code>, 还有你可能自己会写的线程间通信的消息队列, 生产者/消费者的活动对象, 或者一个线程安全的计数器.</p>
+
+<p>如果你想知道是否还有其他的类型也应该做成内部同步的话, 请考虑: 只有那些你能明确知道,这个类型一旦创建,  那它就是要共享给多个线程来做可写访问的时候, 你猜需要让这个类型是内部同步的&hellip; 这个语义同时也意味着这个类型就是为了线程间通讯以及同步而设计的.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-19T23:54:00+08:00" pubdate data-updated="true">Jan 19<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+	</div>
+	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.com/blog/2014/01/19/gotw-95/';
+        var disqus_url = 'http://bitdewy.github.com/blog/2014/01/19/gotw-95/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>
