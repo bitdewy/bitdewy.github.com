@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="前言：这个月初，Herb Sutter 发了一篇名为 Perspective: “Why C++ Is Not ‘Back’”，的文章，虽然 Sutter 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如这里。 &hellip;">
+	<meta name="description" content="C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。 lambda 函数与表达式 C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,54 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/">
+		
+			C++11 Lambda in Qt5</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11 发布已经1年多，各家编译器也都有了很好的支持，新特性中有非常多值得关注的东西，比如：右值引用、类型推导、匿名函数等等。</p>
+
+<h2>lambda 函数与表达式</h2>
+
+<p>C++11 引入了 lambda 函数，在函数是 first class 的语言中，匿名函数是最基础的设施，可以方便的运用闭包造出高阶函数。现在 C++11 引入了 lambda 表达式（是不是可以在 C++ 中玩 Functional Programming 了，嘿嘿)，和标准库算法配合起来就不会像以前那么别扭了。在没有 lambda 的时候使用 <code>std::sort</code> 或者 <code>std::find</code> 时，需要一个具名函数，原本一个很简单的，用完就丢掉的代码段必须声明为一个函数或仿函数，割裂了逻辑不说，还占用了一个标识符(取名，在写代码的时候时很让人头疼的一件事，你懂的)，现在一切都变的简单了。</p>
+
+
+		
+		<a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-23T22:32:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -658,60 +706,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2012/07/15/gotw104/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/07/14/gotw103/">
-		
-			[译] GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a>
-	</h2>
-	<div class="entry-content">
-		<p>原文在这里 <a href="http://herbsutter.com/gotw/_102/">GotW #103: Smart Pointers, Part 1 (Difficulty: 3/10)</a></p>
-
-<h2>JG 问题</h2>
-
-<p>1. 什么情况下你会使用 shared_ptr 和 unique_ptr ？尽可能多的列出你能想到的情况。</p>
-
-<h2>Guru 问题</h2>
-
-<p>2. 为什么要使用 make_shared 来构造 shared_ptr 对象？请解释。</p>
-
-<p>3. 如何处理 auto_ptr ？</p>
-
-
-		
-		<a href="/blog/2012/07/14/gotw103/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-14T19:14:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/07/14/gotw103/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
