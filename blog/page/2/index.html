@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="所谓的原子操作, 取的就是 “原子是最小的, 不可分割的最小个体” 的意义, 它表示在多个线程访问同一个全局资源的时候, 能够确保所有其他的线程都不在同一时间内访问相同的资源. 也就是他确保了在同一时刻只有唯一的线程对这个资源进行访问. 这有点类似互斥对象对共享资源的访问的保护, &hellip;">
+	<meta name="description" content="C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference). 有些时候, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,86 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/09/23/exception-and-multithread/">
+		
+			异常与多线程</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference).</p>
+
+<p>有些时候, 我们不得不使用多线程来提高工作的执行效率, 但由于异常都是基于线程的, 如何在线程间传递异常, 就成为了一个问题. C++11 之前异常是无法在线程之前传递的, C++11 在这方面提供了支持.</p>
+
+<h2>使用 C++11 中的异常相关内容实现在线程间传递异常</h2>
+
+<p>相关类如下:</p>
+
+<p><code>std::exception_ptr</code></p>
+
+<ul>
+<li>一个智能指针类型的异常对象, 支持 bool 操作符, 可以存储空异常 (null) 对象. 也支持比较 (operator==).</li>
+</ul>
+
+
+<p><code>std::current_exception</code></p>
+
+<ul>
+<li>当在异常处理块中 (catch块) 调用时, 会捕获当前异常对象并由被捕获的对象创建一个 <code>std::exception_ptr</code> 对象并返回.</li>
+</ul>
+
+
+<p><code>std::make_exception_ptr</code></p>
+
+<ul>
+<li>接受一个 Exception 对象参数, 并由这个异常对象创建一个 <code>std::exception_ptr</code> 对象</li>
+</ul>
+
+
+<p><code>std::rethrow_exception</code></p>
+
+<ul>
+<li>接受一个 <code>std::exception_ptr</code> 参数, 重新抛出这个异常</li>
+</ul>
+
+
+<p>(<em>以上的一切, 很大一部分都是因为 C++ 的值传递特性引起的一系列不适!!!</em>, !!(╯&#8217; &ndash; &lsquo;)╯︵ ┻━┻)</p>
+
+
+		
+		<a href="/blog/2013/09/23/exception-and-multithread/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-23T23:30:00+08:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/exception/'>exception</a>, <a class='category' href='/blog/categories/multithread/'>multithread</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/09/23/exception-and-multithread/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -792,87 +872,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/07/02/cpp11-rvalue-ref/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/06/25/cpp-template-sfinae/">
-		
-			C++ 泛型编程之 SFINAE</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是 SFINAE?</h2>
-
-<p>(Substitution Failure Is Not An Error) 匹配失败不是错误. 它可以从一组重载函数中剪裁掉不需要的模板实例.</p>
-
-<p>SFINAE 是 C++ 模板的一个特性, 这个特性在 std::enable_if 中使用的非常广泛. 模板参数推导过程中, C++ 编译器会试图实例化一些候选的函数签名, 以确保函数调用时模板的精确匹配, 当找到一个不合适的匹配时(例如无效的参数或范围值), 则会将这个不合适的匹配从重载决议中删除, 而不是产生一个编译错误. 如果有且只有一个函数的话, 才会产生一个编译错误.</p>
-
-<p>考虑下面的简单的乘法计数器</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">long</span> <span class="n">multiply</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">multiplication_result</span> <span class="n">multiply</span><span class="p">(</span><span class="n">T</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T</span> <span class="n">t2</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">t1</span> <span class="o">*</span> <span class="n">t2</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">multiply</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在 main 函数中的函数调用 multiply, 会导致编译器对模板参数的实例化, 虽然第一个非模板函数 multiply 明显是一个更佳的匹配. 在实例化的过程中, 会产生一个非法的类型 int::multiplication_result. 根据 SFINAE, 这个非法的实例化会被自动丢弃. 最终, 非模板的 multiply 会被调用. 编译通过.</p>
-
-
-		
-		<a href="/blog/2013/06/25/cpp-template-sfinae/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-25T23:01:00+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/template/'>template</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/06/25/cpp-template-sfinae/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
