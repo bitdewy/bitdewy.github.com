@@ -73,9 +73,9 @@ CSS2.1 中, [10.6.1 Inline, non-replaced elements][css21.1061] 节, 有如下描
 
 ####5) The pseudo class `:checked` will select inputs with type radio or checkbox, but not `<option>` elements.
 
-伪类 `:checked` 会作用域 `radio` 或者 `checkbox`, 但是不会作用于 `<option>`.
+伪类 `:checked` 会作用于 `radio` 或者 `checkbox`, 但是不会作用于 `<option>`.
 
-**答**: CSS3 中, [6.6.4.2. The :checked pseudo-class][css3.664] 中有如下描述:
+**答**: 错. CSS3 中, [6.6.4.2. The :checked pseudo-class][css3.664] 中有如下描述:
  
 > Radio and checkbox elements can be toggled by the user. Some menu items are "checked" when the user selects them. When such elements are toggled "on" the :checked pseudo-class applies. While the :checked pseudo-class is dynamic in nature, and can altered by user action, since it can also be based on the presence of semantic attributes in the document, it applies to all media. For example, the :checked pseudo-class initially applies to such elements that have the HTML4 selected and checked attributes as described in Section 17.2.1 of HTML4, but of course the user can toggle "off" such elements in which case the :checked pseudo-class would no longer apply.
  
@@ -364,7 +364,8 @@ Sausage 的颜色是 ?
 3. 这里不用考虑 CSS 文件, 用户, 以及浏览器默认的样式覆盖问题.
 4. 这个题目是权重的题目, 但是 `#awesome .favorite:not(#awesome) .highlight` 的权重究竟是多少呢 ?
 
-CSS3 selectors [9. Calculating a selector's specificity][css3] 一节中有如下描述,
+
+CSS3 selectors [9. Calculating a selector's specificity][css3.9] 一节中有如下描述,
 
 > Selectors inside the negation pseudo-class are counted like any other, but the negation itself does not count as a pseudo-class.
 
@@ -401,6 +402,8 @@ CSS2.1 标准 [8.4 Padding properties][css21.84] 一节中有如下描述:
  
 这个题目是 browser specific 的, 不过大部分主流的浏览器实现方式都是一致的. 可以参考这里: http://coding.smashingmagazine.com/2009/07/27/the-definitive-guide-to-using-negative-margins/
 
+![](http://media.smashingmagazine.com/wp-content/uploads/images/css-negative-margins/margin-motion.gif)
+
 
 ####16)
 
@@ -422,13 +425,7 @@ What will happen to the position of `#example` ?
 
 `#example` 的位置会有何变化 ?
 
-**答**: 像左←移动 5px.
-
-CSS2.1 标准 [8.4 Padding properties][css21.84] 一节中有如下描述:
-
-> Negative values for margin properties are allowed, but there may be implementation-specific limits.
- 
-这个题目是 browser specific 的, 不过大部分主流的浏览器实现方式都是一致的. 可以参考这里: http://coding.smashingmagazine.com/2009/07/27/the-definitive-guide-to-using-negative-margins/
+**答**: 像左←移动 5px. 证据同上一题.
 
 
 ####17)
@@ -524,7 +521,7 @@ What is the use of the `only` selector ?
 
 `only` 选择器的作用是什么 ?
 
-**答**: Stops older browsers from parsing the remainder of the selector. 是阻止旧浏览器解析剩余的选择器的.
+**答**: Stops older browsers from parsing the remainder of the selector. 是阻止旧浏览器解析后续的选择器的.
 
 在 CSS3 [Media Queries][css3.mq] 中有如下描述:
 
@@ -599,10 +596,12 @@ Does the `screen` keyword apply to the device's physical screen or the browser's
   [css21.83]: http://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom
   [css21.84]: http://www.w3.org/TR/CSS21/box.html#padding-properties
   [css21.31.re]: http://www.w3.org/TR/CSS21/conform.html#replaced-element
+  [css21.941]: http://www.w3.org/TR/CSS21/visuren.html#block-formatting
   [css21.1061]: http://www.w3.org/TR/CSS21/visudet.html#Computing_heights_and_margins
   [css3rem]: http://www.w3.org/TR/css3-values/#font-relative-lengths
   [css3.664]: http://www.w3.org/TR/css3-selectors/#UIstates
   [css3.6651]: http://www.w3.org/TR/css3-selectors/#root-pseudo
+  [css3.9]: http://www.w3.org/TR/css3-selectors/#specificity
   [css3.translate]: http://www.w3.org/TR/css3-transforms/#funcdef-translate
   [css3.mq]: http://www.w3.org/TR/css3-mediaqueries/#media0
   [html4.1721]: http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.2.1
