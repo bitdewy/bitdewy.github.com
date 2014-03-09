@@ -402,7 +402,7 @@ CSS2.1 标准 [8.4 Padding properties][css21.84] 一节中有如下描述:
  
 这个题目是 browser specific 的, 不过大部分主流的浏览器实现方式都是一致的. 可以参考这里: http://coding.smashingmagazine.com/2009/07/27/the-definitive-guide-to-using-negative-margins/
 
-![](http://media.smashingmagazine.com/wp-content/uploads/images/css-negative-margins/margin-motion.gif)
+![](https://xf8dta.by3302.livefilestore.com/y2p5iAEbpvpJ4V698_MY1TJEkWQirSTMe36n8ag5WbwJCdcv_U-_f76T_HKTl_5zhaqklMq_ND0fmuYxLBLT8RIEJi0rzr-pwYbmsK0WmxI_lc/margin-motion.gif)
 
 
 ####16)
