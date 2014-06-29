@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-03-09T18:00:19+08:00</updated>
+  <updated>2014-06-30T01:34:44+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,144 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Javascript new keyword: yield]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/06/29/why-yield/"/>
+    <updated>2014-06-29T22:14:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/06/29/why-yield</id>
+    <content type="html"><![CDATA[<h2>生成器与迭代器</h2>
+
+<p>在以前写代码的时候, 涉及到迭代算法时, 通常整个过程中都需要维护一个状态变量, 而我们想使用迭代算法的中间值得时候, 不得不使用回调函数.</p>
+
+<p>下面是一个斐波那契数列的例子:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">do_callback</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">fib</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="nx">n</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">do_callback</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">i</span> <span class="o">=</span> <span class="nx">j</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">j</span> <span class="o">+=</span> <span class="nx">t</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">n</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">fib</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码中使用了回调函数, 将小于 10 的斐波那契数列的元素输出到控制台.</p>
+
+<p>迭代器和生成器提供了一个新的, 更好的途径来做同样的事情. 下面是使用生成器实现的代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="o">*</span><span class="nx">fib</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">yield</span> <span class="nx">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">i</span> <span class="o">=</span> <span class="nx">j</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">j</span> <span class="o">+=</span> <span class="nx">t</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">g</span> <span class="o">=</span> <span class="nx">fib</span><span class="p">();</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的 <code>function *fib</code>, 函数体中含有关键字 <code>yield</code> 的函数就是生成器. 当你调用它的时候, 它的形参绑定到实参, 但函数本身并不进行求值, 而是返回一个 <code>generator-iterator</code>, 每调用一次 <code>generator-iterator</code> 的 <code>next</code> 方法, 迭代算法会进行一次. 每一步产生的值都由关键字 <code>yield</code> 返回. <code>yield</code> 关键字可以看做 <code>generator-iterator</code> 的返回值, 它代表迭代算法每次迭代的分界线. 每当调用 <code>next</code> 方法时, 生成器会接着从 <code>yield</code> 语句紧接着的下一句恢复状态继续执行.</p>
+
+<p>我们循环调用生成器的 <code>next</code> 方法, 直到我们想要的结果, 上面的例子中, 我们打印了斐波那契数列的前 10 项. 但是生成器的版本允许我们生成任意多项, 只要继续循环调用 <code>next</code> 方法即可.</p>
+
+<p>对于那些认为 <code>yield</code>, 生成器仅仅是语法糖的人, 我只能表示: 呵呵. 如果一个能影响编程时的思考方式的东西也叫做语法糖的话, 那么 <code>C</code> 是汇编的语法糖, <code>C++</code> 就是 <code>C</code> 的语法糖了.</p>
+
+<p>对 <code>yield</code> 关键字有了概念之后, 我们来看看它都给我们带来了些什么.</p>
+
+<h2>生成器是产生迭代器更好的方式</h2>
+
+<p>学过 <code>python</code> 的同学应该知道 <a href="https://docs.python.org/2/library/functions.html#range"><code>range</code></a> 与 <a href="https://docs.python.org/2/library/functions.html#xrange"><code>xrange</code></a> 的区别. 如果不清楚的话, 见<a href="http://stackoverflow.com/questions/94935/what-is-the-difference-between-range-and-xrange">这个</a>问题. 没错, <code>range</code> 会返回一个 <code>list</code>, 而 <code>xrange</code> 却是惰性求值的. (不是严格意义上的生成器, 但特性类似)</p>
+
+<p>因此, 当我们需要遍历一个非常非常大的列表时, 一次性返回全部结果, 非常的消耗内存, 显然不是一个可行的办法. 我们需要惰性求值, 需要迭代器. 但实现一个迭代器, 我们需要手工维护迭代器的内部状态, 实现 <code>next</code> 方法等等. 此时就该轮到我们的生成器登场了.</p>
+
+<p>使用生成器我们可以仅仅使用一个 <code>function</code> 就实现一个具有内部状态的迭代算法. That&rsquo;s awesome!</p>
+
+<p>我在写 <a href="http://blog.bitdewy.me/roar/">roar</a> 时, 实现惰性求值是一个纠结的问题, 由于 <code>C++</code> 没有生成器类似的特性, 迭代器都是手工完成的, 需要手工维护迭代器状态, 容易出错, 而且实现其他功能也会带来阻碍, 举个例子, 如果 <code>C++</code> 支持 <code>yield</code> 的话, 那么 LINQ 的 concat 函数一个可能的实现就是下面这样了:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Collection</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">typename</span> <span class="n">Collection</span><span class="o">::</span><span class="n">iterator</span> <span class="n">concat</span><span class="p">(</span><span class="n">Collection</span> <span class="n">a</span><span class="p">,</span> <span class="n">Collection</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">x</span> <span class="o">:</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">yield</span> <span class="n">x</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">x</span> <span class="o">:</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">yield</span> <span class="n">x</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从思考到实现都是那么的流畅, 而不用像现在一样还在纠结如何才能在不对 <code>Collection</code> 进行合并操作就能让迭代器很好的工作这个问题了.</p>
+
+<h2>yield 不仅仅为迭代器而生</h2>
+
+<p>本质上, <code>yield</code> 语句就是利用编译器/解释器替我们做了CPS变换而已. 而CPS变化是控制流的最主要武器. 也许, yield 能帮我们简化控制流, 远离 callback hell?</p>
+
+<p>先来回顾一下 <code>yield</code> 的用法及执行过程, 当遇到 <code>yield</code> 语句时, 生成器函数暂停, 交出控制权, 当外部指定生成器函数继续时(调用 <code>next</code> 方法), 控制权又交回生成器函数继续执行直到下一个 <code>yield</code> 语句. 如果我们能够将所有耗时/已经是异步 callback 的函数更改为 <code>yield</code>, 然后在 callback 中直接调用生成器的 <code>next</code> 方法, 那么我们就可以完全的抛弃 callback 来优雅的完成控制流. 已经有人利用生成器的特性完成这个功能了. 见 <a href="https://github.com/jmar777/suspend">suspend</a>.</p>
+
+<p>对异步编程稍微有点研究的话, 相信不难从上面看到 await 的影子, async 和 await 是 C# 5.0 中引入的关键字, 它使得异步编程变得更简单, await 与 yield 类似, 会暂停并交出控制权, 之前的 <a href="http://blog.bitdewy.me/blog/2013/12/23/cps-async/">异步编程和延续传递风格</a> 和 <a href="http://blog.bitdewy.me/blog/2013/08/20/async-and-await/">异步编程 async &amp; await</a> 提到过相关内容. C++ 也会引入相应的标准, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a> 的提案就是 async &amp; await 的 C++ 版.</p>
+
+<p>遗憾的是, 虽然 <code>yield</code> 虽然进入了 ES6, 但是 <code>await</code> 却没有. 如果 <code>await</code> 能够进入标准的话, 那么也许可以早日改善流程控制库满天飞的局面. ╮(╯▽╰)╭</p>
+
+<h2>参考资料</h2>
+
+<ul>
+<li><a href="http://www.ibm.com/developerworks/cn/opensource/os-cn-python-yield/">Python yield 使用浅析</a></li>
+<li><a href="http://legacy.python.org/dev/peps/pep-0255/">PEP 255 &mdash; Simple Generators</a></li>
+<li><a href="http://msdn.microsoft.com/en-us/library/hh191443.aspx">Asynchronous Programming with Async and Await</a></li>
+<li><a href="http://www.cppblog.com/vczh/archive/2013/07/27/202154.html">如何设计一门语言（八）——异步编程和CPS变换</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Web 前端开发小测验, part 1 之 CSS]]></title>
@@ -4154,145 +4292,6 @@
 <ul>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
 <li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 右值引用]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref/"/>
-    <updated>2013-07-02T22:49:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/02/cpp11-rvalue-ref</id>
-    <content type="html"><![CDATA[<h2>什么是右值引用?</h2>
-
-<p>在一般情况下, C++ 不把表达式的左值属性作为类型的一部分, 比如下面的变量声明:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>那么变量 n 的类型是 int. 另外常量 3 也是 int 类型. 虽然他们有相同的类型, 不过这并不是说 n 和 3 总是可以互换的. 比如下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>  <span class="c1">// OK</span>
-</span><span class='line'><span class="kt">int</span><span class="o">&amp;</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// Error</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这是因为标准中规定, 当定义一个引用时, 我们必须使用一个左值来初始化它. 在上面的代码中, n 是一个左值, 而 3 不是. 所以我们不能用 3 来初始化 s. 这个规定可以帮助编译器来捕捉错误, 比如下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// equals std::cin.operator&gt;&gt;(3);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>简单的说, 上面的代码调用了 std::cin 的名为 operator>> 的成员函数, 并使用 3 作为参数. operator>> 是重载函数, 虽然它有接受一个 int&amp; 参数的重载版本, 但是没有能接受一个简单的 int 常量, 或者 int 右值作为参数的重载. 因此, 编译器会检查出我们无法使用 int 的右值作为参数来调用 operator>>.</p>
-
-<!-- more -->
-
-
-<p>C++11 扩展了引用的概念, 增加了右值引用. 右值引用也是一个引用, 但与普通的引用不同, 它只能绑定到右值上. 下面是一个右值引用的声明:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一个普通的引用只能绑定左值, 一个右值引用只能绑定到右值, 也就是说如果我们写了下面的代码, 编译器会报一个错误.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>    <span class="c1">// Error: n is an lvalue</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>右值引用是一个有趣的组合, 虽然你只能绑定右值到右值引用, 但是你使用时它却是一个左值.</p>
-
-<p>例如下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span><span class="o">&amp;&amp;</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
-</span><span class='line'><span class="o">++</span><span class="n">t</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>通常情况下, 程序员不能修改右值. 但是通过右值引用, 获得了左值, 这样我们就能修改它的值了. 另外, 右值在通过右值引用绑定之后, 这个右值就不在可访问, 它使用了转移语义来代替拷贝操作.</p>
-
-<p>定义一个接收右值引用参数的函数, 那么函数就会使用转移语义来替代拷贝操作. 但是这样会禁止接收左值参数.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
-</span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>        <span class="c1">// OK;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
-</span><span class='line'><span class="n">foo</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>         <span class="c1">// Error: n is an lvalue</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我们当然可以定义一个左值的版本来解决上面的问题:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="p">);</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">bar</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>             <span class="c1">// calls bar(int&amp;&amp;)</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
-</span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>               <span class="c1">// calls bar(const int&amp;)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个技术有个值得记住的地方是, 通过 const 引用和右值引用的两个重载版本, 你告诉了编译器哪个修改参数是安全的, 哪个不是. 此外, 编译器在编译期就决定了使用哪个, 从而避免了运行时的开销.</p>
-
-<h2>Move 语义</h2>
-
-<p>右值引用的引入, 从语言层面提升了性能, 提高了内存与时间上的效率.</p>
-
-<p>在 C++03 及之前的标准中, 临时对象 (称为右值 &ldquo;R-values&rdquo;, 位于赋值运算符之右) 无法被改变, 在 C 中亦同 (且被视为无法和 const T&amp; 做出区分). 虽然在某些情况下临时对象的确会被改变, 甚至也被视为是一个有用的漏洞.</p>
-
-<p>C++11 增加一个新的非常数引用 (reference) 类型, 称作右值引用 (R-value reference), 标记为 <code>T&amp;&amp;</code>. 右值引用所引用的临时对象可以在该临时对象被初始化之后做修改, 这是为了允许 move 语义.</p>
-
-<p>C++03 性能上被长期被诟病的其中之一, 就是其耗时且不必要的深度拷贝. 深度拷贝会发生在当对象是以传值的方式传递. 举例而言, <code>std::vector&lt;T&gt;</code> 是内部保存了 C-style 数组的一个包装, 如果一个 <code>std::vector&lt;T&gt;</code> 的临时对象被建构或是从函数返回, 要将其存储只能通过生成新的 <code>std::vector&lt;T&gt;</code>并且把该临时对象所有的数据复制进去. 该临时对象和其拥有的內存会被摧毁. (为了讨论上的方便，这里忽略返回值优化)</p>
-
-<p>在 C++11 中, 一个 <code>std::vector</code> 的 &ldquo;move 构造函数&rdquo; 对某个 vector 的右值引用可以单纯地从右值复制其内部 C-style 数组的指针到新的 vector, 然后留下空的右值. 这个操作不需要数组的复制, 而且空的临时对象的析构也不会摧毁内存. 传回 vector 临时对象的函数不需要显式地传回 <code>std::vector&lt;T&gt;&amp;&amp;</code>. 如果 vector 没有 move 构造函数, 那么复制构造函数将被调用, 以 <code>const std::vector&lt;T&gt; &amp;</code> 的正常形式. 如果它确实有 move 构造函数, 那么就会调用 move 构造函数, 这能够免除大幅的内存配置.</p>
-
-<p>基于安全的理由, 具名的参数将永远不被认定为右值, 即使它是被如此声明的; 为了获得右值必须使用 <code>std::move&lt;T&gt;()</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="kt">bool</span> <span class="n">is_r_value</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">test</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;&amp;</span> <span class="n">i</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> <span class="c1">// i 为具名变量，即使被声明成右值也不會被认为是右值。</span>
-</span><span class='line'>    <span class="n">is_r_value</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">i</span><span class="p">));</span> <span class="c1">// 使用 std::move&lt;T&gt;() 取得右值。</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>由于右值引用的用语特性以及对于左值引用 (L-value references;regular references) 的某些用语修正, 右值引用允许开发者提供完美转发 (perfect function forwarding). 当与变长参数模板结合, 这项能力允许函数模板能够完美地转送引数给其他接受这些特定引数的函数. 最大的用处在于转发构造函数参数, 创造出能够自动为这些特定引数调用正确建构式的工厂函数 (factory function).</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://blog.csdn.net/pongba/article/details/1684519">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(上)</a></li>
-<li><a href="https://zh.wikipedia.org/zh-cn/C%2B%2B11#.E5.8F.B3.E5.80.BC.E5.BC.95.E7.94.A8.E5.92.8C_move_.E8.AA.9E.E6.84.8F">维基百科C++11: 右值引用和 move 语义</a></li>
-<li><a href="http://stackoverflow.com/questions/3106110/what-are-move-semantics/3109981">Stackoverflow：What are move semantics？</a></li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2027.html#Move_Semantics">标准文档提案：Move Semantics</a></li>
 </ul>
 
 ]]></content>
