@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-06-30T01:43:07+08:00</updated>
+  <updated>2014-07-22T01:37:02+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,122 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[《effecticve modern C++》预览]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview/"/>
+    <updated>2014-07-21T22:14:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview</id>
+    <content type="html"><![CDATA[<p>虽然最近工作在用 javascript, 但 C++ 也没放下, <a href="http://www.aristeia.com">Scott Meyers</a> 的新书《Effective modern C++》终于在 O&#8217;Reilly <a href="http://shop.oreilly.com/product/0636920033707.do">上架了</a>. 第一时间买了一本. 2年前的时候, <a href="http://www.aristeia.com">Scott</a> 就给了<a href="http://blog.bitdewy.me/blog/2012/06/24/effective-c-plus-plus-11/">一版</a> Effective C++11 的初步想法, 两年后的今天, 顺带着 C++14 终于正式出炉了, 不过目前还是 early release 版本, 还没有经过 review, 正式版要到年底才会放出.</p>
+
+<p>不得不说, C++ 现在终于有了它该有的样子. 大致浏览了一下, 如果现在才开始关注 C++11/C++14 的话, 非常推荐这本书. 如果看过前两代 《Effective C++》和《More effective C++》的话, 那你会再次找到久违的感觉.</p>
+
+<p>全书共分为 6 章, 包括: 类型推导, 新关键字 auto, C++98 到 C++11/14 的变化, 智能指针, 右值引用转移语义与完美转发, lambda 表达式, 并发 API.</p>
+
+<p>关于类型推导, 由于 C++11/14 引入了新的关键字 <code>auto</code>, <code>decltype</code>, 以及新的概念右值引用, 那么类型推导就不仅仅存在于模板中了, 因此从现在开始掌握类型推导的规则是 C++ 的必备技能了.</p>
+
+<p>C++11/14 和以前相比, 变化非常的大, 在这本书中, 用了近 1/3 的章节来讲述如何从 C++98 过度到 C++11/14. 有些甚至推翻了之前的推荐做法, 比如 Item 13: Prefer const_iterators to iterators 就与作者之前的 《Effective STL》中的 item 26 完全相反. 所以对于每个写 C++ 代码的人来说, 这一部分是必须要更新的知识.</p>
+
+<p>对于智能智能, 相信大家早就不陌生, 作者的《More Effective C++》中也讲到了智能指针. 这一次, 终于成为了标准, 本书中也讲到了各种类型智能指针合适的使用场景, 掌握了这些之后, 相信资源管理的问题, 就能够减少很多了.</p>
+
+<p>转移语义很好的解决了性能问题, 完美转发解决了模板函数重载时爆炸式增长的问题, 而右值引用就是这两个特性的基础. 对于那些写库的人来说, 这些特性真是天大的好事.</p>
+
+<p>关于 lambda 表达式, 有了 lambda 表达式, 标准库中的那些算法终于能变得好用了. 在没有 lambda 之前, 在使用每个标准库算法之前, 还需要一个仿函数, 这是一件多么不爽的事情.</p>
+
+<p>对于并发, 在 C++98 以及之前, 标准连多线程的概念都没有, 我们只能使用平台相关的多线程设施, 甚至一些我们觉得没问题的多线程模型都会在这种情况下出问题. (比如: 这篇<a href="http://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf">C++ and the Perils of Double-Checked Locking</a>) 现在标准中不仅有了 thread, 甚至还有了更高级的 task, future, promise. 当然如果能有 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a> 就更好了, 不过这个特性可能要等到 C++17 了.</p>
+
+<!-- more -->
+
+
+<p>最后放出《effecticve modern C++》的目录</p>
+
+<h4>Chapter 1 Deducing Types</h4>
+
+<ul>
+<li>Item 1: Understand template type deduction.</li>
+<li>Item 2: Understand auto type deduction.</li>
+<li>Item 3: Understand decltype.</li>
+<li>Item 4: Know how to view deduced types.</li>
+</ul>
+
+
+<h4>Chapter 2 auto</h4>
+
+<ul>
+<li>Item 5: Prefer auto to explicit type declarations.</li>
+<li>Item 6: Be aware of the typed initializer idiom.</li>
+</ul>
+
+
+<h4>Chapter 3 From C++98 to C++11 and C++14</h4>
+
+<ul>
+<li>Item 7: Distinguish () and {} when creating objects.</li>
+<li>Item 8: Prefer nullptr to 0 and NULL.</li>
+<li>Item 9: Prefer alias declarations to typedefs.</li>
+<li>Item 10: Prefer scoped enums to unscoped enums.</li>
+<li>Item 11: Prefer deleted functions to private undefined ones.</li>
+<li>Item 12: Declare overriding functions override.</li>
+<li>Item 13: Prefer const_iterators to iterators.</li>
+<li>Item 14: Use constexpr whenever possible.</li>
+<li>Item 15: Make const member functions thread-safe.</li>
+<li>Item 16: Declare functions noexcept whenever possible.</li>
+<li>Item 17: Consider pass by value for cheap-to-move parameters that are always copied.</li>
+<li>Item 18: Consider emplacement instead of insertion.</li>
+<li>Item 19: Understand special member function generation.</li>
+</ul>
+
+
+<h4>Chapter 4 Smart Pointers</h4>
+
+<ul>
+<li>Item 20: Use std::unique_ptr for exclusive-ownership resource management.</li>
+<li>Item 21: Use std::shared_ptr for shared-ownership resource management.</li>
+<li>Item 22: Use std::weak_ptr for std::shared_ptr-like pointers that can dangle.</li>
+<li>Item 23: Prefer std::make_unique and std::make_shared to direct use of new.</li>
+<li>Item 24: When using the Pimpl Idiom, define special member functions in the implementation file.</li>
+</ul>
+
+
+<h4>Chapter 5 Rvalue References, Move Semantics, and Perfect Forwarding</h4>
+
+<ul>
+<li>Item 25: Understand std::move and std::forward.</li>
+<li>Item 26: Distinguish universal references from rvalue references.</li>
+<li>Item 27: Use std::move on rvalue references, std::forward on universal references.</li>
+<li>Item 28: Avoid overloading on universal references.</li>
+<li>Item 29: Familiarize yourself with alternatives to overloading on universal references.</li>
+<li>Item 30: Understand reference collapsing.</li>
+<li>Item 31: Assume that move operations are not present, not cheap, and not used.</li>
+<li>Item 32: Familiarize yourself with perfect forwarding failure cases.</li>
+</ul>
+
+
+<h4>Chapter 6 Lambda Expressions</h4>
+
+<ul>
+<li>Item 33: Avoid default capture modes.</li>
+<li>Item 34: Use init capture to move objects into closures.</li>
+<li>Item 35: Use decltype on auto&amp;&amp; parameters to std::forward them.</li>
+<li>Item 36: Prefer lambdas to std::bind.</li>
+</ul>
+
+
+<h4>Chapter 7 The Concurrency API</h4>
+
+<ul>
+<li>Item 37: Prefer task-based programming to thread-based.</li>
+<li>Item 38: Specify std::launch::async if asynchronicity is essential.</li>
+<li>Item 39: Make std::threads unjoinable on all paths.</li>
+<li>Item 40: Be aware of varying thread handle destructor behavior.</li>
+<li>Item 41: Consider void futures for one-shot event communication.</li>
+<li>Item 42: Use std::atomic for concurrency, volatile for special memory.</li>
+</ul>
+
+
+<p>有时间的话, 后续会持续更新每一章节的具体内容.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Javascript new keyword: yield]]></title>
@@ -151,6 +267,219 @@
 <li><a href="http://www.cppblog.com/vczh/archive/2013/07/27/202154.html">如何设计一门语言（八）——异步编程和CPS变换</a></li>
 </ul>
 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[首尔-釜山-青岛8日游]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/05/15/korea-seoul/"/>
+    <updated>2014-05-15T22:57:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/05/15/korea-seoul</id>
+    <content type="html"><![CDATA[<p>五一假期请了 3 天假, 和几个比较好的朋友一起韩国自由行. (原本预谋好的是台湾自由行, 但是由于小伙伴的证件问题, 只能换了路线 ╮(╯▽╰)╭)</p>
+
+<p>出国当然必备护照, 据说有小伙伴办护照填表格瞎填一通, 还被带到了小黑屋.( ⊙ o ⊙ ). 大家要小心千万不要乱填哈. 关于护照可以参考<a href="http://blog.bitdewy.me/blog/2014/01/28/passport/">这里</a>.</p>
+
+<p>韩国签证还是比较容易办理, 如果没时间去领事馆的话淘宝花 300 块钱左右就可以代办了, 不需要本人办理, 不需要面签.</p>
+
+<p>酒店在国内提前订好, 回避广告, 就不说在哪里定的了, 行程安排是 首尔-釜山-首尔 各住 2 晚. 人均 200 CNY/天. 釜山便宜一些, 首尔较贵, 但住的都不差. 如果能稍微提高一点点预算的话, 能住的非常好呢.</p>
+
+<p>特别安排了 首尔-釜山-首尔 的路线, 坐了韩国的 KTX 高铁, 对外国游客韩国有 KR PASS, 可以直接在网站上预定. 定了 3 日票, 3 日内可以韩国火车随便乱坐, 虽然我们只坐了 首尔-釜山 的往返, 但也比直接买票划算不少. 关于 KR PASS 还差点搞出乌龙, KR PASS 有普通票和同行票, 同行票需要一个普通票带着才可以, 一张普通票最多可以带 5 个同行票(大概是 9 折左右的优惠), 差点全都买成同行票, 还好在出发前又重新定好. 人均 520 CNY.</p>
+
+<p>作为马斯洛需求体系最底层的 WiFi 需求, 当然要提前做好工作, 由于不通韩语, 英语又没信心 ╮(╯▽╰)╭, 最终决定在国内定 wifi egg(3G路由), 国内还. 40CYN/天. 如果是韩国取韩国还的话, 还能再便宜一些. 但是作为一个极度缺乏安全感的人来说, 还是选择了多花一点点钱, 保证万无一失. ^_^</p>
+
+<p>虽然做了不少准备工作, 也还是有不少 bug, 同行的小伙伴没有一个人用的是 中国电信, 而韩国只有 CMDA2000, 导致大家电话都无法使用, 不过 7-11 就有卖电话卡, 也不是什么大问题. 但是毕竟出门在外, 避免有了信号大家乱跑, 最终还是一致决定所有人都紧紧围绕在 WiFi egg 周围, 保持队形.(<em>^__^</em>) 不分开.</p>
+
+<p>最后就是机票了, 往返机票大约 2400 CNY/人. 国际机票税比较高. 提前一个月定的机票, 如果再提前一些的话可能还会更便宜.</p>
+
+<p>废话结束.</p>
+
+<!-- more -->
+
+
+<h2>Day0 北京-首尔-明洞-首尔塔</h2>
+
+<p>提前在某网站定了车, 一大早4点多钟就起来, 5点钟从我大石景山出发, 一路浩浩荡荡 50 多公里到机场, 只花了 78 块钱. 司机人也超级 nice. 简直赚翻了. 一路过了海关, 安检, 到了国际隔离区第一件事请就是取 WiFi egg, 飞机很准时, 8:10 准时起飞, 上了飞机就开始补充睡眠了.</p>
+
+<p>到首尔大概是中午了, 首先去换了一点点零钱, 机场的汇率很不划算, 少换一点点, 够公交卡就可以了. 到了之后首先是要安顿下来.</p>
+
+<p>由于语言不通, 出行的方式选择了确定性最高的地铁, 各种便利店 7-11, CU 都有卖 T Money 公交卡, 自动售票机器可以充值. 全国通用, 在韩国 7 天到处乱跑, 大概花了 26000 KRW, 约合 150 CYN.</p>
+
+<p><img src="http://5oelva.by3302.livefilestore.com/y2pXmwtkkqrS_9h4v1gs-sN80jgqUJziCii8RJVzL1Gl7alLT6GLlNJFSlkhRz4plVxWxYDd_lXkU-jnVBP2XaO40aNlEDICeEOpEw7JOu-zWM/0.png" alt="去酒店的路上" /></p>
+
+<p>第一站首尔塔附近的酒店, 这是这次行程中最好的一家酒店, 有早餐, 有中文服务, 去釜山时候轻装上阵, 旅行箱也存在这家店里.</p>
+
+<p>稍事休息之后, 向第一站明洞出发. 韩国的街区都叫做 xx 洞. 明洞应该是比较有名的商业区, 在我大宇宙中心-五道口, 还有一家店叫明洞排骨呢. 这里的汇率比较高, 在这里换钱比较合算, 一次性多换一些吧. 如果有不需要转换金的外币卡的话, 刷卡也是蛮划算的, 另外韩国很多地方都支持银联哦, 可以直接人民币消费.</p>
+
+<p><img src="http://4uelva.by3302.livefilestore.com/y2pXJ9WZ8wqh2KaXCO1m84PN6Jl0RlvMBBFC_Z-frvbRjAFDnLA3FdGdNCGZZeiQUllGu_q8DWNKuYejNZ458KbKgOycOMPoj8mCFTWtXFmCMk/1.png" alt="明洞" /></p>
+
+<p>第一天, 都比较羞涩, 就吃了些路边摊, 瞎逛, 没买什么东西就撤了. 晚餐是在明洞的一家有名的石锅拌饭.</p>
+
+<p><img src="http://4pelva.by3302.livefilestore.com/y2p8iJie2FXBK0ZIghVur0XkzgD_xBdG1WqfaD400CPiHabTYUXz9ykUDoQFUF0Jq4XPi-P2rLlVQxmYw3q6bVWs4ctGlhYi1G9wvo_6m2IFRQ/2.png" alt="泉州中央会馆" /></p>
+
+<p>要坐着吃, 才有韩国范儿. 石锅拌饭来啦.</p>
+
+<p><img src="http://3uelva.by3302.livefilestore.com/y2pFGsUCvjj2b4MdTVD5ZqS7_yBV-28o-Uhj1V_xIOnnvss-aUS_A13G-K7SWq-JIKvoWk7uJBRVwSKBIjZ_K9NTf3Ddh1ikRigzmIcpcYkNMs/3.png" alt="石锅拌饭来啦" /></p>
+
+<p>晚饭结束后去了首尔塔, 就是这根粉红色的柱子. 地图上看没多远, 但是爬山爬了好一会儿.</p>
+
+<p><img src="http://3eelva.by3302.livefilestore.com/y2pIY_4c1g7-8z1rnm_TflD2wlXgyrsUn19FsQdFppF-OELzlQPtJcNztFC9sk75Zz-goy9YRCTJeZkQ7Z9ID91C0Hq9ChpXfwogDgaYJG9eCo/4.png" alt="首尔塔" /></p>
+
+<p>原本还计划去 泰迪熊博物馆 也没有去~ ╮(╯▽╰)╭, 首尔塔上卖的糖果.</p>
+
+<p><img src="http://3pelva.by3302.livefilestore.com/y2pv68fU3d-mgHL8-RQYdk1yWued3uHS_eTuWrhmCkqDaEHgCmZI5V3l_O1L6MJCxGqaeYJKi_pamxqbl9WMU7yXoZT4wupG0vkvP7LBIHpYL4/5.png" alt="首尔塔" /></p>
+
+<p>有卖明信片, 买了两张, 寄给朋友一张, 寄给自己一张.</p>
+
+<p><img src="http://4oelva.by3302.livefilestore.com/y2pWviiosjd8vBXTo_b7Lt5jJoHlTeobzO65-zw8lo2mPhiHKx9bU3ICWce9f685qMCvsZRxu72Nd_J9_e2bKhIilLv36uYrKfs68G6VLR7ErI/6.png" alt="首尔塔明信片" /></p>
+
+<p>首尔塔上晒幸福</p>
+
+<p><img src="http://2uelva.by3302.livefilestore.com/y2pGVqznVXe959WD6g_0wDnfd21pcpK6P_X-tvTckqfwz2dHDbXCbzCFbQf6qNQMCtRuRZdjX7PjmF1ODismx-7DeICFZOgXU0E68g2PC9f73Y/7.png" alt="" /></p>
+
+<p>好多锁, 超级多.</p>
+
+<p><img src="http://2eelva.by3302.livefilestore.com/y2py9E95pR5WuxB7ocn7RjQYMhI1ETz9QZHE9EzL28uk1gFBJX0lGQXWvctJV1lL68Ane9pbXtYhVYETAIK6kFDlJEYnES0EMlDwTGd5fJQk9E/8.png" alt="" /></p>
+
+<p>从首尔塔回去已经很晚了, 第一天完.</p>
+
+<h2>Day1 仁寺洞-景福宫-三清洞-梨花壁画村-东大门</h2>
+
+<p>第二天, 首先是早餐~(≧▽≦)/~啦啦啦. 有免费早餐还是很幸福的.</p>
+
+<p><img src="http://4ecmmq.by3302.livefilestore.com/y2p7YmYtKKg-Gg6bAe0IebBomsTDMApkCUDt222Sz64-GRgkO8Nv63dSPFrHxtP1WfRuhtKGwzc7ojzbREz5X39EKkQEpTIf-nEk3v82cBCoeo/9.png" alt="早餐" /></p>
+
+<p>韩国的主题, 就是逛街. 早餐过后来到了仁寺洞, 来的太早, 很多店都还木有开门. 全是鸟文, 不知道是神马意思.</p>
+
+<p><img src="http://4ucmmq.by3302.livefilestore.com/y2pMTD4jk2udiJdStPL3aZFH7fd0CWl57dHt_92mgEvvkeomvGMtDEIG9DoP1I4IN2wKIlHzTBb2lQ0VfZ03LOVuOa2QiIXRRwSUVJLARa7KXw/10.png" alt="仁寺洞" /></p>
+
+<p>不知道这个 &ldquo;人人&rdquo; 到底是神马意思, 别人游记中都拍这个, 那我也拍一张吧.</p>
+
+<p><img src="http://4pcmmq.by3302.livefilestore.com/y2pyo8phOB8SHKYCnHAvcFb6nso0W2iasLeuojI1O9eooGru_0koL4kmNLd2XQ_adQADUVCn_3Z76GEpDNDztJmn543kuozfemRQH9VjSrQ3z8/11.png" alt="仁寺洞人人" /></p>
+
+<p>韩国地铁</p>
+
+<p><img src="http://5ocmmq.by3302.livefilestore.com/y2pKpORkeBCHavPB2f17uj7Y5LVQhSeKoCUozoNEmUb1G6XaDDFg26FYixT4vmcSsBBfUxZtsNprbKbO0wL-q7B65etZiX2XycuCUpvdWNeARw/12.png" alt="地铁" /></p>
+
+<p>从仁寺洞坐一站地铁来到了景福宫, 还碰巧赶上了表演, 里面没神马好看的, 貌似有很多棒子的宫廷剧是在景福宫拍摄的, 虽然我也没看过. ╮(╯▽╰)╭</p>
+
+<p><img src="http://3ecmmq.by3302.livefilestore.com/y2pqQFCRxE3UomM386iBExwgYOIucj7DipGcI2_0ZqGhvJV4PgyGoFWdZupn00XRW0CgRtxooXz7o5wa1Rij-zXfWWYSllkfTsqwNoJ41lKSGo/13.png" alt="景福宫表演" /></p>
+
+<p>午饭时间, 来到了景福宫旁边的任何时候都排长队的土俗村参鸡汤, 鸡肚子里有糯米, 板栗, 红枣, 人参, 好吃. ( ⊙ o ⊙ )！ 可惜餐前忘记了拍照给食物消毒. (╯‵□′)╯︵┻━┻ 来张店里的风景吧. 还是坐地上吃. 各种腿麻.</p>
+
+<p><img src="http://3pcmmq.by3302.livefilestore.com/y2pxqXZmDb6W024ho_Sd9FjR22bOSowKCvydxI10fodDTwn2y8GwdYGtQ6vmFBKuGSvH8E4Oyxf3bTHbPO82uxVs1EIGlFrpVIHNNmwvDDxyOg/14.png" alt="参鸡汤" /></p>
+
+<p>青瓦台, 韩国的中南海, 警备森然, 还不能乱拍照, 有小伙伴拍照, 被持枪的警察喝止.</p>
+
+<p><img src="http://3ucmmq.by3302.livefilestore.com/y2pHfNP3YqRnQZAfdnLGF9qAffqYC_wUN248av08tjEXdMVilQGfDuKbFhwSIPAH4X1pIUopQgVoI-SsDMF9EGXGu0OvuTYu_Rid9TWetRZRYo/15.png" alt="青瓦台" /></p>
+
+<p>过了青瓦台不远就到了三清洞, 又开始逛街. 逛完一洞又一洞. 乘地铁去逛大学路, 随便逛逛, 吃了路边摊. 然后徒步去梨花壁画村, 一度在发现了目标之后没当回事儿, 绕了一大圈才找到, 当返回的时候, 发现原来是这里的时候, 我们整个都斯巴达了. (╯‵□′)╯︵┻━┻.</p>
+
+<p><img src="http://4ocmmq.by3302.livefilestore.com/y2pI8loNMMOQsDS9zB5SopnkKWsKafC5Ief4i10-7B_olgOWfC2ZVjEyQ8xH4QX0by4dEDLzOwlXKFdoU1ZbWu8lyGdX1kcPz1U8xICJkBf09Q/16.png" alt="壁画村" /></p>
+
+<p>晚上的主题是东大门逛商场. 第二天完.</p>
+
+<h2>Day2 首尔-釜山-南浦洞-海云台</h2>
+
+<p>第三天一早, 收拾东西出发去釜山, 到达釜山已经接近中午, 天空不作美, 一来釜山就下大雨, 先去了南浦洞随便逛逛. 已经是第三天, 购物没第一天那么矜持了. 主旋律就是买买买. 天都黑了也要各种买.</p>
+
+<p><img src="http://2ecmmq.by3302.livefilestore.com/y2p9loa-_d25Pzjlry5y0bWw1oChfz1kNd1XAL6oyV5XhCYw8jMK2N3Ic1rmn_NXskFRszZMFIWXo2JHQsyelHOAif-3UCCgdT-nP5CYRfZA4c/17.png" alt="南浦洞" /></p>
+
+<p>来釜山就是为了海云台, 以前只吃过海云台, 这次可以见到真的了. 酒店就在海云台海水浴场很近的地方. 来了才发现, 这地方各种 Motel. ( ⊙ o ⊙ )</p>
+
+<p><img src="http://2ucmmq.by3302.livefilestore.com/y2pQkUuZ1f7C6wxVaByFgsDVzJ9vNW9B49ATAbbPCN26dblFBMkgcqveZa816RLmwQCJk8FlW57JSoseeNeqxQLRh2wc6iC8U0aN3lOMicPRRQ/18.png" alt="海云台" /></p>
+
+<p>睡的是地铺, 还在地板上发现了大量钞票. ( ⊙ o ⊙ )！</p>
+
+<p><img src="http://4efbpq.by3302.livefilestore.com/y2p5FS31sa3mGgrY5uh6FJxF3205twkZIe7LK9lgI0NILPn1uwnIQUy11RHWH6yEsEH1NxY5ZUuKC0sKrJElrbVkQkDPMUI5XtzxgOt5OsT3lg/19.png" alt="海云台地铺" /></p>
+
+<p>入住已经很晚了, 都懒得动, 只好派人去买晚饭, 还点名要炸鸡啤酒, 人生地不熟, 语言不通, 暴雨. 一路暴走, 走到了海边, 拍了些照片, 最后买了这些东西回来.</p>
+
+<p><img src="http://4pfbpq.by3302.livefilestore.com/y2pX9YajED1sD-s6Sg4uC8DiT7hrf8mBPV17FTGNT5WFI-rU8qRkxiX9zdVdS0fMT6ZDHhAzWyrwzs7T_LnxOTyL0bRgRddBmVOQ_uokEOzLFA/20.png" alt="汉堡王" /></p>
+
+<p>还有两瓶奇怪的东西乱入
+<img src="http://5ofbpq.by3302.livefilestore.com/y2pjjMPS1w6jsGAMC8PuBY0Vey9dN1eK7Ho3dZSYgxFCHsp-L-zIlR6lrgo8QfQJGwf2jwaNcZjD9O3tNzCQ0Rj6qugmV6y8ukqgqsFk5roLQU/21.png" alt="" /></p>
+
+<p>第三天就这么结束了.</p>
+
+<h2>Day3 海云台-迎月路-VESTA汗蒸</h2>
+
+<p>这是最舒服的一天, 主题就是玩沙子 + 汗蒸.</p>
+
+<p><img src="http://4ufbpq.by3302.livefilestore.com/y2p_s1AL8MFrjxjEzcl2MsDb9YiVHcUehDA4bph7kbwa23AJ7VBFNlYtrUxRVG2FR1Ur_AWlKtrwlY6FarOBFqOoY24mKTCqWwZaY5Ze2Dy7sg/22.png" alt="海云台" /></p>
+
+<p>拍照技巧之一拼星星</p>
+
+<p><img src="http://3ufbpq.by3302.livefilestore.com/y2pDrFyr01vnAeSsKhdvhJMHxzHGLWxxrWiIJtdw2RCHswuQ4ZQD-1X6g4AEyKismWDKZu5qJBK2ra6fT1eo6rUJXlufe-swpm97K6XdIgWuqk/23.png" alt="拼星星" /></p>
+
+<p>玩沙子玩到中午, 去吃了烤肉, 虽然语言不通, 但是老板娘很热情, 还帮烤好并喂到妹纸嘴里. 作为男孩子, 就木有这个福利了. ╮(╯▽╰)╭</p>
+
+<p>下午的主题就是洗澡. 没法贴照片了. 第一次看着大海洗澡. 感觉还是很爽的, 哈哈.</p>
+
+<p>晚上去吃了海鲜. 已经到了第 4 天, 拍照变得没那么勤快了.</p>
+
+<h2>Day4 海云台-首尔-八色烤肉-弘大</h2>
+
+<p>第 5 天早上, 早早的起来, 准备看日出, 可惜天气不好，云太厚 ╮(╯﹏╰）╭, 没能看成.</p>
+
+<p><img src="http://3efbpq.by3302.livefilestore.com/y2pO07WFZTh0-ARIOoS3doc2z0Pks0hrH7Y_E3iiv9uMie4t_bCxO7LiEcpHl3UMoqbrMokRZX4AeFMRDcf1Ym3p-X3DrnzZhVnmzzD13K5k2s/24.png" alt="清晨的海云台" /></p>
+
+<p>韩国海难刚过去不久, 有人在海云台边上点的蜡烛祈福</p>
+
+<p><img src="http://3pfbpq.by3302.livefilestore.com/y2pfcilFVrjrj8Zi2anshIWhtG1T53QUktkeKP5p9TnEOGcwufxpOp_2jj8YAb_mX0WQlvQMirAQ0gdWUciamusc1eWBR6RP4V50K7fhxGmxQQ/25.png" alt="祈福" /></p>
+
+<p>很遗憾, 没看成日出, 大家都表示要回笼. 回去回笼之后吃了早餐出发回首尔. 由于回笼太久, 到达首尔已经过了午饭时间, 大家一致表示晚上要吃一顿大的. 午餐就免了. 取回行李后, 赶到新的入住地点, 弘益大学附近. 入住之后, 在弘大附近瞎逛一下, 开始觅食寻找八色五花肉. 这家店在地下一层. 门面很不起眼. 路过都没看见. 一个韩国大叔看我们拿着 ipad 寻觅, 主动提供帮助, 一路我们领到了店门口. 好吃不贵, 感觉比国内还便宜, 肉也够厚, 味道很好.</p>
+
+<p><img src="http://2ufbpq.by3302.livefilestore.com/y2ptkzspaxZG56Bj9FTcZZncDbEGLtGiKWSj08Aztr7uC8iP-69Q8Jdq8ixZ6UZH8v-lBzI8cWcVZ5iK1dBTFzus0DIIxuL2uRQuU35PtsNbFg/26.png" alt="八色五花肉" /></p>
+
+<p>吃饱了, 逛街又有劲儿了. 第 5 日完.</p>
+
+<h2>Day5 梨花女子大学-东大门-国立中央博物管-3D美术馆-炸鸡啤酒</h2>
+
+<p>梨花女子大学, 不解释.</p>
+
+<p><img src="http://4ofbpq.by3302.livefilestore.com/y2pXKgkblEDSkhXt6-qkPMIgO16FJiza5NF0ALTECImqE1B4x_y1sik8lk7yGDOzIn2XJXwEqBmbqx6zaO3CG92LiwzkxsBfxfBHgwnZDNpBSQ/27.png" alt="梨花女子大学" /></p>
+
+<p>放眼望去全是妹纸, 不知道该看哪里.</p>
+
+<p><img src="http://2efbpq.by3302.livefilestore.com/y2pg6187-yNBVPt6F358Rav3W6SDodEmVZwY7QvOwfJ5Bl1EIYnA3R7YyxygRBGY6Zwl1ioLxzereZkcWQ3POnfhf2LN-aQfo_F6GQQp0Ufdzo/28.png" alt="" /></p>
+
+<p>在梨花女子大学的妇女文化博物馆还遇到了来学习的中学生(萝莉).</p>
+
+<p>到了最后的日子, 只有疯狂的购物才是主旋律. 买的差不多了之后, 才想起要去国立中央博物馆看看, 可惜赶到的时候博物馆已经关门, 只能在博物馆外面围观.</p>
+
+<p><img src="http://4edcgg.by3302.livefilestore.com/y2pmND85irttef8lFxrzm_S6CTndD3ZJ9h0PxygRv6WyvJX9iGbUIeiia4t9eLBr3jBJK3FKnWJuYk7fcyQBbmKdsQYyIt0OMniPJkjZse-6Mk/29.png" alt="国立中央博物馆" /></p>
+
+<p>去博物馆未遂, 回到了住处继续逛弘大, 去了 3D 美术馆, 各种拍照. 国内貌似也有不少这种地方. 可惜的是时间不多, 而我们却在外面免费的地方折腾了超长时间. 囧o(╯□╰)o</p>
+
+<p><img src="http://4udcgg.by3302.livefilestore.com/y2pTKsz1Zz9G0ul-ClsJ2fzdXjq651IWCFX2DTkwk7ssaR-pGTZ48YenqWlpTVc80WAWUTpQ-ux3gqKhNKsRoh-z__h9JQF5pHTDm-yYt9j8Ps/30.png" alt="" /></p>
+
+<p>这是在韩国的最后一晚, 当然少不了炸鸡啤酒. 跋山涉水走了 N 个街区找到了这家有名的店.</p>
+
+<p><img src="http://4pdcgg.by3302.livefilestore.com/y2pm6sIn3zKwjuVRNb_PUWwvrRdtI-juRTIMS_yLCkANoU1is2rgCvPKY62o_VhgILeYXzNTkqUORbVxb328Do1Txc6omzlIqpw8jjbElikG9M/31.png" alt="炸鸡啤酒" /></p>
+
+<p>尽兴而归, 又是买买买, 在一家化妆品店里一次买了 210000 KRW 的东西, 导购妹子各种热情, 送了不少东西, 还送了每人一瓶玫瑰茶. 第 6 天完.</p>
+
+<h2>Day6 梨花女子大学-仁川机场-青岛</h2>
+
+<p>最后一天疯狂的购物, 又来到了梨花女子大学附近, 发现了 工口 乱入.</p>
+
+<p><img src="http://5odcgg.by3302.livefilestore.com/y2p4a-87Qq57mnzyWrUC75ysdhh6ELoM_NAc9AHZNX9-SHtnVwSUx9xSOWWtASyVss6W4d0jznZvo1uEE7WBGgkZsZB2o0PZxC1fe2pnp8dyBk/32.png" alt="工口" /></p>
+
+<p>买了一上午之后, 就要赶去机场准备回国了, 在我们离开韩国地铁 2 号线到达机场一个小时之后, 它就撞了. ( ⊙ o ⊙ ). 好惊悚. 机场退税退了不少, 全都在免税店花完了. ╮(╯▽╰)╭</p>
+
+<p>下午 6 点就到了青岛, 住小伙伴家, 家长各种款待. 都不好意思了.</p>
+
+<h2>Day7 青岛</h2>
+
+<p>小伙伴家住八大关, 家门口各种游客, 我们进进出出, 游客都会投来诧异的目光. 他的麻麻还在淘宝上淘了个复古的报箱挂在大铁门上, 不少游客都以报箱为背景拍照. 忘了照报箱了, 随便拿一张八大关的照片顶一下吧.</p>
+
+<p><img src="http://3edcgg.by3302.livefilestore.com/y2pSBtjYAoqIFITiZt-mOE87vxfXuRFNQy3tBxl1d8V7X9S7h8nsk8bPPo4ZSi7g3S0b_GyLpDB5h_QA6Bwmd_ZXHSaBCRgL7xD7jWErj670ZE/33.png" alt="八大关" /></p>
+
+<p>这一天, 沿着青岛海岸线一路狂奔, 并发现了美女.</p>
+
+<p><img src="http://3udcgg.by3302.livefilestore.com/y2pT72VndPKJpoLOzIAIZeg4IyiErhVAMyR2e-j5eCd73Jr2fQnygbNudrlgOOD1ZQbTN2si5jcUFttQ899Jas7tiGqm5pFphiojquTA0a2yLk/34.png" alt="美女" /></p>
+
+<p>一路上的风景都很不错, 晚上6点从青岛出发回北京, 第二天上班. 8 天的旅行就这么结束了.<del>(>_&lt;)</del> 什么时候再去( ⊙ o ⊙ )啊！</p>
 ]]></content>
   </entry>
   
@@ -3576,725 +3905,6 @@
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">wikipedia: Producer–consumer problem</a></li>
 <li><a href="http://en.cppreference.com/w/cpp/thread/condition_variable">cppreference.com: std::condition_variable</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Visitor 模式与 boost.variant.static_visitor]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/15/static-visitor/"/>
-    <updated>2013-07-15T00:36:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/15/static-visitor</id>
-    <content type="html"><![CDATA[<h2>visitor 模式</h2>
-
-<p>visitor 模式是一种将算法与对象结构分离的软件设计模式.</p>
-
-<p>这个模式的基本想法如下: 首先我们拥有一个由许多对象构成的对象结构, 这些对象的类都拥有一个 accept 方法用来接受访问者对象; 访问者是一个接口, 它拥有一个 visit 方法, 这个方法对访问到的对象结构中不同类型的元素作出不同的反应; 在对象结构的一次访问过程中, 我们遍历整个对象结构, 对每一个元素都实施 accept 方法, 在每一个元素的 accept 方法中回调访问者的 visit 方法, 从而使访问者得以处理对象结构的每一个元素. 我们可以针对对象结构设计不同的实在的访问者类来完成不同的操作.</p>
-
-<p>访问者模式使得我们可以在传统的单分派语言 (如 Smalltalk, Java 和 C++) 中模拟双分派技术.</p>
-
-<!-- more -->
-
-
-<h2>传统的 visitor 模式实现</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-<span class='line-number'>151</span>
-<span class='line-number'>152</span>
-<span class='line-number'>153</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;memory&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;tuple&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">/// original visitor pattern</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Wheel</span><span class="p">;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Engine</span><span class="p">;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Body</span><span class="p">;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Car</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">CarElementVisitor</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;&amp;</span> <span class="n">wheel</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">CarElement</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Wheel</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElement</span><span class="p">,</span>
-</span><span class='line'>              <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">shared_from_this</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Engine</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElement</span><span class="p">,</span>
-</span><span class='line'>               <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">shared_from_this</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Body</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElement</span><span class="p">,</span>
-</span><span class='line'>             <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">shared_from_this</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Car</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElement</span><span class="p">,</span>
-</span><span class='line'>            <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">Elements</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">int_</span> <span class="p">{};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">pos</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">pos</span><span class="o">&gt;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="n">pos</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
-</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Tuple</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">Tuple</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple_size</span><span class="o">&lt;</span><span class="n">Tuple</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">t</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">int_</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Args</span><span class="p">)</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="n">Car</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">elements_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">accept</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElementVisitor</span><span class="o">&gt;&amp;</span> <span class="n">visitor</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">visit</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">elements_</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">visitor</span><span class="o">-&gt;</span><span class="n">visit</span><span class="p">(</span><span class="n">shared_from_this</span><span class="p">());</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">Elements</span> <span class="n">elements_</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">PrintVisitor</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElementVisitor</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;&amp;</span> <span class="n">wheel</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Body&gt; body) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintVisitor::visit(std::shared_ptr&lt;Car&gt; car) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">OtherVisitor</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CarElementVisitor</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="o">&gt;&amp;</span> <span class="n">wheel</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Wheel&gt; wheel) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Engine</span><span class="o">&gt;&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Engine&gt; engine) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Body</span><span class="o">&gt;&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Body&gt; body) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">visit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherVisitor::visit(std::shared_ptr&lt;Car&gt; car) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CarElement</span><span class="o">&gt;</span> <span class="n">car</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="n">car</span><span class="o">-&gt;</span><span class="n">accept</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">PrintVisitor</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="n">car</span><span class="o">-&gt;</span><span class="n">accept</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OtherVisitor</span><span class="o">&gt;</span><span class="p">());</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>boost.variant.static_visitor 的实现</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;boost/variant.hpp&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;boost/variant/static_visitor.hpp&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;boost/variant/apply_visitor.hpp&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Wheel</span> <span class="p">{};</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Engine</span> <span class="p">{};</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Body</span> <span class="p">{};</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Car</span> <span class="p">{};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">/// boost static visitor</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">typedef</span> <span class="n">boost</span><span class="o">::</span><span class="n">variant</span><span class="o">&lt;</span><span class="n">Wheel</span><span class="p">,</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">Body</span><span class="p">,</span> <span class="n">Car</span><span class="o">&gt;</span> <span class="n">CarElement</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">PrintVisitor</span> <span class="o">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">static_visitor</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Wheel</span><span class="o">&amp;</span> <span class="n">wheel</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintStaticVisitor::operator()(const Wheel&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Engine</span><span class="o">&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintStaticVisitor::operator()(const Engine&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Body</span><span class="o">&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintStaticVisitor::operator()(const Body&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Car</span><span class="o">&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="c1">/// bla bla bla</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void PrintStaticVisitor::operator()(const Car&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">OtherVisitor</span> <span class="o">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">static_visitor</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Wheel</span><span class="o">&amp;</span> <span class="n">wheel</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherStaticVisitor::operator()(const Wheel&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Engine</span><span class="o">&amp;</span> <span class="n">engine</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherStaticVisitor::operator()(const Engine&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Body</span><span class="o">&amp;</span> <span class="n">body</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherStaticVisitor::operator()(const Body&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">Car</span><span class="o">&amp;</span> <span class="n">car</span><span class="p">)</span> <span class="k">const</span>
-</span><span class='line'>  <span class="p">{</span>
-</span><span class='line'>    <span class="c1">/// bla bla bla</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;void OtherStaticVisitor::operator()(const Car&amp;) const&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">CarElement</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Car</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">PrintVisitor</span> <span class="n">print_visitor</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">OtherVisitor</span> <span class="n">other_visitor</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">print_visitor</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">other_visitor</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://www.boost.org/doc/libs/1_54_0/doc/html/variant/reference.html#header.boost.variant.static_visitor_hpp">boost.variant.static_visitor</a></li>
-<li><a href="http://en.wikipedia.org/wiki/Visitor_pattern">维基百科: visitor 模式</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++11 完美转发]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward/"/>
-    <updated>2013-07-08T22:09:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/08/cpp11-perfect-forward</id>
-    <content type="html"><![CDATA[<h2>动机</h2>
-
-<p>在泛型编码中经常出现的一个问题是: 如何将一组参数原封不动的转发给另一个函数? 这里的原封不动指的是: 保持参数的左值 (右值), const (non-const) 属性不变.</p>
-
-<h2>C++03 中参数转发存在的问题</h2>
-
-<p>下面来看一个例子, 对于表达式 <code>E(a, b, …, c)</code> 我们希望它与 <code>f(a, b, …, c)</code> 完全等价. 在 C++03 中这是不可能的. 下面是几种设计方案, 但所有的都会在某些条件下失效.</p>
-
-<p>最简单的, 使用引用参数:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>很遗憾, 函数 f 无法处理临时变量, 例如 <code>f(1, 2, 3)</code>; 会编译失败. 这三个参数都无法绑定到引用.</p>
-
-<p>再来看看 const 引用:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!-- more -->
-
-
-<p>这解决了上面的问题, 但是又引入了新的问题, 现在我们无法让 E 接收 non-const 参数了, 下面的代码也会产生一个编译失败.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">E</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'><span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span> <span class="c1">// oops! E cannot modify these</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>嗯, 再来个尝试, 解决上面的问题, 我们接收 const 引用, 然后使用 const_cast 来去掉 const 属性.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="k">const_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">C</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">));</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后来终极解决方案吧, 利用重载, 根据重载决议, 我们可以使用 const 引用和 non-const 引用来进行参数重载, 对于上面的例子, 我们的实现如下:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="p">,</span> <span class="k">typename</span> <span class="n">B</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">B</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">C</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>n 个参数的函数, 就需要 2<sup>n</sup> 个重载版本, 这太恐怖了, 我们非常需要自动完成这些工作. 这个问题在 C++11 中的到了完美的解决.</p>
-
-<h2>完美转发</h2>
-
-<p>C++11 新标准给了我们修复这个问题的机会 (这里有一个破坏性的解决方案, 虽然解决了完美转发的问题, 但是破坏了现有的类型推导规则<a href="http://stackoverflow.com/questions/3591832/perfect-forwarding-in-c03/3591909#3591909">《Perfect Forwarding in C++03》</a>).</p>
-
-<p>C++11 中引入了新的概念, 右值引用. 我们可以在不破坏现有代码的情况下, 定义右值引用的推导规则, 来解决完美转发的问题.</p>
-
-<p>看下面的表格, (TR 表示 T 引用类型)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TR</span>   <span class="n">R</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">T</span><span class="o">&amp;</span>   <span class="o">&amp;</span>  <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// lvalue reference to cv TR -&gt; lvalue reference to T</span>
-</span><span class='line'><span class="n">T</span><span class="o">&amp;</span>   <span class="o">&amp;&amp;</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// rvalue reference to cv TR -&gt; TR (lvalue reference to T)</span>
-</span><span class='line'><span class="n">T</span><span class="o">&amp;&amp;</span>  <span class="o">&amp;</span>  <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;</span>  <span class="c1">// lvalue reference to cv TR -&gt; lvalue reference to T</span>
-</span><span class='line'><span class="n">T</span><span class="o">&amp;&amp;</span>  <span class="o">&amp;&amp;</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">&amp;&amp;</span> <span class="c1">// rvalue reference to cv TR -&gt; TR (rvalue reference to T)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后, 模板参数推导时, 如果参数是左值, 那么就推导为左值引用. 否则使用正常的类型推导. 这里又引入了一个新的概念, “全局引用” (universal references), 具体细节详见: <a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Scott-Meyers-Universal-References-in-Cpp11">C++ and Beyond 2012: Scott Meyers &ndash; Universal References in C++11</a></p>
-
-<p>为什么这样就能解决问题? 因为我们保持了参数的类型: 如果参数是一个左值, 我们得到的是左值引用的参数, 否则我们得到的是右值引用类型的参数, 看下面的代码:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span><span class="kt">void</span> <span class="n">deduce</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
-</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> <span class="c1">// deduce&lt;int&amp;&gt;(int&amp; &amp;&amp;) -&gt; deduce&lt;int&amp;&gt;(int&amp;)</span>
-</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// deduce&lt;int&gt;(int&amp;&amp;)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后就是要做“转发”了. 需要注意的是, 在函数内参数类型是一个左值类型.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">deduce</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">){</span>
-</span><span class='line'>    <span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="c1">// fine, foo can refer to x</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">deduce</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// okay, foo operates on x which has a value of 1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这还不足够. foo 需要拿到和 deduce 一样的参数类型, 解决方案如下.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面这行代码做了什么呢? 我们在 deduce 函数中, 且我们接收了一个左值类型的参数, 这意味着 T 是 A&amp; 类型, 经过静态类型转换 A&amp; &amp;&amp; 仍然是 A&amp; 类型. 因此, 加入 x 以及是一个 A&amp; 类型, 那么我们什么也没有做, 它仍然是一个左值引用类型.</p>
-
-<p>当我们接收的是一个右值, T 就是 A 类型, 因此我们转换后的类型为 A&amp;&amp;. 转换后的类型是一个右值表达式, 这样就不会再作为左值参数了. 我们保持住了参数的类型. 将上面的组合到一起, 我们就得到了“完美转发”:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">A</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">A</span><span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">E</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">));</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当 f 接收到一个左值, 那么 E 也接收一个左值, 当 f 接收的是一个右值, 那么 E 接受到的也是一个右值, 完美了.</p>
-
-<p>当然, 上面的代码是有一点丑陋. <code>static_cast&lt;T&amp;&amp;&gt;</code> 古怪而且不容易记住. 标准库中提供了一个工具函数, 叫做 forward, 它所做的事情与类型转换完全一致.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// is the same as</span>
-</span><span class='line'><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">C++标准提案(N1385)：The Forwarding Problem: Arguments</a></li>
-<li><a href="http://blog.csdn.net/pongba/article/details/1697636">《C++0x漫谈》系列之：右值引用(或“move语意与完美转发”)(下)</a></li>
 </ul>
 
 ]]></content>

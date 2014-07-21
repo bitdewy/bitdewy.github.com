@@ -7,8 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="历史 在 C++ 中，第一个被广泛使用的哈希表实现是 SGI STL 中的，hash_map, hash_set, hash_multimap, hash_mutiset。
-由于哈希表是非常常用的数据结构，逐渐的各厂家实现的标准库中都引入了该数据结构。 例如，GCC 的 lisbstdc &hellip;">
+	<meta name="description" content="玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以.开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。 8月份的时候，Rob Pike 在 Google+ 上发了一篇名为 &ldquo;A lession in shortcuts&rdquo; &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -99,6 +98,122 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/">
+		
+			Unix 的隐藏文件是个 Bug</a>
+	</h2>
+	<div class="entry-content">
+		<p>玩过 Unix/Linux 的人应该都知道，在 *nix 文件系统中，以<code>.</code>开始的文件(夹)是隐藏文件(夹)，但你可能想不到这是一个设计上的 bug。</p>
+
+<p>8月份的时候，<a href="http://en.wikipedia.org/wiki/Rob_Pike">Rob Pike</a> 在 Google+ 上发了一篇名为 &ldquo;<a href="https://plus.google.com/101960720994009339267/posts/R58WgWwN9jp">A lession in shortcuts</a>&rdquo; 的短文，介绍了 Unix 文件系统中隐藏文件这个设计上的 bug (feature)。</p>
+
+<p>在 Unix 文件系统设计的早期，为了导航更方便而引入了 <code>.</code> 和 <code>..</code>。当用户输入 <code>ls</code> 时会列出文件清单，所以 <a href="http://en.wikipedia.org/wiki/Ken_Thompson">Ken</a> 或 <a href="http://en.wikipedia.org/wiki/Dennis_Ritchie">Dennis</a> 添加了一些简单的代码。当时用的是汇编，不过代码看起来应该是像这样的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;.&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">continue</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这比它应有的样子稍微短了一点点：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;..&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">continue</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>嘿，这很简单。</p>
+
+
+		
+		<a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-14T01:05:00+08:00" pubdate data-updated="true">Sep 14<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/unix/'>unix</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/09/14/unix-hidden-file-is-a-bug/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/08/21/cpp-orm-odb/">
+		
+			C++ ORM 框架 ODB</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是 ORM？</h2>
+
+<p>对象关系映射（Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。如今已有很多免费和收费的ORM产品，而有些程序员更倾向于创建自己的ORM工具。</p>
+
+<p>面向对象是从软件工程基本原则（如耦合、聚合、封装）的基础上发展起来的，而关系数据库则是从数学理论发展而来的，两套理论存在显著的区别。为了解决这个不匹配的现象，对象关系映射技术应运而生。</p>
+
+<p>简单的说：ORM相当于中继数据。通俗的说，ORM就是将对象和它们之间的关系映射成关系数据库的表，以及在数据库中它们的关系。目标就是确定一种持久化对象数据的有效策略，在考虑类之间继承结构的同时，存储各个对象的数据属性和对象间的关系。</p>
+
+
+		
+		<a href="/blog/2012/08/21/cpp-orm-odb/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-21T22:03:00+08:00" pubdate data-updated="true">Aug 21<span>st</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/orm/'>ORM</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/08/21/cpp-orm-odb/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -643,66 +758,12 @@
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/05/28/threads-events-qobjects/">
-		
-			[译]Threads, Events and QObjects</a>
-	</h2>
-	<div class="entry-content">
-		<p>前言: <a href="http://qt-project.org/wiki/">Qt wiki</a> 中这篇文章3月份再次更新，文章对 <a href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a> 的用法，使用场景，有很好的论述，可以作为 Qt 多线程编程的使用指南，原文在<a href="http://qt-project.org/wiki/Threads_Events_QObjects">这里</a>，原作者 <a href="http://qt-project.org/member/5319">peppe</a> 开的讨论贴在<a href="http://developer.qt.nokia.com/forums/viewthread/2423/">这里</a>。</p>
-
-<p>原文以姓名标识-相同方式分享 2.5 通用版发布</p>
-
-<p><a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 Generic</a></p>
-
-<h2>背景</h2>
-
-<p>在 <a href="irc://irc.freenode.net/#qt">#qt IRC channel</a> [irc.freenode.net] 中，讨论最多的话题之一就是多线程。很多同学选择了多线程并行编程，然后……呃，掉进了并行编程的无尽的陷阱中。</p>
-
-<p>由于缺乏 Qt 多线程编程经验（尤其是结合Qt 信号槽机制的异步网络编程）加上一些现有的其他语言（工具）的使用经验，导致在使用 Qt 时，一些同学有朝自己脚开枪的行为。Qt 的多线程支持是一把双刃剑：虽然 Qt 的多线程支持使得多线程编程变得简单，但同时也引入了一些其他特性（尤其是与 <a href="http://doc.qt.nokia.com/latest/qobject.html">QObject</a> 的交互），这些特性需要特别小心。</p>
-
-<p>本文的目的不是教你如何使用多线程，加锁、并行、扩展性，这不是本文的重点，而且这些问题已经有非常多的讨论，可以参考<a href="http://qt-project.org/doc/qt-4.8/threads.html#recommended-reading">这里</a> [doc.qt.nokia.com] 的推荐。本文作为 Qt 多线程的指南，目的是帮助开发者避免常见的陷阱，开发出更健壮的程序。</p>
-
-
-		
-		<a href="/blog/2012/05/28/threads-events-qobjects/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-28T23:53:00+08:00" pubdate data-updated="true">May 28<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/qt/'>Qt</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/05/28/threads-events-qobjects/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
         <a href="/blog/page/4/" class="prev">Prev</a>
     
+    
+        <a href="/blog/page/6/" class="next">Next</a>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>

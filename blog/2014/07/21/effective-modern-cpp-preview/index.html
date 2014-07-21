@@ -1,0 +1,299 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>《effecticve modern C++》预览 - Bitdewy</title>
+	<meta name="author" content="bitdewy">
+
+	
+	<meta name="description" content="虽然最近工作在用 javascript, 但 C++ 也没放下, Scott Meyers 的新书《Effective modern C++》终于在 O&#8217;Reilly 上架了. 第一时间买了一本. 2年前的时候, Scott 就给了一版 Effective C++11 的初步想法, &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Bitdewy" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Bitdewy</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:bitdewy.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/bitdew" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/102998539730080432817?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/bitdewy" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/bitdewy" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/bitdewy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:bitdewy.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/bitdewy">bitdewy</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('bitdewy', 4, false);
+	})(jQuery);
+</script>
+
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">《effecticve Modern C++》预览</h2>
+	<div class="entry-content"><p>虽然最近工作在用 javascript, 但 C++ 也没放下, <a href="http://www.aristeia.com">Scott Meyers</a> 的新书《Effective modern C++》终于在 O&#8217;Reilly <a href="http://shop.oreilly.com/product/0636920033707.do">上架了</a>. 第一时间买了一本. 2年前的时候, <a href="http://www.aristeia.com">Scott</a> 就给了<a href="http://blog.bitdewy.me/blog/2012/06/24/effective-c-plus-plus-11/">一版</a> Effective C++11 的初步想法, 两年后的今天, 顺带着 C++14 终于正式出炉了, 不过目前还是 early release 版本, 还没有经过 review, 正式版要到年底才会放出.</p>
+
+<p>不得不说, C++ 现在终于有了它该有的样子. 大致浏览了一下, 如果现在才开始关注 C++11/C++14 的话, 非常推荐这本书. 如果看过前两代 《Effective C++》和《More effective C++》的话, 那你会再次找到久违的感觉.</p>
+
+<p>全书共分为 6 章, 包括: 类型推导, 新关键字 auto, C++98 到 C++11/14 的变化, 智能指针, 右值引用转移语义与完美转发, lambda 表达式, 并发 API.</p>
+
+<p>关于类型推导, 由于 C++11/14 引入了新的关键字 <code>auto</code>, <code>decltype</code>, 以及新的概念右值引用, 那么类型推导就不仅仅存在于模板中了, 因此从现在开始掌握类型推导的规则是 C++ 的必备技能了.</p>
+
+<p>C++11/14 和以前相比, 变化非常的大, 在这本书中, 用了近 1/3 的章节来讲述如何从 C++98 过度到 C++11/14. 有些甚至推翻了之前的推荐做法, 比如 Item 13: Prefer const_iterators to iterators 就与作者之前的 《Effective STL》中的 item 26 完全相反. 所以对于每个写 C++ 代码的人来说, 这一部分是必须要更新的知识.</p>
+
+<p>对于智能智能, 相信大家早就不陌生, 作者的《More Effective C++》中也讲到了智能指针. 这一次, 终于成为了标准, 本书中也讲到了各种类型智能指针合适的使用场景, 掌握了这些之后, 相信资源管理的问题, 就能够减少很多了.</p>
+
+<p>转移语义很好的解决了性能问题, 完美转发解决了模板函数重载时爆炸式增长的问题, 而右值引用就是这两个特性的基础. 对于那些写库的人来说, 这些特性真是天大的好事.</p>
+
+<p>关于 lambda 表达式, 有了 lambda 表达式, 标准库中的那些算法终于能变得好用了. 在没有 lambda 之前, 在使用每个标准库算法之前, 还需要一个仿函数, 这是一件多么不爽的事情.</p>
+
+<p>对于并发, 在 C++98 以及之前, 标准连多线程的概念都没有, 我们只能使用平台相关的多线程设施, 甚至一些我们觉得没问题的多线程模型都会在这种情况下出问题. (比如: 这篇<a href="http://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf">C++ and the Perils of Double-Checked Locking</a>) 现在标准中不仅有了 thread, 甚至还有了更高级的 task, future, promise. 当然如果能有 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a> 就更好了, 不过这个特性可能要等到 C++17 了.</p>
+
+<!-- more -->
+
+
+<p>最后放出《effecticve modern C++》的目录</p>
+
+<h4>Chapter 1 Deducing Types</h4>
+
+<ul>
+<li>Item 1: Understand template type deduction.</li>
+<li>Item 2: Understand auto type deduction.</li>
+<li>Item 3: Understand decltype.</li>
+<li>Item 4: Know how to view deduced types.</li>
+</ul>
+
+
+<h4>Chapter 2 auto</h4>
+
+<ul>
+<li>Item 5: Prefer auto to explicit type declarations.</li>
+<li>Item 6: Be aware of the typed initializer idiom.</li>
+</ul>
+
+
+<h4>Chapter 3 From C++98 to C++11 and C++14</h4>
+
+<ul>
+<li>Item 7: Distinguish () and {} when creating objects.</li>
+<li>Item 8: Prefer nullptr to 0 and NULL.</li>
+<li>Item 9: Prefer alias declarations to typedefs.</li>
+<li>Item 10: Prefer scoped enums to unscoped enums.</li>
+<li>Item 11: Prefer deleted functions to private undefined ones.</li>
+<li>Item 12: Declare overriding functions override.</li>
+<li>Item 13: Prefer const_iterators to iterators.</li>
+<li>Item 14: Use constexpr whenever possible.</li>
+<li>Item 15: Make const member functions thread-safe.</li>
+<li>Item 16: Declare functions noexcept whenever possible.</li>
+<li>Item 17: Consider pass by value for cheap-to-move parameters that are always copied.</li>
+<li>Item 18: Consider emplacement instead of insertion.</li>
+<li>Item 19: Understand special member function generation.</li>
+</ul>
+
+
+<h4>Chapter 4 Smart Pointers</h4>
+
+<ul>
+<li>Item 20: Use std::unique_ptr for exclusive-ownership resource management.</li>
+<li>Item 21: Use std::shared_ptr for shared-ownership resource management.</li>
+<li>Item 22: Use std::weak_ptr for std::shared_ptr-like pointers that can dangle.</li>
+<li>Item 23: Prefer std::make_unique and std::make_shared to direct use of new.</li>
+<li>Item 24: When using the Pimpl Idiom, define special member functions in the implementation file.</li>
+</ul>
+
+
+<h4>Chapter 5 Rvalue References, Move Semantics, and Perfect Forwarding</h4>
+
+<ul>
+<li>Item 25: Understand std::move and std::forward.</li>
+<li>Item 26: Distinguish universal references from rvalue references.</li>
+<li>Item 27: Use std::move on rvalue references, std::forward on universal references.</li>
+<li>Item 28: Avoid overloading on universal references.</li>
+<li>Item 29: Familiarize yourself with alternatives to overloading on universal references.</li>
+<li>Item 30: Understand reference collapsing.</li>
+<li>Item 31: Assume that move operations are not present, not cheap, and not used.</li>
+<li>Item 32: Familiarize yourself with perfect forwarding failure cases.</li>
+</ul>
+
+
+<h4>Chapter 6 Lambda Expressions</h4>
+
+<ul>
+<li>Item 33: Avoid default capture modes.</li>
+<li>Item 34: Use init capture to move objects into closures.</li>
+<li>Item 35: Use decltype on auto&amp;&amp; parameters to std::forward them.</li>
+<li>Item 36: Prefer lambdas to std::bind.</li>
+</ul>
+
+
+<h4>Chapter 7 The Concurrency API</h4>
+
+<ul>
+<li>Item 37: Prefer task-based programming to thread-based.</li>
+<li>Item 38: Specify std::launch::async if asynchronicity is essential.</li>
+<li>Item 39: Make std::threads unjoinable on all paths.</li>
+<li>Item 40: Be aware of varying thread handle destructor behavior.</li>
+<li>Item 41: Consider void futures for one-shot event communication.</li>
+<li>Item 42: Use std::atomic for concurrency, volatile for special memory.</li>
+</ul>
+
+
+<p>有时间的话, 后续会持续更新每一章节的具体内容.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-21T22:14:00+08:00" pubdate data-updated="true">Jul 21<span>st</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+		
+		
+	</div>
+	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    bitdewy
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'bitdewy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview/';
+        var disqus_url = 'http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>
