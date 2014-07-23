@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "《effecticve modern C++》预览"
+title: "《Effecticve Modern C++》预览"
 date: 2014-07-21 22:14
 comments: true
 categories: [C++]
