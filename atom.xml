@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-10-21T21:12:26+08:00</updated>
+  <updated>2014-10-21T21:22:23+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[译] Item 2: Understand `auto` type deduction]]></title>
+    <title type="html"><![CDATA[[译] Item 2: Understand auto type deduction]]></title>
     <link href="http://bitdewy.github.com/blog/2014/09/18/emcpp-item-2/"/>
     <updated>2014-09-18T23:04:00+08:00</updated>
     <id>http://bitdewy.github.com/blog/2014/09/18/emcpp-item-2</id>
@@ -86,6 +86,11 @@
 </span><span class='line'>void func_for_rx(const T& param);   // conceptual template for deducing rx's type
 </span><span class='line'>
 </span><span class='line'>func_for_rx(x);                     // conceptual call: param's deduced type is rx's type</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
 
 
 <p>就像刚才说的一样，<code>auto</code> 的类型推导只有一点（一会儿会讲到）不一样之外，其他与模板类型推导完全一致。</p>
@@ -324,6 +329,9 @@
 <li>ParamType 是一个全局引用。</li>
 <li>ParamType 即不是指针也不是引用</li>
 </ul>
+
+
+<!-- more -->
 
 
 <p>因此我们需要考虑上面描述的三种场景来一一讲述。每个都基于下面的伪代码，</p>

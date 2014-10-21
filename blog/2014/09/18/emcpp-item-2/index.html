@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>[译] Item 2: Understand `auto` type deduction - Bitdewy</title>
+	<title>[译] Item 2: Understand auto type deduction - Bitdewy</title>
 	<meta name="author" content="bitdewy">
 
 	
@@ -98,7 +98,7 @@
 
 	
 	<div id="content" class="inner"><article class="post">
-	<h2 class="title">[译] Item 2: Understand `auto` Type Deduction</h2>
+	<h2 class="title">[译] Item 2: Understand Auto Type Deduction</h2>
 	<div class="entry-content"><p>如果你已经阅读了 Item 1 模板类型推导，那么你应该已经掌握了 <code>auto</code> 的类型推导，出了下面要讲到的一个不同之外，其他都和 Item 1 完全一致，但是你肯定还有疑问，为什么模板类型推导涉及到了模板，函数以及参数，而 <code>auto</code> 却不涉及这些。</p>
 
 <p>没错，但是这也没什么关系。其实模板类型推导与 <code>auto</code> 类型推导有直接的映射关系。有很直观的转换关系。</p>
@@ -167,6 +167,11 @@
 </span><span class='line'>void func_for_rx(const T& param);   // conceptual template for deducing rx's type
 </span><span class='line'>
 </span><span class='line'>func_for_rx(x);                     // conceptual call: param's deduced type is rx's type</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
 
 
 <p>就像刚才说的一样，<code>auto</code> 的类型推导只有一点（一会儿会讲到）不一样之外，其他与模板类型推导完全一致。</p>
