@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-07-22T01:37:02+08:00</updated>
+  <updated>2014-10-21T21:12:26+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -14,7 +14,680 @@
 
   
   <entry>
-    <title type="html"><![CDATA[《effecticve modern C++》预览]]></title>
+    <title type="html"><![CDATA[[译] Item 2: Understand `auto` type deduction]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/09/18/emcpp-item-2/"/>
+    <updated>2014-09-18T23:04:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/09/18/emcpp-item-2</id>
+    <content type="html"><![CDATA[<p>如果你已经阅读了 Item 1 模板类型推导，那么你应该已经掌握了 <code>auto</code> 的类型推导，出了下面要讲到的一个不同之外，其他都和 Item 1 完全一致，但是你肯定还有疑问，为什么模板类型推导涉及到了模板，函数以及参数，而 <code>auto</code> 却不涉及这些。</p>
+
+<p>没错，但是这也没什么关系。其实模板类型推导与 <code>auto</code> 类型推导有直接的映射关系。有很直观的转换关系。</p>
+
+<p>在 Item 1 中，我们使用下面的模板函数用来描述模板类型推导，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(ParamType param);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>调用如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>f (expr);    // call f with some expression</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在调用函数 <code>f</code> 时，编译器使用表达式 <code>expr</code> 来推导类型 <code>T</code> 和 <code>ParamType</code>。</p>
+
+<p>当使用 <code>auto</code> 来声明变量时，<code>auto</code> 代替了上面 <code>T</code> 的位置，同时变量的类型就是 <code>ParamType</code> 的类型。看下面的例子会更直观，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = 27;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里，变量 <code>x</code> 的类型标识符就是一个简单的 <code>auto</code>，在</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const auto cx = x;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>中，类型标识符是 <code>const auto</code>，在</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const auto& rx = x;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>中，类型标识符是 <code>const auto&amp;</code>。推导上面 <code>x</code>, <code>cx</code> 以及 <code>rx</code> 的类型，编译器所做的事情就像是有一个模板函数一样，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void func_for_x(T param);           // conceptual template for deducing x's type
+</span><span class='line'>
+</span><span class='line'>func_for_x(27);                     // conceptual call: param's deduced type is x's type
+</span><span class='line'>
+</span><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void func_for_cx(const T param);    // conceptual template for deducing cx's type
+</span><span class='line'>
+</span><span class='line'>func_for_cx(x);                     // conceptual call: param's deduced type is cx's type
+</span><span class='line'>
+</span><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void func_for_rx(const T& param);   // conceptual template for deducing rx's type
+</span><span class='line'>
+</span><span class='line'>func_for_rx(x);                     // conceptual call: param's deduced type is rx's type</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就像刚才说的一样，<code>auto</code> 的类型推导只有一点（一会儿会讲到）不一样之外，其他与模板类型推导完全一致。</p>
+
+<p>Item 1 中根据 <code>ParamType</code> 的类型，把类型推导分了三种情况来处理，在 <code>auto</code> 类型推导时，<code>auto</code> 替代了 <code>ParamType</code>  也同样分为三种情况，</p>
+
+<ul>
+<li>情况1：类型标识符是一个指针或者引用，但不是右值引用</li>
+<li>情况2：类型标识符是一个全局引用</li>
+<li>情况3：类型标识符既不是指针也不是引用</li>
+</ul>
+
+
+<p>我们已经见过了情况1 与情况3 的例子了，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = 27;           // case 3 (x is neither ptr nor reference)
+</span><span class='line'>
+</span><span class='line'>const auto cx = x;     // case 3 (cx isn't neither)
+</span><span class='line'>
+</span><span class='line'>const auto& rx = x;    // case 1 (rx is a non-universal ref.)
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>情况2 就像你预期的那样，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto&& uref1 = x;     // x is int lvalue, so uref1's type is int&
+</span><span class='line'>
+</span><span class='line'>auto&& uref2 = cx;    // cx is const int and lvalue, so uref2's type is const int&
+</span><span class='line'>
+</span><span class='line'>auto&& uref3 = 27;    // 27 is int and rvalue, so uref3's type is int&&</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Item 1 中我们讨论了非引用的数组和函数是如何退化成指针的。在 <code>auto</code> 类型推导中也是一样的，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const char name[] = "R. N. Briggs";    // name's type is const char[13]
+</span><span class='line'>
+</span><span class='line'>auto arr1 = name;                      // arr1's type is const char *
+</span><span class='line'>
+</span><span class='line'>auto& arr2 = name;                     // arr2's type is const char (&)[13]
+</span><span class='line'>
+</span><span class='line'>void someFunc(int, double);            // someFunc is function, type is void(int, double)
+</span><span class='line'>
+</span><span class='line'>auto func1 = someFunc;                 // func1's type is void(*)(int, double)
+</span><span class='line'>
+</span><span class='line'>auto& func2 = someFunc;                // func2's type is void(&)(int, double)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就像你看到这样，<code>auto</code> 类型推导就像模板类型推导一样。</p>
+
+<p>仅有一种情况，他们是不一样的。我们从一个简单的例子开始，在 C++98 中，我们用 27 来初始化一个 int 变量，我们可以有下面两种写法，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int x1 = 27;
+</span><span class='line'>int x2(27);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>C++11 统一初始化，增加了下面的写法，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int x3 = { 27 };
+</span><span class='line'>int x4{ 27 };</span></code></pre></td></tr></table></div></figure>
+
+
+<p>总而言之，4中不同的写法的结果都是一样的，初始化了一个值为 27 的整型。</p>
+
+<p>但是，就像 Item 5 中解释的一样，使用 <code>auto</code> 来声明类型是可以获得好处的，所有我们可以将上面的 <code>int</code> 全部替换为 <code>auto</code>：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x1 = 27;
+</span><span class='line'>auto x2(27);
+</span><span class='line'>auto x3 = { 27 };
+</span><span class='line'>auto x4{ 27 };</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这 4 种写法都能够正常编译，但是却表达了不同的含义。前两种写法定义了一个值为 27 的整型。但后两种写法实际上定义了一个只有一个元素 27 的 <code>std::initializer_list&lt;int&gt;</code>！</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x1 = 27;        // type is int, value is 27
+</span><span class='line'>auto x2(27);         // ditto
+</span><span class='line'>auto x3 = { 27 };    // type is std::initializier_list&lt;int&gt;, value is { 27 }
+</span><span class='line'>auto x4{ 27 };       // ditto</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是 <code>auto</code> 类型推导的一个特殊规则。当使用大括号初始化一个 <code>auto</code> 变量时，类型会被推导为 <code>std::initializer_list</code>，如果类型推导不成功（比如，大括号中的某个元素类型与其他的不一致），那么将会编译失败：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x5 = { 1, 2, 3.0 };    // error! can't deduce T for std::initializer_list&lt;int&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就像上面注释中写的一样，类型推导在这种情况下会失败，但是要明白这里有两个类型推导，这是很重要的。第一个是 <code>auto</code>，<code>x5</code> 使用了大括号来初始化，那么 <code>auto</code> 会被推导为 <code>std::initializer_list</code> 类型，但同时 <code>std::initializer_list</code> 是一个模板类型，模板参数 <code>T</code> 同样需要推导，类型推导失败产生于第二步：模板类型推导。在上面的例子中，就是由于大括号中的元素类型不一致而导致的模板类型推导失败。</p>
+
+<p><code>auto</code> 类型推导与模板类型推导的唯一不同在于大括号初始化。当使用大括号初始化时，<code>auto</code> 会推到为 <code>std::initializer_list</code> 类型，但对于模板类型推导来说，这会产生一个错误，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = { 11, 23, 9 };  // x's type is std::initializer_list&lt;int&gt;
+</span><span class='line'>
+</span><span class='line'>template&lt;typename T&gt;
+</span><span class='line'>void f(T param);         // template with parameter declaration equivalent to x's
+</span><span class='line'>
+</span><span class='line'>f({ 11, 23, 9});         // error! can't deduce type for T</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不过，如果你明确指定了 <code>param</code> 的类型为 <code>std::initializer_list&lt;T&gt;</code> 那么模板类型推导会推导出 <code>T</code> 的类型，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template&lt;typename T&gt;
+</span><span class='line'>void f(std::initializer_list&lt;T&gt; initList);
+</span><span class='line'>
+</span><span class='line'>f({ 11, 23, 9 });    // T deduce as int, and initList's type is std::initializer_list&lt;int&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因此，<code>auto</code> 类型推导与模板类型推导唯一的不同在于，对于大括号初始化，<code>auto</code> 类型推导会将它推导为 <code>std::initializer_list</code>，而模板类型推导不会。</p>
+
+<p>也许你会想知道为什么会有这样的区别。我也曾想过，但是没有找到一个很好的解释。不过规则就是规则，你只需要记住，当使用大括号初始化 <code>auto</code> 类型时，它会被自动推到为 <code>std::initializer_list</code> 类型。如果你想要使用新的统一初始化，那么记住这一点是非常重要的。一个典型的 C++11 错误就是当你想要一个其他类型时却意外的声明了一个 <code>std::initializer_list</code> 类型。这也是为什么有些开发者仅仅在必要的时候才使用大括号初始化的一个原因。（我们会在 Item 7 中详细讨论）</p>
+
+<p>对 C++11 来说，这就是全部了。但是对于 C++14，还有些其他内容。C++14 允许使用 <code>auto</code> 来表示需要被推导的函数返回值类型（详见 Item 3），C++14 的 lambda 中也允许 <code>auto</code> 用作参数类型。但是这些 <code>auto</code> 遵循的是模板类型推导，而不是 <code>auto</code> 类型推导。因此，一个返回值类型声明为 <code>auto</code> 返回一个大括号初始化时，会导致编译失败，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto createInitList()
+</span><span class='line'>{
+</span><span class='line'>  return { 1, 2, 3 };    // error: can't deduce type for { 1, 2, 3 }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>lambda:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>std::vector&lt;int&gt; v;
+</span><span class='line'>// ...
+</span><span class='line'>auto resetV = [&v](const auto& newValue) { v = newValue; };    // C++14
+</span><span class='line'>// ...
+</span><span class='line'>
+</span><span class='line'>resetV({ 1, 2, 3 });    // error! can't deduce type for { 1, 2, 3 }</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>需要记住的</h2>
+
+<ul>
+<li><code>auto</code> 类型推导通常和模板类型推导是一致的，但是 <code>auto</code> 类型推导会将大括号初始化推到为 <code>std::initializer_list</code>，而模板类型推导不会</li>
+<li><code>auto</code> 在函数返回值以及 lambda 参数类型推导时，遵循模板类型推导，而不是 <code>auto</code> 类型推导。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 1: Understand template type deduction]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/08/23/emcpp-item-1/"/>
+    <updated>2014-08-23T00:04:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/08/23/emcpp-item-1</id>
+    <content type="html"><![CDATA[<p>在使用一个复杂的系统时，我们可以不用知道具体的细节。从这个方面来说，C++ 的模板类型推导是很成功的。数以百万的程序员都使用过模板，即使他们可能很难描述清楚这些类型是如何推导的。</p>
+
+<p>如果你是其中的一员，我有一个好消息，也有一个坏消息。好消息是，模板类型推导是最引人注目的 C++11 新特性 <code>auto</code> 的基础。如果你很清楚 C++98 中的模板类型推导，那么你会很容易明白 C++11 中的 <code>auto</code>。坏消息是，当使用 <code>auto</code> 时，有些类型推导会变得没有那么直观。因此完全掌握类型推导的规则是非常有必要的。Item 1 会介绍你必须知道的类型推导规则。</p>
+
+<p>我们从一小段伪代码开始：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(ParamType param);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>调用如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>f (expr);    // call f with some expression</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在编译期间，编译器使用表达式 <code>expr</code> 来推导两个类型：一个是 <code>T</code> 另一个是 <code>ParamType</code>。这两个类型通常是不一样的，因为 <code>ParamType</code> 通常是含有修饰的，比如 <code>const</code> 或者引用。举个例子，如果模板的声明如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f (const T& param);    // ParamType is const T&</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后调用如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int x = 0;
+</span><span class='line'>f(x);    // call f with an int</span></code></pre></td></tr></table></div></figure>
+
+
+<p>类型 <code>T</code> 会被推导为 <code>int</code>，而 <code>ParamType</code> 被推导为 <code>const int&amp;</code>。</p>
+
+<p>将类型 <code>T</code> 推导为传入的参数类型是很自然的，即 <code>T</code> 的类型就是 <code>expr</code> 的类型。在上面的例子中，<code>x</code> 是 <code>int</code> 类型，<code>T</code> 被推导为 <code>int</code> 类型。但是有时候却不是这样的。类型推导不仅仅依赖于表达式 <code>expr</code> 的类型，同时还依赖于 <code>ParamType</code> 的形式。有下面三种情况：</p>
+
+<ul>
+<li>ParamType 是一个指针或者引用类型，但是不是全局引用。（全局引用将会在 Item 24 中讲述。现在你只需要知道他不同于引用，也不同于右值引用即可）。</li>
+<li>ParamType 是一个全局引用。</li>
+<li>ParamType 即不是指针也不是引用</li>
+</ul>
+
+
+<p>因此我们需要考虑上面描述的三种场景来一一讲述。每个都基于下面的伪代码，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(ParamType param);
+</span><span class='line'>
+</span><span class='line'>f(expr);    // deduce T and ParamType from expr</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>情况1：<code>ParamType</code> 是一个指针或者引用，但不是右值引用</h3>
+
+<p>这是最简单的一种情况，在这种情况下，类型推导的工作如下：</p>
+
+<ol>
+<li>如果 <code>expr</code> 是一个引用类型，忽略引用部分。</li>
+<li>然后模式匹配 <code>expr</code> 的类型，根据 <code>ParamType</code> 的类型来决定 <code>T</code> 的类型。</li>
+</ol>
+
+
+<p>举个例子，如果我们的模板是下面这样，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T& param);    // param is a reference</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后我们有如下的变量声明，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int x = 27;           // x is an int
+</span><span class='line'>const int cx = x;     // cx is a const int
+</span><span class='line'>const int& rx = x;    // rx is a reference to x as a const int</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>param</code> 和 <code>T</code> 的类型推导结果如下，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>f(x);     // T is int, param's type is int&
+</span><span class='line'>
+</span><span class='line'>f(cx);    // T is const int, param's type is const int&
+</span><span class='line'>
+</span><span class='line'>f(rx);    // T is const int, param's type is const int&</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在第二个以及第三个调用中，注意由于 <code>cx</code> 和 <code>rx</code> 是 <code>const</code> 值，所以 <code>T</code> 被推导为 <code>const int</code> 类型，这对调用者来说是至关重要的。当调用者传入一个 <code>const</code> 对象给一个引用参数时，参数仍然是不可更改的。比如，参数是一个 <code>const</code> 引用。这也是为什么传入一个 <code>const</code> 对象给一个接受 <code>T&amp;</code> 类型的模板参数是安全的：<code>const</code> 约束直接变为了 <code>T</code> 类型的一部分。</p>
+
+<p>在第三个调用中，注意虽然 <code>rx</code> 的类型是引用，<code>T</code> 仍然被推导为非引用。这是由于类型推导过程中 <code>rx</code> 的引用修饰被忽略掉了。</p>
+
+<p>上面的例子都是左值引用参数，但其实右值引用的类型推导和上面是完全一样的。当然，只有右值类型的参数才能传递给右值引用，但他对类型推导完全没有影响。</p>
+
+<p>如果我们将 <code>f</code> 的参数类型由 <code>T&amp;</code> 更改为 <code>const T&amp;</code>，情况会有一些变化，但非常好理解。<code>cx</code> 和 <code>rx</code> 的 <code>const</code> 修饰仍然有用。但由于现在假定 <code>param</code> 的类型是一个 <code>const</code> 引用，现在不再需要将 <code>const</code> 推断为类型 <code>T</code> 的一部分了：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(const T& param);    // param is now ref-to-const
+</span><span class='line'>
+</span><span class='line'>int x = 27;                // as before
+</span><span class='line'>const int cx = x;          // as before
+</span><span class='line'>const int& rx = x;         // as before
+</span><span class='line'>
+</span><span class='line'>f(x);                      // T is int, param's type is const int&
+</span><span class='line'>
+</span><span class='line'>f(cx);                     // T is int, param's type is const int&
+</span><span class='line'>
+</span><span class='line'>f(rx);                     // T is int, param's type is const int&</span></code></pre></td></tr></table></div></figure>
+
+
+<p>和上面一样，<code>rx</code> 的引用修饰在类型推导时会被忽略。</p>
+
+<p>如果 <code>param</code> 是一个指针（或者 <code>const</code> 指针），类型推导基本是一样的。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T* param);          // param is now a pointer
+</span><span class='line'>
+</span><span class='line'>int x = 27;                // as before
+</span><span class='line'>const int *px = &x;        // px is a ptr to x as a const int
+</span><span class='line'>
+</span><span class='line'>f(&x);                     // T is int, param's type is int*
+</span><span class='line'>
+</span><span class='line'>f(px);                     // T is const int, param's type is const int*</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到目前位置，你可能已经哈欠不断了，因为对于指针和引用的类型推导，规则这么简单，所有的结果都是显而易见的，就和你想象的完全一样。</p>
+
+<h3>情况2：<code>ParamType</code> 是全局引用</h3>
+
+<p>当模版参数是全局引用时，类型推导就没有那么明显了。声明的形式有点像右值引用（全局引用的类型声明形式是 <code>T&amp;&amp;</code>），但是当传入的参数是左值类型时行为是不一样的。具体细节在 Item 24 中讲述，现在我们来看一个简单的版本：</p>
+
+<ul>
+<li>如果 <code>expr</code> 是一个左值，那么 <code>T</code> 和 <code>ParamType</code> 都会推导为左值引用。有两个不寻常的地方。第一，这是仅有的模板类型推导会将类型 <code>T</code> 推导为引用类型的情形。第二，尽管 <code>ParamType</code> 的类型声明使用了右值引用的符号，但却推导为了左值引用。</li>
+<li>如果 <code>expr</code> 是一个右值，会使用“正常的”（情况1）规则。</li>
+</ul>
+
+
+<p>例子：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tempalte &lt;typename T&gt;
+</span><span class='line'>void f(T&& param);        // param is now a universal reference
+</span><span class='line'>
+</span><span class='line'>int x = 27;               // as before
+</span><span class='line'>const int cx = x;         // as before
+</span><span class='line'>const int& rx = x;        // as before
+</span><span class='line'>
+</span><span class='line'>f(x);                     // x is lvalue, so T is int&, param's type is also int&
+</span><span class='line'>
+</span><span class='line'>f(cx);                    // cx is lvalue, so T is const int&, param's type is also const int&
+</span><span class='line'>
+</span><span class='line'>f(rx);                    // rx is lvalue, so T is const int&, param's type is also const int&
+</span><span class='line'>
+</span><span class='line'>f(27);                    // 27 is rvalue, so T is int, param's type is therefore int&&</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 Item 24 中会详细解释为什么在上面的情形中类型推导是这样的。在这里我们的重点是，左值参数和右值参数对于全局引用来说，类型推导的规则是不一样的。这很特别的，当使用全局引用时，类型推导会区别对待左值参数和右值参数，这是在其他类型中不会发生的。</p>
+
+<h3>情况3：<code>ParamType</code> 即不是引用也不是指针</h3>
+
+<p>当 <code>ParamType</code> 既不是引用也不是指针时，我们来按值传递，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T param);          // param is now passed by value</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这意味着 <code>param</code> 会做一个拷贝 —— 产生一个全新的对象。<code>param</code> 的类型推导遵循如下规则：</p>
+
+<ol>
+<li>像上面一样，如果 <code>expr</code> 的类型是一个引用，那么引用类型会被忽略。</li>
+<li>如果忽略了 <code>expr</code> 的引用修饰之后，<code>expr</code> 是一个 <code>const</code>，那么将 <code>const</code> 也忽略。如果有 <code>volatile</code> 修饰，也同样忽略。（<code>volatile</code> 修饰并不常用，通常只是在实现设备驱动时会用到。更多细节，参见 Item 40）。</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int x = 27;              // as before
+</span><span class='line'>const int cx = x;        // as before
+</span><span class='line'>const int& rx = x;       // as before
+</span><span class='line'>
+</span><span class='line'>f(x);                    // T's and param's types are both int
+</span><span class='line'>f(cx);                   // T's and param's types are again both int
+</span><span class='line'>f(rx);                   // T's and param's types are still both int</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意，即使 <code>cx</code> 和 <code>rx</code> 都是 <code>const</code> 类型，<code>param</code> 的类型也不是 <code>const</code>。这是有道理的。<code>param</code> 是一个与 <code>cx</code> 和 <code>rx</code> 无关的对象 —— 是一份拷贝。因此， <code>cx</code> 和 <code>rx</code> 的 <code>const</code> 属性，不会影响 <code>param</code>。这就是为什么在类型推导过程中 <code>expr</code> 的 <code>const</code>（以及 volatile）修饰会被忽略的原因：<code>expr</code> 不可更改并不意味着它的拷贝不可以。</p>
+
+<p>意识到 <code>const</code>（以及<code>volatile</code>）修饰仅仅在传值参数中会被忽略，是非常重要的。像前面看到的，对于 <code>const</code> 引用，或者 指向 <code>const</code> 对象的指针参数，<code>expr</code> 的 <code>const</code> 修饰是保留到类型推导中的。但是考虑以下情况，<code>expr</code> 是一个指向 <code>const</code> 对象的 <code>const</code> 指针，且 <code>expr</code> 是值传递给 <code>param</code> 的：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T param);                              // param is still passed by value
+</span><span class='line'>
+</span><span class='line'>const char* const ptr = "Fun with pointers";  // ptr is const pointer to const object
+</span><span class='line'>
+</span><span class='line'>f(ptr);                                       // pass arg of type const char * const</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里，右边（第二个）的 <code>const</code> 表示 <code>ptr</code> 不可更改。左边（第一个）表示 <code>ptr</code> 指向的常量字符串不可更改。当 <code>ptr</code> 传递给 <code>f</code> 时，<code>ptr</code> 值传递会产生一个拷贝，根据类型推导规则，<code>ptr</code> 的 <code>const</code> 修饰会被忽略掉，最终 <code>param</code> 类型为 <code>const char*</code>，即指向常量字符串的指针。<code>ptr</code> 所指向的内容的 <code>cosnt</code> 修饰被保留，而 <code>ptr</code> 本身的 <code>const</code> 修饰在值传递时被忽略。</p>
+
+<h4>数组参数</h4>
+
+<p>几乎所有主流的模板类型推导都包含它，但是还是有一些值得注意的地方。数组类型与指针类型是不同的，尽管他们有时可以转换。在很多时候数组是可以退化成指针的。下面的代码可以编译通过：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const char name[] = "J. P. Briggs";   // name's type is const char[13]
+</span><span class='line'>
+</span><span class='line'>const char* ptrToName = name;         // array decays to pointer</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里，<code>ptrToName</code> 作为一个 <code>const char*</code> 类型，使用了 <code>const char[13]</code> 类型的 <code>name</code> 来初始化。但是这两个类型是不同的，由于数组到指针的退化规则才使得代码能够编译通过。</p>
+
+<p>但当我们将一个数组类型传递给一个值传递的模版参数时，会发生什么呢？</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T param);               // template with by-value paramter
+</span><span class='line'>
+</span><span class='line'>f(name);                       // what types are deduced for T and param ?</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们使用没有模板的情况先来观察，对，没错，下面的语法是合法的，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>void myFunc(int param[]);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是数组参数的声明会被退化成指针，这意味着它和下面的声明是完全一致的：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>void myFunc(int* param);     // same function as above</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的退化是从 C 语言中继承而来的，他给我们造成了数组类型与指针类型是一样的这种幻觉。</p>
+
+<p>由于数组参数的声明会被当作指针来看待，那么当模版参数是数组并且按值传递时，参数会被推导为指针类型。这意味着模板函数 <code>f</code> 的模板参数 <code>T</code> 会被推导为 <code>const char *</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>f(name);        // name is array, but T deduced as const char*</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是现在问题出现了，尽管参数不能是一个真正的数组类型，但是我们可以声明一个数组的引用。因此当我们更改模板函数 <code>f</code> 使他接受引用参数时，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
+</span><span class='line'>void f(T& param);        // template with by-reference parameter</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后我们传入有一个数组，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>f(name);                 // pass array of f</span></code></pre></td></tr></table></div></figure>
+
+
+<p>类型推导会将 <code>T</code> 推导为数组类型，这个类型包括了数组的长度，在这个例子中，<code>T</code> 的类型被推导成为 <code>const char[13]</code>，函数 <code>f</code> 的参数类型为 <code>const char(&amp;)[13]</code>。</p>
+
+<p>有趣的是，它提供了一种推导数组元素个数的方式：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// return size of an array as a compile-time constant. (The array parameter has no name,
+</span><span class='line'>// because we care only about the number of elements it contains.)
+</span><span class='line'>
+</span><span class='line'>template &lt;typename T&gt;                                // info
+</span><span class='line'>constexpr std::size_t arraySize(T(&)[N]) noexcept    // below on
+</span><span class='line'>{                                                    // constexpr
+</span><span class='line'>  return N;                                        // and
+</span><span class='line'>}                                                    // noexcept</span></code></pre></td></tr></table></div></figure>
+
+
+<p>与 Item 15 中解释的一样，声明一个 <code>constexpr</code> 函数，那么它的返回值在编译期就确定了。这就让用一个已知的数组去声明一个同样大小的数组成为可能：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>int keyVals[] = { 1, 3, 5, 7, 9, 11, 22, 35 };    // keyVals has 7 elements
+</span><span class='line'>
+</span><span class='line'>int mappedVals[arraySize(keyVals)];               // so does mappedVals</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然，作为一个现代的 C++ 程序员，你会很自然的习惯于用 <code>std::array</code> 来代替内建的数组类型，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>std::array&lt;int, arraySize(keyVals)&gt; mappedVals;   // mappedVals' size is 7</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>arraySize</code> 声明时带着 <code>noexcept</code>，这帮助编译器生成更好的代码。详细内容，参见 Item 14。</p>
+
+<h4>函数参数</h4>
+
+<p>在 C++ 中，不是只有数组才会退化成指针。函数类型可以退化成函数指针，上面我们讨论的关于数组的类型推导规则也适用于函数，只是退化成函数指针而已。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>void someFunc(int, double);    // someFunc is a function;
+</span><span class='line'>                               // type is void(int, double)
+</span><span class='line'>
+</span><span class='line'>template&lt;typename T&gt;
+</span><span class='line'>void f1(T param);              // in f1, param passed by value
+</span><span class='line'>
+</span><span class='line'>template&lt;typename T&gt;
+</span><span class='line'>void f2(T& param);             // in f2, param passed by ref
+</span><span class='line'>
+</span><span class='line'>f1(someFunc);                  // param deduced as ptr-to-func;
+</span><span class='line'>                               // type is void (*)(int, double)
+</span><span class='line'>f2(someFunc);                  // param deduced as ref-to-func;
+</span><span class='line'>                               // type is void (&)(int, double)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在日常的使用中，这几乎没有什么区别，但是如果你已经知道了数组会退化成指针，那么你也会很自然的知道函数到指针的退化。</p>
+
+<p>这就是模板类型推导的规则。大部分情况下它非常简单。左值在传递给全局引用时的推导有些稍微不同，但是数组和函数类型的退化更让人迷惑。有时候你会想抓住编译器问，“告诉我你在推导什么类型！” 这个时候，你需要 Item 4 中的内容，它会告诉你如何查看正在推导的类型。</p>
+
+<h2>需要记住的</h2>
+
+<ul>
+<li>在模板类型推导时，引用类型的参数会被当作非引用，即引用限定会被忽略。</li>
+<li>当推导类型是全局引用时，左值会被特殊对待。</li>
+<li>当推导值传递参数时，<code>const</code>, <code>volatile</code> 会被忽略。</li>
+<li>在类型推导时，数组以及函数名会退化为指针，除非它们被用来初始化引用变量。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[《Effecticve Modern C++》预览]]></title>
     <link href="http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview/"/>
     <updated>2014-07-21T22:14:00+08:00</updated>
     <id>http://bitdewy.github.com/blog/2014/07/21/effective-modern-cpp-preview</id>
@@ -3670,243 +4343,6 @@
 <p><del><em>文中使用的图做完之后就后悔了… 先这样吧, 下次一定要用矢量图, SVG 什么的… 现在完全看不清啊,还有不和谐的纯白底色, 魂淡…</em> (╯‵□′)╯︵┻━┻</del></p>
 
 <p>实在是无法忍受看不清的图片, 全都换成 svg 了, 这下整个人都舒服了. O(∩_∩)O 哈!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[类型选择]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/30/type-selection/"/>
-    <updated>2013-07-30T18:26:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/30/type-selection</id>
-    <content type="html"><![CDATA[<h2>目的</h2>
-
-<p>在编译期间, 根据一些条件, 决定类型.</p>
-
-<h2>动机</h2>
-
-<p>在编译期根据一些信息来做出决议是元编程的一个强大工具. 其中一种就是在编译期决定类型, 比如根据一些列的条件最后决定具体的类型.</p>
-
-<p>例如, 考虑一个 Queue 的实现, 这个模板类有一个静态数组, 模板参数作为这个 Queue 类型的最大容量. Queue 类同时需要存储当前元素的个数, 从 0 开始. 可能的优化方案是用不同的类型, 来存储 size 值. 比如当 Queue 的最大容量小于 256 时, 存储容量的类型是 unsigned char, 当容量小于 65536 时, 存储容量的类型是 unsigned short, 更大的容量时使用 unsigned int 类型. 类型选择可以在这个时候发挥作用.</p>
-
-<h2>解决方案以及代码示例</h2>
-
-<p>一个简单的解决方案是使用 IF 模板. IF 模板有三个模板参数, 第一个参数是编译期的 bool 表达式. 如果表达式为 true 那么第二个模板参数类型将被选中, 否则会选中第三个模板参数. IF 模板由下面的一个模板和一个模板偏特化构成.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">IF</span>  <span class="c1">// primary template</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">typedef</span> <span class="n">R</span> <span class="n">type</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">L</span><span class="p">,</span> <span class="k">class</span> <span class="nc">R</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="o">&gt;</span> <span class="c1">// partial specialization</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">typedef</span> <span class="n">L</span> <span class="n">type</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">false</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to long i;</span>
-</span><span class='line'><span class="n">IF</span><span class="o">&lt;</span><span class="kc">true</span><span class="p">,</span>  <span class="kt">int</span><span class="p">,</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">type</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// is equivalent to int i;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<p>下面就是使用类型选择实现的 Queue 类:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">CAPACITY</span><span class="o">&gt;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Queue</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">T</span> <span class="n">array</span><span class="p">[</span><span class="n">CAPACITY</span><span class="p">];</span>
-</span><span class='line'>  <span class="k">typename</span> <span class="n">IF</span><span class="o">&lt;</span><span class="p">(</span><span class="n">CAPACITY</span> <span class="o">&lt;=</span> <span class="mi">256</span><span class="p">),</span>
-</span><span class='line'>      <span class="kt">unsigned</span> <span class="kt">char</span><span class="p">,</span>
-</span><span class='line'>      <span class="k">typename</span> <span class="n">IF</span><span class="o">&lt;</span><span class="p">(</span><span class="n">CAPACITY</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">),</span>
-</span><span class='line'>                  <span class="kt">unsigned</span> <span class="kt">short</span><span class="p">,</span>
-</span><span class='line'>                  <span class="kt">unsigned</span> <span class="kt">int</span>
-</span><span class='line'>                 <span class="o">&gt;::</span><span class="n">type</span>
-</span><span class='line'>    <span class="o">&gt;::</span><span class="n">type</span> <span class="n">size</span><span class="p">;</span>
-</span><span class='line'>  <span class="c1">// ...</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>模板类 Queue 声明了一个类型为 T 的数组, 数据成员 size 的类型由两个 IF 模板的结果来决定. 注意, 这些比较不是在运行时而是在编译期.</p>
-
-<h2>已知的应用</h2>
-
-<ul>
-<li><a href="http://www.boost.org/doc/libs/1_54_0/libs/mpl/doc/index.html">Boost.MPL Library</a></li>
-</ul>
-
-
-<h2>参考</h2>
-
-<ul>
-<li>《Modern C++ design》(2.6 型别选择 (type selection)) Andrei Alexandrescu</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用 condition variable 实现生产者 消费者模型]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond/"/>
-    <updated>2013-07-22T00:05:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/07/22/resolve-producer-consumer-problem-with-cond</id>
-    <content type="html"><![CDATA[<h2>什么是生产者-消费者问题?</h2>
-
-<p>生产者消费者问题 (英语: Producer-consumer problem), 也称有限缓冲问题 (英语: Bounded-buffer problem), 是一个多线程同步问题的经典案例. 该问题描述了两个共享固定大小缓冲区的线程 —— 即所谓的 “生产者” 和 “消费者” —— 在实际运行时会发生的问题. 生产者的主要作用是生成一定量的数据放到缓冲区中, 然后重复此过程. 与此同时, 消费者也在缓冲区消耗这些数据. 该问题的关键就是要保证生产者不会在缓冲区满时加入数据, 消费者也不会在缓冲区中空时消耗数据.</p>
-
-<p>要解决该问题, 就必须让生产者在缓冲区满时休眠 (要么干脆就放弃数据), 等到下次消费者消耗缓冲区中的数据的时候, 生产者才能被唤醒, 开始往缓冲区添加数据. 同样, 也可以让消费者在缓冲区空时进入休眠, 等到生产者往缓冲区添加数据之后, 再唤醒消费者. 通常采用进程间通信的方法解决该问题, 常用的方法有信号量等. 如果解决方法不够完善, 则容易出现死锁的情况. 出现死锁时, 两个线程都会陷入休眠, 等待对方唤醒自己. 该问题也能被推广到多个生产者和消费者的情形.</p>
-
-<!-- more -->
-
-
-<h2>使用 condition variable 实现生产者-消费者模型</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;condition_variable&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;future&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;mutex&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">buffer_mutex</span><span class="p">;</span>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span> <span class="n">buffer_not_empty</span><span class="p">;</span>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span> <span class="n">buffer_not_full</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">buffer</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">kBufferMaxSize</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;&amp;</span> <span class="n">s</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">rdbuf</span><span class="p">();</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span> <span class="n">s</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">send</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="n">buffer</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kBufferMaxSize</span><span class="p">;</span> <span class="p">});</span>
-</span><span class='line'>  <span class="n">buffer</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;produce: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">receive</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lk</span><span class="p">(</span><span class="n">buffer_mutex</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">buffer_not_empty</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span> <span class="k">return</span> <span class="o">!</span><span class="n">buffer</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="p">});</span>
-</span><span class='line'>  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">.</span><span class="n">back</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">buffer</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;consume: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">buffer_not_full</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">future_producer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">send</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">future_consumer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="p">[]{</span>
-</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">receive</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>  <span class="n">future_producer</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="n">future_consumer</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem">wikipedia: Producer–consumer problem</a></li>
-<li><a href="http://en.cppreference.com/w/cpp/thread/condition_variable">cppreference.com: std::condition_variable</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
