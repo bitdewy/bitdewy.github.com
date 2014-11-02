@@ -105,41 +105,46 @@
 
 <p>在 Item 1 中，我们使用下面的模板函数用来描述模板类型推导，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
-</span><span class='line'>void f(ParamType param);</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">ParamType</span> <span class="n">param</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>调用如下：</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>f (expr);    // call f with some expression</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">f</span> <span class="p">(</span><span class="n">expr</span><span class="p">);</span>    <span class="c1">// call f with some expression</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>在调用函数 <code>f</code> 时，编译器使用表达式 <code>expr</code> 来推导类型 <code>T</code> 和 <code>ParamType</code>。</p>
 
 <p>当使用 <code>auto</code> 来声明变量时，<code>auto</code> 代替了上面 <code>T</code> 的位置，同时变量的类型就是 <code>ParamType</code> 的类型。看下面的例子会更直观，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = 27;</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>在这里，变量 <code>x</code> 的类型标识符就是一个简单的 <code>auto</code>，在</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>const auto cx = x;</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="k">auto</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>中，类型标识符是 <code>const auto</code>，在</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>const auto& rx = x;</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">rx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>中，类型标识符是 <code>const auto&amp;</code>。推导上面 <code>x</code>, <code>cx</code> 以及 <code>rx</code> 的类型，编译器所做的事情就像是有一个模板函数一样，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -153,20 +158,21 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>template &lt;typename T&gt;
-</span><span class='line'>void func_for_x(T param);           // conceptual template for deducing x's type
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">func_for_x</span><span class="p">(</span><span class="n">T</span> <span class="n">param</span><span class="p">);</span>           <span class="c1">// conceptual template for deducing x&#39;s type</span>
 </span><span class='line'>
-</span><span class='line'>func_for_x(27);                     // conceptual call: param's deduced type is x's type
+</span><span class='line'><span class="n">func_for_x</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>                     <span class="c1">// conceptual call: param&#39;s deduced type is x&#39;s type</span>
 </span><span class='line'>
-</span><span class='line'>template &lt;typename T&gt;
-</span><span class='line'>void func_for_cx(const T param);    // conceptual template for deducing cx's type
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">func_for_cx</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="n">param</span><span class="p">);</span>    <span class="c1">// conceptual template for deducing cx&#39;s type</span>
 </span><span class='line'>
-</span><span class='line'>func_for_cx(x);                     // conceptual call: param's deduced type is cx's type
+</span><span class='line'><span class="n">func_for_cx</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                     <span class="c1">// conceptual call: param&#39;s deduced type is cx&#39;s type</span>
 </span><span class='line'>
-</span><span class='line'>template &lt;typename T&gt;
-</span><span class='line'>void func_for_rx(const T& param);   // conceptual template for deducing rx's type
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">func_for_rx</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">);</span>   <span class="c1">// conceptual template for deducing rx&#39;s type</span>
 </span><span class='line'>
-</span><span class='line'>func_for_rx(x);                     // conceptual call: param's deduced type is rx's type</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="n">func_for_rx</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>                     <span class="c1">// conceptual call: param&#39;s deduced type is rx&#39;s type</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 
@@ -187,36 +193,37 @@
 
 <p>我们已经见过了情况1 与情况3 的例子了，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = 27;           // case 3 (x is neither ptr nor reference)
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>           <span class="c1">// case 3 (x is neither ptr nor reference)</span>
 </span><span class='line'>
-</span><span class='line'>const auto cx = x;     // case 3 (cx isn't neither)
+</span><span class='line'><span class="k">const</span> <span class="k">auto</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>     <span class="c1">// case 3 (cx isn&#39;t neither)</span>
 </span><span class='line'>
-</span><span class='line'>const auto& rx = x;    // case 1 (rx is a non-universal ref.)
+</span><span class='line'><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">rx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>    <span class="c1">// case 1 (rx is a non-universal ref.)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>情况2 就像你预期的那样，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto&& uref1 = x;     // x is int lvalue, so uref1's type is int&
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref1</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>     <span class="c1">// x is int lvalue, so uref1&#39;s type is int&amp;</span>
 </span><span class='line'>
-</span><span class='line'>auto&& uref2 = cx;    // cx is const int and lvalue, so uref2's type is const int&
+</span><span class='line'><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref2</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>    <span class="c1">// cx is const int and lvalue, so uref2&#39;s type is const int&amp;</span>
 </span><span class='line'>
-</span><span class='line'>auto&& uref3 = 27;    // 27 is int and rvalue, so uref3's type is int&&</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref3</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>    <span class="c1">// 27 is int and rvalue, so uref3&#39;s type is int&amp;&amp;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Item 1 中我们讨论了非引用的数组和函数是如何退化成指针的。在 <code>auto</code> 类型推导中也是一样的，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -227,97 +234,105 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>const char name[] = "R. N. Briggs";    // name's type is const char[13]
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">char</span> <span class="n">name</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&quot;R. N. Briggs&quot;</span><span class="p">;</span>    <span class="c1">// name&#39;s type is const char[13]</span>
 </span><span class='line'>
-</span><span class='line'>auto arr1 = name;                      // arr1's type is const char *
+</span><span class='line'><span class="k">auto</span> <span class="n">arr1</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>                      <span class="c1">// arr1&#39;s type is const char *</span>
 </span><span class='line'>
-</span><span class='line'>auto& arr2 = name;                     // arr2's type is const char (&)[13]
+</span><span class='line'><span class="k">auto</span><span class="o">&amp;</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>                     <span class="c1">// arr2&#39;s type is const char (&amp;)[13]</span>
 </span><span class='line'>
-</span><span class='line'>void someFunc(int, double);            // someFunc is function, type is void(int, double)
+</span><span class='line'><span class="kt">void</span> <span class="n">someFunc</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">double</span><span class="p">);</span>            <span class="c1">// someFunc is function, type is void(int, double)</span>
 </span><span class='line'>
-</span><span class='line'>auto func1 = someFunc;                 // func1's type is void(*)(int, double)
+</span><span class='line'><span class="k">auto</span> <span class="n">func1</span> <span class="o">=</span> <span class="n">someFunc</span><span class="p">;</span>                 <span class="c1">// func1&#39;s type is void(*)(int, double)</span>
 </span><span class='line'>
-</span><span class='line'>auto& func2 = someFunc;                // func2's type is void(&)(int, double)</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="k">auto</span><span class="o">&amp;</span> <span class="n">func2</span> <span class="o">=</span> <span class="n">someFunc</span><span class="p">;</span>                <span class="c1">// func2&#39;s type is void(&amp;)(int, double)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>就像你看到这样，<code>auto</code> 类型推导就像模板类型推导一样。</p>
 
 <p>仅有一种情况，他们是不一样的。我们从一个简单的例子开始，在 C++98 中，我们用 27 来初始化一个 int 变量，我们可以有下面两种写法，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>int x1 = 27;
-</span><span class='line'>int x2(27);</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>C++11 统一初始化，增加了下面的写法，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>int x3 = { 27 };
-</span><span class='line'>int x4{ 27 };</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>总而言之，4中不同的写法的结果都是一样的，初始化了一个值为 27 的整型。</p>
 
 <p>但是，就像 Item 5 中解释的一样，使用 <code>auto</code> 来声明类型是可以获得好处的，所有我们可以将上面的 <code>int</code> 全部替换为 <code>auto</code>：</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x1 = 27;
-</span><span class='line'>auto x2(27);
-</span><span class='line'>auto x3 = { 27 };
-</span><span class='line'>auto x4{ 27 };</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>这 4 种写法都能够正常编译，但是却表达了不同的含义。前两种写法定义了一个值为 27 的整型。但后两种写法实际上定义了一个只有一个元素 27 的 <code>std::initializer_list&lt;int&gt;</code>！</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x1 = 27;        // type is int, value is 27
-</span><span class='line'>auto x2(27);         // ditto
-</span><span class='line'>auto x3 = { 27 };    // type is std::initializier_list&lt;int&gt;, value is { 27 }
-</span><span class='line'>auto x4{ 27 };       // ditto</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>        <span class="c1">// type is int, value is 27</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>         <span class="c1">// ditto</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>    <span class="c1">// type is std::initializier_list&lt;int&gt;, value is { 27 }</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x4</span><span class="p">{</span> <span class="mi">27</span> <span class="p">};</span>       <span class="c1">// ditto</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>这是 <code>auto</code> 类型推导的一个特殊规则。当使用大括号初始化一个 <code>auto</code> 变量时，类型会被推导为 <code>std::initializer_list</code>，如果类型推导不成功（比如，大括号中的某个元素类型与其他的不一致），那么将会编译失败：</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x5 = { 1, 2, 3.0 };    // error! can't deduce T for std::initializer_list&lt;int&gt;</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x5</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">3.0</span> <span class="p">};</span>    <span class="c1">// error! can&#39;t deduce T for std::initializer_list&lt;int&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>就像上面注释中写的一样，类型推导在这种情况下会失败，但是要明白这里有两个类型推导，这是很重要的。第一个是 <code>auto</code>，<code>x5</code> 使用了大括号来初始化，那么 <code>auto</code> 会被推导为 <code>std::initializer_list</code> 类型，但同时 <code>std::initializer_list</code> 是一个模板类型，模板参数 <code>T</code> 同样需要推导，类型推导失败产生于第二步：模板类型推导。在上面的例子中，就是由于大括号中的元素类型不一致而导致的模板类型推导失败。</p>
 
 <p><code>auto</code> 类型推导与模板类型推导的唯一不同在于大括号初始化。当使用大括号初始化时，<code>auto</code> 会推到为 <code>std::initializer_list</code> 类型，但对于模板类型推导来说，这会产生一个错误，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto x = { 11, 23, 9 };  // x's type is std::initializer_list&lt;int&gt;
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">9</span> <span class="p">};</span>  <span class="c1">// x&#39;s type is std::initializer_list&lt;int&gt;</span>
 </span><span class='line'>
-</span><span class='line'>template&lt;typename T&gt;
-</span><span class='line'>void f(T param);         // template with parameter declaration equivalent to x's
+</span><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">T</span> <span class="n">param</span><span class="p">);</span>         <span class="c1">// template with parameter declaration equivalent to x&#39;s</span>
 </span><span class='line'>
-</span><span class='line'>f({ 11, 23, 9});         // error! can't deduce type for T</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="n">f</span><span class="p">({</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">9</span><span class="p">});</span>         <span class="c1">// error! can&#39;t deduce type for T</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>不过，如果你明确指定了 <code>param</code> 的类型为 <code>std::initializer_list&lt;T&gt;</code> 那么模板类型推导会推导出 <code>T</code> 的类型，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>template&lt;typename T&gt;
-</span><span class='line'>void f(std::initializer_list&lt;T&gt; initList);
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">initList</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>f({ 11, 23, 9 });    // T deduce as int, and initList's type is std::initializer_list&lt;int&gt;</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="n">f</span><span class="p">({</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">9</span> <span class="p">});</span>    <span class="c1">// T deduce as int, and initList&#39;s type is std::initializer_list&lt;int&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>因此，<code>auto</code> 类型推导与模板类型推导唯一的不同在于，对于大括号初始化，<code>auto</code> 类型推导会将它推导为 <code>std::initializer_list</code>，而模板类型推导不会。</p>
@@ -326,30 +341,32 @@
 
 <p>对 C++11 来说，这就是全部了。但是对于 C++14，还有些其他内容。C++14 允许使用 <code>auto</code> 来表示需要被推导的函数返回值类型（详见 Item 3），C++14 的 lambda 中也允许 <code>auto</code> 用作参数类型。但是这些 <code>auto</code> 遵循的是模板类型推导，而不是 <code>auto</code> 类型推导。因此，一个返回值类型声明为 <code>auto</code> 返回一个大括号初始化时，会导致编译失败，</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>auto createInitList()
-</span><span class='line'>{
-</span><span class='line'>  return { 1, 2, 3 };    // error: can't deduce type for { 1, 2, 3 }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">createInitList</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>    <span class="c1">// error: can&#39;t deduce type for { 1, 2, 3 }</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>lambda:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>std::vector&lt;int&gt; v;
-</span><span class='line'>// ...
-</span><span class='line'>auto resetV = [&v](const auto& newValue) { v = newValue; };    // C++14
-</span><span class='line'>// ...
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">resetV</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">v</span><span class="p">](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">newValue</span><span class="p">)</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="n">newValue</span><span class="p">;</span> <span class="p">};</span>    <span class="c1">// C++14</span>
+</span><span class='line'><span class="c1">// ...</span>
 </span><span class='line'>
-</span><span class='line'>resetV({ 1, 2, 3 });    // error! can't deduce type for { 1, 2, 3 }</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="n">resetV</span><span class="p">({</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">});</span>    <span class="c1">// error! can&#39;t deduce type for { 1, 2, 3 }</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>需要记住的</h2>
