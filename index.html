@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="如果你已经阅读了 Item 1 模板类型推导，那么你应该已经掌握了 auto 的类型推导，出了下面要讲到的一个不同之外，其他都和 Item 1 完全一致，但是你肯定还有疑问，为什么模板类型推导涉及到了模板，函数以及参数，而 auto 却不涉及这些。 没错，但是这也没什么关系。其实模板类型推导与 &hellip;">
+	<meta name="description" content="decltype 是一个奇怪的发明。给一个名字或者表达式，decltype 可以告诉你这个名字或者表达式的类型。通常的情况下，他告诉你的都是你预期的。但是偶尔也会有些出人意料。 我们从最典型的情况开始 —— 那些不会让你惊奇的情况。与模板类型推导和 auto 类型推导不同，decltype &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,114 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/10/21/emcpp-item-3/">
+		
+			[译] Item 3: Understand Decltype</a>
+	</h2>
+	<div class="entry-content">
+		<p><code>decltype</code> 是一个奇怪的发明。给一个名字或者表达式，<code>decltype</code> 可以告诉你这个名字或者表达式的类型。通常的情况下，他告诉你的都是你预期的。但是偶尔也会有些出人意料。</p>
+
+<p>我们从最典型的情况开始 —— 那些不会让你惊奇的情况。与模板类型推导和 <code>auto</code> 类型推导不同，<code>decltype</code> 通常只是鹦鹉学舌般的返回你传入的名字或表达式的类型：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const int i = 0;    // decltype(i) is const int
+</span><span class='line'>
+</span><span class='line'>bool f(const Widget& w);    // decltype(w) is const Widget&
+</span><span class='line'>                            // decltype(f) is bool(const Widget&)
+</span><span class='line'>
+</span><span class='line'>struct Point {
+</span><span class='line'>  int x, y;               // decltype(Point::x) is int
+</span><span class='line'>};                          // decltype(Point::y) is int
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>Widget w;                   // decltype(w) is Widget
+</span><span class='line'>
+</span><span class='line'>if (f(w)) {                 // decltype(f(w)) is bool
+</span><span class='line'>  // ...
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>template&lt;typename T&gt;        // simplified version of std::vector
+</span><span class='line'>class vector {
+</span><span class='line'>public:
+</span><span class='line'>    // ...
+</span><span class='line'>    T& operator[](std::size_t index);
+</span><span class='line'>    // ...
+</span><span class='line'>};
+</span><span class='line'>
+</span><span class='line'>vector&lt;int&gt; v;              // decltype(v) is vector&lt;int&gt;
+</span><span class='line'>
+</span><span class='line'>if (v[0] == 0) {            // decltype(v[0]) is int&
+</span><span class='line'>  // ...
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>是不是完全没有惊喜？</p>
+
+
+		
+		<a href="/blog/2014/10/21/emcpp-item-3/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-21T14:55:00+08:00" pubdate data-updated="true">Oct 21<span>st</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/effective-modern-c-plus-plus/'>Effective Modern C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/10/21/emcpp-item-3/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -804,91 +912,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2014/01/12/why-make-shared/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/01/06/windows-api-raii/">
-		
-			当 Windows API 遇上 RAII</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是 RAII (Resource Acquisition Is Initialization) ?</h2>
-
-<p>RAII (Resource Acquisition Is Initialization), 也称为&#8221;资源获取就是初始化&#8221;, 是 C++ 语言的一种管理资源, 避免泄漏的惯用法. C++ 标准保证任何情况下, 已构造的对象最终会销毁, 即它的析构函数最终会被调用. 简单的说, RAII 的做法是使用一个对象, 在其构造时获取资源, 在对象生命期控制对资源的访问使之始终保持有效, 最后在对象析构的时候释放资源.</p>
-
-<p>RAII 是保证代码异常安全的重要基础设施. RAII 的使用场景有很多, 如: C++11 中的智能指针, scope lock, scope exit 等等. (早在2000年，<a href="http://erdani.com/">Andrei Alexandrescu</a> 就在DDJ杂志上发表了一篇文章，提出了这个叫做 <a href="http://www.drdobbs.com/cpp/generic-change-the-way-you-write-excepti/184403758">ScopeGuard</a> 的设施)</p>
-
-<h2>当 Windows API 遇上 RAII</h2>
-
-<p>Windows API 大多是 C 语言风格的函数和句柄, 或者是 COM 风格的接口, 这些用起来都不太方便, 需要进行一定的封装. 至于为什么要封装就不用多说了, 如果你想要异常安全, 想要不必在每个分支中都写清理代码的话, 你一定知道利用 RAII 封装的意义.</p>
-
-<p>ATL 中有对 COM 接口的封装, 智能指针 <code>CComPtr</code>, <code>CComQIPtr</code> 解决了一遍遍的手工 <code>Release</code> 以及 <code>QueryInterface</code>. 但对于普通的 C 语言风格的函数和句柄呢? 难道还要一遍遍的 <code>CloseHandle</code> , <code>ReleaseDC</code>, <code>GlobalUnlock</code> 麽? 弱爆了.</p>
-
-<p>借助 <code>ScopeGuard</code> 和 lambda 表达式(⊙_⊙)？ 可以是可以, 但是并不是所有的资源获取都会成功, 那么每次都要产生一个具名的 <code>ScopeGuard</code>, 在申请失败的时候调用 <code>Dismiss</code>, 取消清理的动作嘛? 像这样:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">release1</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
-</span><span class='line'>  <span class="c1">// throw exception or return or...</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">Acquire</span> <span class="n">Resource2</span>
-</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource2</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">release2</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
-</span><span class='line'>  <span class="c1">// throw exception or return or...</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-		
-		<a href="/blog/2014/01/06/windows-api-raii/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-06T00:18:00+08:00" pubdate data-updated="true">Jan 6<span>th</span>, 2014</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2014/01/06/windows-api-raii/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

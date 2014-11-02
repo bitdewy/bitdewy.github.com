@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="什么是延续传递风格(Continuation-passing Style)? Continuation-passing style(CPS) 是指将控制流 (Control flow) 显式的当做参数传递的编程风格. 函数的返回不在通过 return 语句, 而是将返回值当做参数, 调用控制流 &hellip;">
+	<meta name="description" content="什么是 RAII (Resource Acquisition Is Initialization) ? RAII (Resource Acquisition Is Initialization), 也称为&#8221;资源获取就是初始化&#8221;, 是 C++ 语言的一种管理资源, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,91 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/01/06/windows-api-raii/">
+		
+			当 Windows API 遇上 RAII</a>
+	</h2>
+	<div class="entry-content">
+		<h2>什么是 RAII (Resource Acquisition Is Initialization) ?</h2>
+
+<p>RAII (Resource Acquisition Is Initialization), 也称为&#8221;资源获取就是初始化&#8221;, 是 C++ 语言的一种管理资源, 避免泄漏的惯用法. C++ 标准保证任何情况下, 已构造的对象最终会销毁, 即它的析构函数最终会被调用. 简单的说, RAII 的做法是使用一个对象, 在其构造时获取资源, 在对象生命期控制对资源的访问使之始终保持有效, 最后在对象析构的时候释放资源.</p>
+
+<p>RAII 是保证代码异常安全的重要基础设施. RAII 的使用场景有很多, 如: C++11 中的智能指针, scope lock, scope exit 等等. (早在2000年，<a href="http://erdani.com/">Andrei Alexandrescu</a> 就在DDJ杂志上发表了一篇文章，提出了这个叫做 <a href="http://www.drdobbs.com/cpp/generic-change-the-way-you-write-excepti/184403758">ScopeGuard</a> 的设施)</p>
+
+<h2>当 Windows API 遇上 RAII</h2>
+
+<p>Windows API 大多是 C 语言风格的函数和句柄, 或者是 COM 风格的接口, 这些用起来都不太方便, 需要进行一定的封装. 至于为什么要封装就不用多说了, 如果你想要异常安全, 想要不必在每个分支中都写清理代码的话, 你一定知道利用 RAII 封装的意义.</p>
+
+<p>ATL 中有对 COM 接口的封装, 智能指针 <code>CComPtr</code>, <code>CComQIPtr</code> 解决了一遍遍的手工 <code>Release</code> 以及 <code>QueryInterface</code>. 但对于普通的 C 语言风格的函数和句柄呢? 难道还要一遍遍的 <code>CloseHandle</code> , <code>ReleaseDC</code>, <code>GlobalUnlock</code> 麽? 弱爆了.</p>
+
+<p>借助 <code>ScopeGuard</code> 和 lambda 表达式(⊙_⊙)？ 可以是可以, 但是并不是所有的资源获取都会成功, 那么每次都要产生一个具名的 <code>ScopeGuard</code>, 在申请失败的时候调用 <code>Dismiss</code>, 取消清理的动作嘛? 像这样:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">Acquire</span> <span class="n">Resource1</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource1 */</span> <span class="p">})</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">release1</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
+</span><span class='line'>  <span class="c1">// throw exception or return or...</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Acquire</span> <span class="n">Resource2</span>
+</span><span class='line'><span class="n">ScopeGuard</span> <span class="n">release2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="cm">/* Release Resource2 */</span> <span class="p">})</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Resource2</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">release2</span><span class="p">.</span><span class="n">Dismiss</span><span class="p">();</span>
+</span><span class='line'>  <span class="c1">// throw exception or return or...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2014/01/06/windows-api-raii/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-06T00:18:00+08:00" pubdate data-updated="true">Jan 6<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/01/06/windows-api-raii/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -853,56 +938,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/08/14/attorney-client/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/05/io-model/">
-		
-			IO 模型</a>
-	</h2>
-	<div class="entry-content">
-		<h2>阻塞 I/O</h2>
-
-<p>考虑到应用进程与内核的区别, 我们将函数 recvfrom 视为系统调用. 不管函数 recvfrom 如何实现, 一般都有一个从应用进程中运行到内核中运行的切换, 一段时间后再跟着一个返回到应用进程的切换.</p>
-
-<p><img src="http://bitdewy.github.io/static/2013-08-05-io-model/1.svg" alt="" /></p>
-
-<p>如图, 进程调用 recvfrom, 此时系统调用直到数据报到达且拷贝到应用缓冲区, 或者出错才返回. 我们所说的进程阻塞的整段时间是指从调用 recvfrom 开始到它返回的这段时间, 当进程返回成功指示时, 应用进程开始处理数据报.</p>
-
-
-		
-		<a href="/blog/2013/08/05/io-model/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-05T15:24:00+08:00" pubdate data-updated="true">Aug 5<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/io/'>IO</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/08/05/io-model/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

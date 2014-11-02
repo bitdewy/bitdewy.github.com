@@ -7,7 +7,8 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="原文在这里 GotW #1 Solution: Variable Initialization – or Is It? 第一个问题是用来强调理解你写的代码的含义的重要性. 下面是几行简单的代码 &ndash; 大部分都与其他的有一些区别, 即使只是语法略有变化. JG 问题 1. &hellip;">
+	<meta name="description" content="这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗 使用小技巧来声明函数指针 在 c++03 中, 函数指针要这么写: 1
+typedef void (*FunctionPtr)(); 这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +99,79 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/21/cpp11-keywords-using/">
+		
+			C++11 关键字 Using</a>
+	</h2>
+	<div class="entry-content">
+		<p><em>这个特性, 10年前就已经有提案了, 直到 C++11 中才正式加入标准. ⊙﹏⊙b汗</em></p>
+
+<h2>使用小技巧来声明函数指针</h2>
+
+<p>在 c++03 中, 函数指针要这么写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">FunctionPtr</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个声明读起来相当的费劲, C 语言的初学者会很难理解上面的 typedef 表达的意思.</p>
+
+<p>在 C++11 中, 我们可以使用更易读懂的方式来表达, 利用 using 关键字:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想去除丑陋的 * 号, 还可以利用类型特化这么来写:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;type_traits&gt;</span>
+</span><span class='line'><span class="k">using</span> <span class="n">FunctionPtr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">add_pointer</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>新关键字 using 当然不仅仅是为了这个简单的功能了, 最主要的目的是为了模板别名.</p>
+
+
+		
+		<a href="/blog/2013/05/21/cpp11-keywords-using/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-21T00:45:00+08:00" pubdate data-updated="true">May 21<span>st</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-11/'>C++11</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/05/21/cpp11-keywords-using/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -750,70 +824,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2012/12/15/cmake-lua5-dot-2/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/09/com-and-reference-counting/">
-		
-			COM、ABI与引用计数</a>
-	</h2>
-	<div class="entry-content">
-		<h2>什么是 COM ？</h2>
-
-<p>Component Object Model (COM) 组件对象模型，是微软 1993 年引入的软件组件的二进制接口标准。它可以让多种编程语言之间可以相互通信，动态的创建对象。详细内容请看 <a href="http://en.wikipedia.org/wiki/Component_Object_Model">Component Object Model</a>。</p>
-
-<h2>什么是 ABI ？</h2>
-
-<p>Application Binary Interface (ABI) 应用二进制接口，描述了应用程序和操作系统之间，一个应用和它的库之间，或者应用的组成部分之间的低层接口。</p>
-
-<p>ABI涵盖了各种细节，例如：</p>
-
-<ul>
-<li>数据类型、大小以及内存布局</li>
-<li>调用约定（控制着函数的参数如何传送以及如何接受返回值）</li>
-<li>系统调用的编码和一个应用如何向操作系统进行系统调用</li>
-<li>在一个完整的操作系统ABI中，目标文件、程序库的二进制格式等等。</li>
-</ul>
-
-
-<p>一个完整的ABI，像Intel二进制兼容标准(<a href="http://www.everything2.com/index.pl?node=iBCS">iBCS</a>)，允许支持它的操作系统上的程序不经修改在其他支持此ABI的操作体统上运行。</p>
-
-<p>其他的ABI标准化细节包括<a href="http://en.wikipedia.org/wiki/Name_mangling#Name_mangling_in_C.2B.2B">C++ name mangling</a>、异常传播，同一个平台上的编译器之间的调用约定，但是不包括跨平台的兼容性。详细内容请看 <a href="http://en.wikipedia.org/wiki/Application_binary_interface">Application binary interface</a></p>
-
-
-		
-		<a href="/blog/2012/12/09/com-and-reference-counting/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-09T18:18:00+08:00" pubdate data-updated="true">Dec 9<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/com/'>COM</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/12/09/com-and-reference-counting/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
