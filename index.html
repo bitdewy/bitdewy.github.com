@@ -7,7 +7,10 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="decltype 是一个奇怪的发明。给一个名字或者表达式，decltype 可以告诉你这个名字或者表达式的类型。通常的情况下，他告诉你的都是你预期的。但是偶尔也会有些出人意料。 我们从最典型的情况开始 —— 那些不会让你惊奇的情况。与模板类型推导和 auto 类型推导不同，decltype &hellip;">
+	<meta name="description" content="如何选择查看类型推导结果的工具依赖于你想在开发的那个阶段查看这个类型信息。下面来介绍三种可能的情况，编辑代码时，编译过程中，以及运行时。 IDE 编辑器 当你将鼠标移动到某处代码时，IDE 编辑器通常都会显示出类型（比如，变量，参数，函数的类型等），例如下面的代码： 1
+2
+3
+const &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +101,93 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/04/emcpp-item-4/">
+		
+			[译] Item 4: Know How to View Deduced Types</a>
+	</h2>
+	<div class="entry-content">
+		<p>如何选择查看类型推导结果的工具依赖于你想在开发的那个阶段查看这个类型信息。下面来介绍三种可能的情况，编辑代码时，编译过程中，以及运行时。</p>
+
+<h3>IDE 编辑器</h3>
+
+<p>当你将鼠标移动到某处代码时，IDE 编辑器通常都会显示出类型（比如，变量，参数，函数的类型等），例如下面的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">theAnswer</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">theAnswer</span><span class="p">;</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">theAnswer</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>IDE 编辑器应该显示变量 <code>x</code> 的类型是 <code>int</code>，变量 <code>y</code> 的类型是 <code>const int*</code>。</p>
+
+<p>要让上面的情况可以工作，你的代码必须是可编译的，因为编辑器之所以能够提示出变量的类型，是因为已经有足够的信息供它内部的编译器（或者至少是编译器前端）来做类型推导的工作。如果信息不足够供编译器做类型推导的话，那么变量类型是不会提示出来的。</p>
+
+<p>对于像 <code>int</code> 一样的简单类型，IDE 生成的信息通常都是正确的。但是对于更复杂的情况，就像后面我们将看到的一样，IDE 生成的信息也许就不是那么有帮助了。</p>
+
+<h3>编译器诊断</h3>
+
+<p>让编译器提示类型推导的类型的一个有效的办法是，用这个类型构造一个编译失败的错误。编译错误的信息会告诉你这个类型。</p>
+
+<p>考虑之前的例子，我们想看一看 <code>x</code> 和 <code>y</code> 的类型。首先我们声明一个未定义的模板类，它看起来应该是下面这样；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>    <span class="c1">// declaration only for TD;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">TD</span><span class="p">;</span>                <span class="c1">// TD == &quot;Type Displayer&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>企图实例化这个模板会产生错误，因为这个模板类我们根本就没有定义。接下来，想要看 <code>x</code> 和 <code>y</code> 的类型，我们只需要用它们的类型实例化 TD 就可以了；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
+</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
+</span><span class='line'>                          <span class="c1">// see Item 3 for info on decltype</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2014/11/04/emcpp-item-4/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-04T14:55:00+08:00" pubdate data-updated="true">Nov 4<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/effective-modern-c-plus-plus/'>Effective Modern C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/11/04/emcpp-item-4/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -854,75 +944,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2014/01/19/gotw-95/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/01/12/why-make-shared/">
-		
-			Why Make_shared ?</a>
-	</h2>
-	<div class="entry-content">
-		<p>C++11 中引入了智能指针, 同时还有一个模板函数 <code>std::make_shared</code> 可以返回一个指定类型的 <code>std::shared_ptr</code>, 那与 <code>std::shared_ptr</code> 的构造函数相比它能给我们带来什么好处呢 ?</p>
-
-<h2>优点</h2>
-
-<h3>效率更高</h3>
-
-<p><code>shared_ptr</code> 需要维护引用计数的信息,</p>
-
-<ul>
-<li>强引用, 用来记录当前有多少个存活的 shared_ptrs 正持有该对象. 共享的对象会在最后一个强引用离开的时候销毁( 也可能释放).</li>
-<li>弱引用, 用来记录当前有多少个正在观察该对象的 weak_ptrs. 当最后一个弱引用离开的时候, 共享的内部信息控制块会被销毁和释放 (共享的对象也会被释放, 如果还没有释放的话).</li>
-</ul>
-
-
-<p>如果你通过使用原始的 new 表达式分配对象, 然后传递给 shared_ptr (也就是使用 shared_ptr 的构造函数) 的话, shared_ptr 的实现没有办法选择, 而只能单独的分配控制块:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">widget</span><span class="p">();</span>
-</span><span class='line'><span class="n">shared_ptr</span> <span class="n">sp1</span><span class="p">{</span> <span class="n">p</span> <span class="p">},</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
-
-<p>如果选择使用 <code>make_shared</code> 的话, 情况就会变成下面这样:</p>
-
-
-		
-		<a href="/blog/2014/01/12/why-make-shared/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-12T21:01:00+08:00" pubdate data-updated="true">Jan 12<span>th</span>, 2014</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2014/01/12/why-make-shared/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

@@ -7,7 +7,20 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="[这是 GotW #24 的 C++11 更新版] 原文在这里 GotW #100: Compilation Firewalls (Difficulty: 6/10) JG 问题 1. Pimpl 惯用法是什么？为什么要使用它？ Guru 问题 2. 怎样才是 Pimpl 惯用法在 C++11 &hellip;">
+	<meta name="description" content="原文在这里 GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10) Guru问题 GotW #100 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现： 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +111,93 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/07/02/gotw101/">
+		
+			[译] GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a>
+	</h2>
+	<div class="entry-content">
+		<p>原文在这里 <a href="http://herbsutter.com/gotw/_101/">GotW #101: Compilation Firewalls, Part 2 (Difficulty: 8/10)</a></p>
+
+<h2>Guru问题</h2>
+
+<p><a href="http://bitdewy.github.com/blog/2012/06/30/gotw100/">GotW #100</a> 展示了仅使用标准 C++11 的 Pimpl 惯用法最佳实现：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// in header file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'>    <span class="o">~</span><span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="k">private</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">impl</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">impl</span><span class="o">&gt;</span> <span class="n">pimpl</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// in implementation file</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">widget</span><span class="o">::</span><span class="n">impl</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// :::</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">widget</span><span class="o">::</span><span class="n">widget</span><span class="p">()</span> <span class="o">:</span> <span class="n">pimpl</span><span class="p">{</span> <span class="k">new</span> <span class="n">impl</span><span class="p">{</span> <span class="cm">/*...*/</span> <span class="p">}</span> <span class="p">}</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class='line'><span class="n">widget</span><span class="o">::~</span><span class="n">widget</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span> <span class="c1">// or =default</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有办法把 Pimpl 模式包装到库中使得 widget 类更容易实现吗？如果可以？应该怎么做？试着让 widget 的实现更方便更简洁，让编译器默认生成的函数有正确的行为，或者当 widget 的实现存在问题时给出编译错误。</p>
+
+
+		
+		<a href="/blog/2012/07/02/gotw101/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-02T02:38:00+08:00" pubdate data-updated="true">Jul 2<span>nd</span>, 2012</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2012/07/02/gotw101/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">

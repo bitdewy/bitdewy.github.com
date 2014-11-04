@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-11-02T22:33:46+08:00</updated>
+  <updated>2014-11-04T21:06:25+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,268 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 4: Know how to view deduced types]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/11/04/emcpp-item-4/"/>
+    <updated>2014-11-04T14:55:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/11/04/emcpp-item-4</id>
+    <content type="html"><![CDATA[<p>如何选择查看类型推导结果的工具依赖于你想在开发的那个阶段查看这个类型信息。下面来介绍三种可能的情况，编辑代码时，编译过程中，以及运行时。</p>
+
+<h3>IDE 编辑器</h3>
+
+<p>当你将鼠标移动到某处代码时，IDE 编辑器通常都会显示出类型（比如，变量，参数，函数的类型等），例如下面的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">theAnswer</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">theAnswer</span><span class="p">;</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">theAnswer</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>IDE 编辑器应该显示变量 <code>x</code> 的类型是 <code>int</code>，变量 <code>y</code> 的类型是 <code>const int*</code>。</p>
+
+<p>要让上面的情况可以工作，你的代码必须是可编译的，因为编辑器之所以能够提示出变量的类型，是因为已经有足够的信息供它内部的编译器（或者至少是编译器前端）来做类型推导的工作。如果信息不足够供编译器做类型推导的话，那么变量类型是不会提示出来的。</p>
+
+<p>对于像 <code>int</code> 一样的简单类型，IDE 生成的信息通常都是正确的。但是对于更复杂的情况，就像后面我们将看到的一样，IDE 生成的信息也许就不是那么有帮助了。</p>
+
+<h3>编译器诊断</h3>
+
+<p>让编译器提示类型推导的类型的一个有效的办法是，用这个类型构造一个编译失败的错误。编译错误的信息会告诉你这个类型。</p>
+
+<p>考虑之前的例子，我们想看一看 <code>x</code> 和 <code>y</code> 的类型。首先我们声明一个未定义的模板类，它看起来应该是下面这样；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>    <span class="c1">// declaration only for TD;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">TD</span><span class="p">;</span>                <span class="c1">// TD == &quot;Type Displayer&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>企图实例化这个模板会产生错误，因为这个模板类我们根本就没有定义。接下来，想要看 <code>x</code> 和 <code>y</code> 的类型，我们只需要用它们的类型实例化 TD 就可以了；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>    <span class="c1">// elicit errors containing</span>
+</span><span class='line'><span class="n">TD</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>    <span class="c1">// x&#39;s and y&#39;s types;</span>
+</span><span class='line'>                          <span class="c1">// see Item 3 for info on decltype</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>这里我们使用 变量名+Type 来命名，方便我们从错误信息中找到它。对于上面的代码某些编译器的错误提示是下面这样的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">xType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</span><span class='line'><span class="nl">error:</span> <span class="n">aggregate</span> <span class="err">&#39;</span><span class="n">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span> <span class="n">yType</span><span class="err">&#39;</span> <span class="n">has</span> <span class="n">incomplete</span> <span class="n">type</span> <span class="n">and</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">defined</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外一些编译器提示从形式上来看稍微有些不同：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">xType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="err">&#39;</span>
+</span><span class='line'><span class="nl">error:</span> <span class="err">&#39;</span><span class="n">yType</span><span class="err">&#39;</span> <span class="n">uses</span> <span class="n">undefined</span> <span class="k">class</span> <span class="err">&#39;</span><span class="nc">TD</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span> <span class="o">*&gt;</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>虽然形式稍微有些不同，但是测试过的所有编译器都能给出有用的信息。</p>
+
+<h3>运行时输出</h3>
+
+<p><code>printf</code> 虽然只能在运行时期打印出类型信息（我并不是想推荐你使用 <code>printf</code> 哦~），但是我们可以格式化我们想要输出的内容。现在的问题如何产生适合显示的类型信息字符串。你会想，“不用担心，<code>typeid</code> 和 <code>std::type_info::name</code> 会把我们从这个问题中解救出来”。对于我们要看 <code>x</code> 和 <code>y</code> 的类型信息的需求，你也许会说我们可以写如下的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>    <span class="c1">// display types for</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">y</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>    <span class="c1">// x and y</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码对 <code>x</code> 和 <code>y</code> 使用 <code>typeid</code> 返回一个 <code>std::type_info</code> 对象，然后调用它的 <code>name()</code> 方法，它会返回一个 C 风格的字符串（比如：const char*）来表示类型信息。</p>
+
+<p>调用 <code>std::type_info::name</code> 不能保证一定返回有用的信息。但是编译器的实现会尽量保证信息是有用的。但是这个 <code>有用</code> 的范围就比较模糊了。比如 GNU 和 Clang 编译器的结果是 <code>x</code> 的类型为 &ldquo;i&#8221;，<code>y</code> 的类型为 &#8220;PKi&#8221;。一旦你熟悉了它之后，这些信息都是有用的，&#8221;i&rdquo; 表示的是 <code>int</code>，&#8221;PK&#8221; 表示的是 &ldquo;pointer to const&#8221;。（而且这两个编译器都提供一个工具 c++filt，可以来解码这些经过 mangled 的类型。）微软的编译器给出的输出看起来更清楚一些：<code>x</code> 是 &#8220;int&#8221;，而 <code>y</code> 是 &#8220;int const *&#8221;。</p>
+
+<p>对于 <code>x</code> 和 <code>y</code> 的类型我们都得到了正确的结果，你可能会认为识别类型推导的具体类型的问题已经解决了，但是别高兴的太早，我们来看一个更复杂的例子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">);</span>  <span class="c1">// template function to be called</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span> <span class="n">createVec</span><span class="p">();</span>  <span class="c1">// factory function</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">const</span> <span class="k">auto</span> <span class="n">vw</span> <span class="o">=</span> <span class="n">createVec</span><span class="p">();</span>    <span class="c1">// init vw w/factory return</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">vw</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vw</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>        <span class="c1">// call f</span>
+</span><span class='line'>  <span class="c1">// ...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码，调用了一个用户定义类型 <code>Widget</code>，一个标准库容器 <code>std::vector</code>，以及一个 <code>auto</code> 变量 <code>vm</code>，这是一个你想要查看类型信息时更具代表性的一个例子。知道模板参数 <code>T</code> 以及 <code>param</code> 的类型是非常有用的。</p>
+
+<p>使用 <code>typeid</code> 是一个很直白的方法，只需要在函数体中增加一点点代码即可；</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">using</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;T =     &quot;</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">T</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>      <span class="c1">// show T</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">param</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>  <span class="c1">// show param&#39;s type</span>
+</span><span class='line'>  <span class="c1">// ...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 GNU 和 Clang 编译器上跑一下我们得到如下输出：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">T</span> <span class="o">=</span>     <span class="n">PK6Widget</span>
+</span><span class='line'><span class="n">param</span> <span class="o">=</span> <span class="n">PK6Widget</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对于这个两个编译器，我们已经知道 &ldquo;PK&rdquo;  的含义是 &ldquo;pointer to const&#8221;，那么唯一的疑问就是这个神奇的数字 6了。其实很简单，这个 6 就是类名 <code>Widget</code> 的字符个数。所以，编译器告诉我们的就是 <code>T</code> 与 <code>param</code> 的类型都是 <code>const Widget*</code>。</p>
+
+<p>微软的编译器输出如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">T</span> <span class="o">=</span>     <span class="k">class</span> <span class="nc">Widget</span> <span class="k">const</span> <span class="o">*</span>
+</span><span class='line'><span class="n">param</span> <span class="o">=</span> <span class="k">class</span> <span class="nc">Widget</span> <span class="k">const</span> <span class="o">*</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>三家编译器给出了相同的结果，貌似答案是正确的。不过再仔细看看。在模板函数 <code>f</code> 中，<code>param</code> 的声明是 <code>const T&amp;</code>。这就很奇怪了，<code>T</code> 和 <code>param</code> 怎么可能是一样的类型呢。如果 <code>T</code> 是 <code>int</code> 类型，那么 <code>param</code> 的类型应该是 <code>const int&amp;</code> —— 完全不一样的类型。</p>
+
+<p>很遗憾，<code>std::type_info::name</code> 是不可靠的，上面的例子中，三家的编译器给出的 <code>param</code> 的类型都是错的。不过，他们必须，也只能是错的，因为标准中规定了 <code>std::type_info::name</code> 的类型信息要遵循模板函数的传值参数的推导规则。就像 Item 1 中描述的那样，这意味着引用，<code>const</code> 以及 <code>volatile</code> 都会别忽略。这就是为什么 <code>param</code> 的类型 —— <code>const Widget * const &amp;</code> —— 却输出为 <code>const Widget *</code>。首先，引用被忽略掉了，同时指针本身的 <code>const</code> 修饰也被忽略掉了。</p>
+
+<p>同样很遗憾，IDE 的编辑器的提示信息同样是不可靠的 —— 或者说是至少不可用的。比如 <code>T</code> 类型的提示信息在某个 IED 下是下面这样的（我绝对没有做过更改~）：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">_Simple_types</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">_Wrap_alloc</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">_Vec_base_types</span><span class="o">&lt;</span><span class="n">Widget</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">allocator</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span> <span class="o">&gt;::</span><span class="n">_Alloc</span><span class="o">&gt;::</span><span class="n">value_type</span><span class="o">&gt;::</span><span class="n">value_type</span> <span class="o">*</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样的 <code>param</code> 的类型是这样的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">_Simple_types</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">value_type</span> <span class="o">*</span> <span class="k">const</span> <span class="o">&amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个比 <code>T</code> 的类型看起来更短一些，不过中间的 <code>...</code> 可能会迷惑你一阵，直到你意识到这是编辑器在提示你 &ldquo;中间省略的内容与 <code>T</code> 类型一致&rdquo; 为止。运气好的话，你的开发环境可以帮助你来识别类型。</p>
+
+<p>不过如果你更倾向于使用库而不是凭运气的话，你需要知道 <code>std::type_info::name</code> 和 IDE 都是靠不住的，而 Boost TypeIndex 库 (Boost.TypeIndex) 是一个选择。这不是标准库的一部分，也不是 IDE 提供的功能，更不是类似 <code>TD</code> 的模板。Boost 库 (<a href="http://boost.org">boost.org</a>) 是一个跨平台，开源的，并且有一个宽松的许可协议的 C++ 库。</p>
+
+<p>下面我们来看看如何使用 Boost.TypeIndex 来解决我们上面的问题：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;boost/type_index.hpp&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">using</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">using</span> <span class="n">boost</span><span class="o">::</span><span class="n">tyepindex</span><span class="o">::</span><span class="n">type_id_with_cvr</span><span class="p">;</span>
+</span><span class='line'>  <span class="c1">// show T</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;T =     &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="c1">// show param&#39;s type</span>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;param = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>boost::tyepindex::type_id_with_cvr</code> 接受一个类型参数，并且不会去掉 const，volatile 以及引用修饰 (命名中的 <code>with_cvr</code> 也能说明这一点)。然后构造出了一个 <code>boost::tyepindex::type_index</code> 对象，成员函数 <code>pretty_name</code> 会返回一个可读性很高的 <code>std::string</code>，它的值就是我们所期待的类型信息。</p>
+
+<p>对于这个版本的模板函数 <code>f</code> 的实现，我们再来看看之前的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span> <span class="n">createVec</span><span class="p">();</span>  <span class="c1">// factory function</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">const</span> <span class="k">auto</span> <span class="n">vw</span> <span class="o">=</span> <span class="n">createVec</span><span class="p">();</span>    <span class="c1">// init vw w/factory return</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">vw</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">f</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vw</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>        <span class="c1">// call f</span>
+</span><span class='line'>  <span class="c1">// ...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用 Boost.TypeIndex 时，GNU 和 Clang 编译器输出的信息如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">T</span> <span class="o">=</span>     <span class="n">Widget</span> <span class="k">const</span><span class="o">*</span>
+</span><span class='line'><span class="n">param</span> <span class="o">=</span> <span class="n">Widget</span> <span class="k">const</span><span class="o">*</span> <span class="k">const</span><span class="o">&amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>微软的编译器输出的信息几乎完全一致，如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">T</span> <span class="o">=</span>     <span class="k">class</span> <span class="nc">Widget</span> <span class="k">const</span><span class="o">*</span>
+</span><span class='line'><span class="n">param</span> <span class="o">=</span> <span class="k">class</span> <span class="nc">Widget</span> <span class="k">const</span><span class="o">*</span> <span class="k">const</span><span class="o">&amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这下看起来比较完美了，不过要记住，IDE 的编辑器、编译器提示信息以及像 Boost.TypeIndex 这样的库，虽然是有用的，但它们仅仅是帮助你识别类型推导结果的工具。不能代替你理解 Item 1-3 中所讲的类型推导规则。</p>
+
+<h2>需要记住的</h2>
+
+<ul>
+<li>类型推导的结果通常可以通过 IDE 编辑器，编译器提示信息，以及 Boost.TypeIndex 库来查看。</li>
+<li>一些工具产生的结果可能是没用甚至是不准确的，因此理解 C++ 的类型推导规则仍然是很必要的。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] Item 3: Understand decltype]]></title>
@@ -4408,208 +4670,6 @@
 <li><a href="http://msdn.microsoft.com/en-us/library/vstudio/hh191443.aspx">Asynchronous Programming with Async and Await (C# and Visual Basic)</a></li>
 <li><a href="http://channel9.msdn.com/Events/Build/2013/2-306">The future of C++</a></li>
 <li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Attorney Client]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/08/14/attorney-client/"/>
-    <updated>2013-08-14T00:45:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/08/14/attorney-client</id>
-    <content type="html"><![CDATA[<h2>目的</h2>
-
-<p>控制访问一个类内部实现细节的粒度.</p>
-
-<h2>动机</h2>
-
-<p>C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口.</p>
-
-<p>看下面的例子, 下面的类 Foo 中声明了 Bar 友元. 因此 Bar 类可以访问 Foo 的全部私有成员. 这不可取, 因为它增加了耦合. Bar 类会变得没有 Foo 类就无法单独使用.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="c1">// This class needs access to Foo::A and Foo::B only.</span>
-</span><span class='line'><span class="c1">// C++ friendship rules, however, give access to all the private members of Foo.</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>提供选择性访问成员子集的功能, 是可取的. 这样的话, 剩余的私有成员如果需要的话, 可以更改接口. 它有助于减少两个类之间的耦合. Attorney-Client 可以精确控制它的友元能够访问的成员的数量.</p>
-
-<!-- more -->
-
-
-<h2>解决方案 &amp; 示例代码</h2>
-
-<p>Attorney-Client 通过增加一个间接层来解决上面描述的问题. 想要访问一个类的实现细节, 我们需要一个 Attorney 类, 一个真正的 C++ 友元. Attorney 类是精心设计的一个代理类. 和一般的代理类不同, Attorney 类只负责复制 Foo 类的内部实现的接口的子集. 为了更好的描述, 我们把 Foo 类重新命名为 Client, Client 仅仅想通过 Attorney 提供 Client::A 以及 Client::B 的访问权限.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Client</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Attorney</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Attorney</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callA</span><span class="p">(</span><span class="n">Client</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">int</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">A</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callB</span><span class="p">(</span><span class="n">Client</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">float</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">c</span><span class="p">.</span><span class="n">B</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="c1">// Bar now has access to only Client::A and Client::B through the Attorney.</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Attorney 类限制仅能访问部分函数, Attorney 类中仅函数静态内联成员函数, 每个都需要一个 Client 类实例的引用, 然后将调用转到这个实例上. 他的实现是完全私有的. 这可以禁止其他类去访问 Client 内部. Attorney 可以决定哪些类, 成员函数, 以及自由函数可以访问 Client. 它只需要将能访问这些细节的东西声明为友元即可. 如果没有 Attorney 类, Client 也需要子集来做.</p>
-
-<p>它也可以有多个 attorney 类来提供访问 Client 的不同细节. 比如 AttorneyC 类只提供 Client::C 的访问.</p>
-
-<p>在下面的例子中, Attorney-client 用在了 类 Base 和 main 函数中间. Derived::Func 函数通过多态性得以访问. 不过如果想要再访问 Derived 类的一些细节的时候, 那就需要再次使用 Attorney 了.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;cstdio&gt;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Base</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">Func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Attorney</span><span class="p">;</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="o">~</span><span class="n">Base</span><span class="p">()</span> <span class="p">{}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Derived</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Base</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">Func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span>  <span class="p">{</span>
-</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Derived::Func</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span> <span class="c1">// This is called even though main is not a friend of Derived.</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="k">public</span><span class="o">:</span>
-</span><span class='line'>  <span class="o">~</span><span class="n">Derived</span><span class="p">()</span> <span class="p">{}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Attorney</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="k">static</span> <span class="kt">void</span> <span class="n">callFunc</span><span class="p">(</span><span class="n">Base</span> <span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">b</span><span class="p">.</span><span class="n">Func</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="kt">int</span> <span class="n">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">Derived</span> <span class="n">d</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">Attorney</span><span class="o">::</span><span class="n">callFunc</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>已知的应用</h2>
-
-<ul>
-<li><a href="http://www.boost.org/doc/libs/1_50_0/libs/iterator/doc/iterator_facade.html#iterator-core-access">Boost.Iterators library</a></li>
-<li><a href="http://www.boost.org/doc/libs/1_50_0/libs/serialization/doc/serialization.html#member">Boost.Serialization: class boost::serialization::access</a></li>
-</ul>
-
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://drdobbs.com/184402053">Friendship and the Attorney-Client Idiom (Dr. Dobb&rsquo;s Journal)</a></li>
 </ul>
 
 ]]></content>

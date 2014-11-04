@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Effective Modern C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/effective-modern-c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-11-02T22:33:46+08:00</updated>
+  <updated>2014-11-04T21:06:25+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,221 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 4: Know how to view deduced types]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/11/04/emcpp-item-4/"/>
+    <updated>2014-11-04T14:55:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/11/04/emcpp-item-4</id>
+    <content type="html"><![CDATA[<p>如何选择查看类型推导结果的工具依赖于你想在开发的那个阶段查看这个类型信息。下面来介绍三种可能的情况，编辑代码时，编译过程中，以及运行时。</p>
+
+<h3>IDE 编辑器</h3>
+
+<p>当你将鼠标移动到某处代码时，IDE 编辑器通常都会显示出类型（比如，变量，参数，函数的类型等），例如下面的代码：</p>
+
+<p><code>cpp
+const int theAnswer = 42;
+auto x = theAnswer;
+auto y = &amp;theAnswer;
+</code></p>
+
+<p>IDE 编辑器应该显示变量 <code>x</code> 的类型是 <code>int</code>，变量 <code>y</code> 的类型是 <code>const int*</code>。</p>
+
+<p>要让上面的情况可以工作，你的代码必须是可编译的，因为编辑器之所以能够提示出变量的类型，是因为已经有足够的信息供它内部的编译器（或者至少是编译器前端）来做类型推导的工作。如果信息不足够供编译器做类型推导的话，那么变量类型是不会提示出来的。</p>
+
+<p>对于像 <code>int</code> 一样的简单类型，IDE 生成的信息通常都是正确的。但是对于更复杂的情况，就像后面我们将看到的一样，IDE 生成的信息也许就不是那么有帮助了。</p>
+
+<h3>编译器诊断</h3>
+
+<p>让编译器提示类型推导的类型的一个有效的办法是，用这个类型构造一个编译失败的错误。编译错误的信息会告诉你这个类型。</p>
+
+<p>考虑之前的例子，我们想看一看 <code>x</code> 和 <code>y</code> 的类型。首先我们声明一个未定义的模板类，它看起来应该是下面这样；</p>
+
+<p><code>cpp
+template &lt;typename T&gt;    // declaration only for TD;
+class TD;                // TD == "Type Displayer"
+</code></p>
+
+<p>企图实例化这个模板会产生错误，因为这个模板类我们根本就没有定义。接下来，想要看 <code>x</code> 和 <code>y</code> 的类型，我们只需要用它们的类型实例化 TD 就可以了；</p>
+
+<p>``` cpp
+TD&lt;decltype(x)> xType;    // elicit errors containing
+TD&lt;decltype(x)> yType;    // x&rsquo;s and y&rsquo;s types;</p>
+
+<pre><code>                      // see Item 3 for info on decltype
+</code></pre>
+
+<p>```</p>
+
+<!-- more -->
+
+
+<p>这里我们使用 变量名+Type 来命名，方便我们从错误信息中找到它。对于上面的代码某些编译器的错误提示是下面这样的：</p>
+
+<p><code>
+error: aggregate 'TD&lt;int&gt; xType' has incomplete type and cannot be defined
+error: aggregate 'TD&lt;const int *&gt; yType' has incomplete type and cannot be defined
+</code></p>
+
+<p>另外一些编译器提示从形式上来看稍微有些不同：</p>
+
+<p><code>
+error: 'xType' uses undefined class 'TD&lt;int&gt;'
+error: 'yType' uses undefined class 'TD&lt;const int *&gt;'
+</code></p>
+
+<p>虽然形式稍微有些不同，但是测试过的所有编译器都能给出有用的信息。</p>
+
+<h3>运行时输出</h3>
+
+<p><code>printf</code> 虽然只能在运行时期打印出类型信息（我并不是想推荐你使用 <code>printf</code> 哦~），但是我们可以格式化我们想要输出的内容。现在的问题如何产生适合显示的类型信息字符串。你会想，“不用担心，<code>typeid</code> 和 <code>std::type_info::name</code> 会把我们从这个问题中解救出来”。对于我们要看 <code>x</code> 和 <code>y</code> 的类型信息的需求，你也许会说我们可以写如下的代码：</p>
+
+<p><code>cpp
+std::cout &lt;&lt; typeid(x).name() &lt;&lt; '\n';    // display types for
+std::cout &lt;&lt; typeid(y).name() &lt;&lt; '\n';    // x and y
+</code></p>
+
+<p>上面的代码对 <code>x</code> 和 <code>y</code> 使用 <code>typeid</code> 返回一个 <code>std::type_info</code> 对象，然后调用它的 <code>name()</code> 方法，它会返回一个 C 风格的字符串（比如：const char*）来表示类型信息。</p>
+
+<p>调用 <code>std::type_info::name</code> 不能保证一定返回有用的信息。但是编译器的实现会尽量保证信息是有用的。但是这个 <code>有用</code> 的范围就比较模糊了。比如 GNU 和 Clang 编译器的结果是 <code>x</code> 的类型为 &ldquo;i"，<code>y</code> 的类型为 "PKi"。一旦你熟悉了它之后，这些信息都是有用的，"i&rdquo; 表示的是 <code>int</code>，"PK" 表示的是 &ldquo;pointer to const"。（而且这两个编译器都提供一个工具 c++filt，可以来解码这些经过 mangled 的类型。）微软的编译器给出的输出看起来更清楚一些：<code>x</code> 是 "int"，而 <code>y</code> 是 "int const *"。</p>
+
+<p>对于 <code>x</code> 和 <code>y</code> 的类型我们都得到了正确的结果，你可能会认为识别类型推导的具体类型的问题已经解决了，但是别高兴的太早，我们来看一个更复杂的例子：</p>
+
+<p>```cpp
+template <typename T>
+void f(const T&amp; param);  // template function to be called</p>
+
+<p>std::vector<Widget> createVec();  // factory function</p>
+
+<p>const auto vw = createVec();    // init vw w/factory return</p>
+
+<p>if (!vw.empty()) {</p>
+
+<pre><code>f(&amp;vw[0]);        // call f
+// ...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上面的代码，调用了一个用户定义类型 <code>Widget</code>，一个标准库容器 <code>std::vector</code>，以及一个 <code>auto</code> 变量 <code>vm</code>，这是一个你想要查看类型信息时更具代表性的一个例子。知道模板参数 <code>T</code> 以及 <code>param</code> 的类型是非常有用的。</p>
+
+<p>使用 <code>typeid</code> 是一个很直白的方法，只需要在函数体中增加一点点代码即可；</p>
+
+<p>``` cpp
+template <typename T>
+void f(const T&amp; param)
+{</p>
+
+<pre><code>using std::cout;
+cout &lt;&lt; "T =     " &lt;&lt; typeid(T).name() &lt;&lt; '\n';      // show T
+cout &lt;&lt; "param = " &lt;&lt; typeid(param).name() &lt;&lt; '\n';  // show param's type
+// ...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在 GNU 和 Clang 编译器上跑一下我们得到如下输出：</p>
+
+<p><code>
+T =     PK6Widget
+param = PK6Widget
+</code></p>
+
+<p>对于这个两个编译器，我们已经知道 &ldquo;PK&rdquo;  的含义是 &ldquo;pointer to const"，那么唯一的疑问就是这个神奇的数字 6了。其实很简单，这个 6 就是类名 <code>Widget</code> 的字符个数。所以，编译器告诉我们的就是 <code>T</code> 与 <code>param</code> 的类型都是 <code>const Widget*</code>。</p>
+
+<p>微软的编译器输出如下：</p>
+
+<p><code>
+T =     class Widget const *
+param = class Widget const *
+</code></p>
+
+<p>三家编译器给出了相同的结果，貌似答案是正确的。不过再仔细看看。在模板函数 <code>f</code> 中，<code>param</code> 的声明是 <code>const T&amp;</code>。这就很奇怪了，<code>T</code> 和 <code>param</code> 怎么可能是一样的类型呢。如果 <code>T</code> 是 <code>int</code> 类型，那么 <code>param</code> 的类型应该是 <code>const int&amp;</code> —— 完全不一样的类型。</p>
+
+<p>很遗憾，<code>std::type_info::name</code> 是不可靠的，上面的例子中，三家的编译器给出的 <code>param</code> 的类型都是错的。不过，他们必须，也只能是错的，因为标准中规定了 <code>std::type_info::name</code> 的类型信息要遵循模板函数的传值参数的推导规则。就像 Item 1 中描述的那样，这意味着引用，<code>const</code> 以及 <code>volatile</code> 都会别忽略。这就是为什么 <code>param</code> 的类型 —— <code>const Widget * const &amp;</code> —— 却输出为 <code>const Widget *</code>。首先，引用被忽略掉了，同时指针本身的 <code>const</code> 修饰也被忽略掉了。</p>
+
+<p>同样很遗憾，IDE 的编辑器的提示信息同样是不可靠的 —— 或者说是至少不可用的。比如 <code>T</code> 类型的提示信息在某个 IED 下是下面这样的（我绝对没有做过更改~）：</p>
+
+<p><code>cpp
+const std::_Simple_types&lt;std::_Wrap_alloc&lt;std::_Vec_base_types&lt;Widget, std::allocator&lt;Widget&gt; &gt;::_Alloc&gt;::value_type&gt;::value_type *
+</code></p>
+
+<p>同样的 <code>param</code> 的类型是这样的：</p>
+
+<p><code>cpp
+const std::_Simple_types&lt;...&gt;::value_type * const &amp;
+</code></p>
+
+<p>这个比 <code>T</code> 的类型看起来更短一些，不过中间的 <code>...</code> 可能会迷惑你一阵，直到你意识到这是编辑器在提示你 &ldquo;中间省略的内容与 <code>T</code> 类型一致&rdquo; 为止。运气好的话，你的开发环境可以帮助你来识别类型。</p>
+
+<p>不过如果你更倾向于使用库而不是凭运气的话，你需要知道 <code>std::type_info::name</code> 和 IDE 都是靠不住的，而 Boost TypeIndex 库 (Boost.TypeIndex) 是一个选择。这不是标准库的一部分，也不是 IDE 提供的功能，更不是类似 <code>TD</code> 的模板。Boost 库 (<a href="http://boost.org">boost.org</a>) 是一个跨平台，开源的，并且有一个宽松的许可协议的 C++ 库。</p>
+
+<p>下面我们来看看如何使用 Boost.TypeIndex 来解决我们上面的问题：</p>
+
+<p>```cpp</p>
+
+<h1>include &lt;boost/type_index.hpp></h1>
+
+<p>template <typename T>
+void f(const T&amp; param)
+{</p>
+
+<pre><code>using std::cout;
+using boost::tyepindex::type_id_with_cvr;
+// show T
+cout &lt;&lt; "T =     " &lt;&lt; type_id_with_cvr&lt;T&gt;().pretty_name() &lt;&lt; '\n';
+// show param's type
+cout &lt;&lt; "param = " &lt;&lt; type_id_with_cvr&lt;decltype(param)&gt;().pretty_name() &lt;&lt; '\n';
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>boost::tyepindex::type_id_with_cvr</code> 接受一个类型参数，并且不会去掉 const，volatile 以及引用修饰 (命名中的 <code>with_cvr</code> 也能说明这一点)。然后构造出了一个 <code>boost::tyepindex::type_index</code> 对象，成员函数 <code>pretty_name</code> 会返回一个可读性很高的 <code>std::string</code>，它的值就是我们所期待的类型信息。</p>
+
+<p>对于这个版本的模板函数 <code>f</code> 的实现，我们再来看看之前的代码：</p>
+
+<p>``` cpp
+std::vector<Widget> createVec();  // factory function</p>
+
+<p>const auto vw = createVec();    // init vw w/factory return</p>
+
+<p>if (!vw.empty()) {</p>
+
+<pre><code>f(&amp;vw[0]);        // call f
+// ...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>使用 Boost.TypeIndex 时，GNU 和 Clang 编译器输出的信息如下：</p>
+
+<p><code>
+T =     Widget const*
+param = Widget const* const&amp;
+</code></p>
+
+<p>微软的编译器输出的信息几乎完全一致，如下：</p>
+
+<p><code>
+T =     class Widget const*
+param = class Widget const* const&amp;
+</code></p>
+
+<p>这下看起来比较完美了，不过要记住，IDE 的编辑器、编译器提示信息以及像 Boost.TypeIndex 这样的库，虽然是有用的，但它们仅仅是帮助你识别类型推导结果的工具。不能代替你理解 Item 1-3 中所讲的类型推导规则。</p>
+
+<h2>需要记住的</h2>
+
+<ul>
+<li>类型推导的结果通常可以通过 IDE 编辑器，编译器提示信息，以及 Boost.TypeIndex 库来查看。</li>
+<li>一些工具产生的结果可能是没用甚至是不准确的，因此理解 C++ 的类型推导规则仍然是很必要的。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] Item 3: Understand decltype]]></title>

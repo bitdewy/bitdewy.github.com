@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="什么是 RAII (Resource Acquisition Is Initialization) ? RAII (Resource Acquisition Is Initialization), 也称为&#8221;资源获取就是初始化&#8221;, 是 C++ 语言的一种管理资源, &hellip;">
+	<meta name="description" content="C++11 中引入了智能指针, 同时还有一个模板函数 std::make_shared 可以返回一个指定类型的 std::shared_ptr, 那与 std::shared_ptr 的构造函数相比它能给我们带来什么好处呢 ? 优点 效率更高 shared_ptr 需要维护引用计数的信息, &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,75 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/01/12/why-make-shared/">
+		
+			Why Make_shared ?</a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11 中引入了智能指针, 同时还有一个模板函数 <code>std::make_shared</code> 可以返回一个指定类型的 <code>std::shared_ptr</code>, 那与 <code>std::shared_ptr</code> 的构造函数相比它能给我们带来什么好处呢 ?</p>
+
+<h2>优点</h2>
+
+<h3>效率更高</h3>
+
+<p><code>shared_ptr</code> 需要维护引用计数的信息,</p>
+
+<ul>
+<li>强引用, 用来记录当前有多少个存活的 shared_ptrs 正持有该对象. 共享的对象会在最后一个强引用离开的时候销毁( 也可能释放).</li>
+<li>弱引用, 用来记录当前有多少个正在观察该对象的 weak_ptrs. 当最后一个弱引用离开的时候, 共享的内部信息控制块会被销毁和释放 (共享的对象也会被释放, 如果还没有释放的话).</li>
+</ul>
+
+
+<p>如果你通过使用原始的 new 表达式分配对象, 然后传递给 shared_ptr (也就是使用 shared_ptr 的构造函数) 的话, shared_ptr 的实现没有办法选择, 而只能单独的分配控制块:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">widget</span><span class="p">();</span>
+</span><span class='line'><span class="n">shared_ptr</span> <span class="n">sp1</span><span class="p">{</span> <span class="n">p</span> <span class="p">},</span> <span class="n">sp2</span><span class="p">{</span> <span class="n">sp1</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://y6bhba.bay.livefilestore.com/y1pDu8kORu85CKSKHFVBvapxrccVoMAjc8W0d6mScWwunuhqV8n25QZKgZhM6MPtFGV1c6dPgjil7g/sharedptr1.png" alt="" /></p>
+
+<p>如果选择使用 <code>make_shared</code> 的话, 情况就会变成下面这样:</p>
+
+
+		
+		<a href="/blog/2014/01/12/why-make-shared/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-12T21:01:00+08:00" pubdate data-updated="true">Jan 12<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/01/12/why-make-shared/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -853,91 +922,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/08/20/async-and-await/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/14/attorney-client/">
-		
-			Attorney Client</a>
-	</h2>
-	<div class="entry-content">
-		<h2>目的</h2>
-
-<p>控制访问一个类内部实现细节的粒度.</p>
-
-<h2>动机</h2>
-
-<p>C++ 的友元申明可以完全访问一个类的内部细节. 所以, 唔, 友元太邪恶了, 它破坏了精心的封装. C++ 中不提供选择性的授权访问类私有成员子集的方式. 在 C++ 中要么使用友元, 可以访问一个类的全部细节, 要么不用友元, 只能访问公有接口.</p>
-
-<p>看下面的例子, 下面的类 Foo 中声明了 Bar 友元. 因此 Bar 类可以访问 Foo 的全部私有成员. 这不可取, 因为它增加了耦合. Bar 类会变得没有 Foo 类就无法单独使用.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="k">private</span><span class="o">:</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">B</span><span class="p">(</span><span class="kt">float</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'>  <span class="kt">void</span> <span class="n">C</span><span class="p">(</span><span class="kt">double</span> <span class="n">c</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">friend</span> <span class="k">class</span> <span class="nc">Bar</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="c1">// This class needs access to Foo::A and Foo::B only.</span>
-</span><span class='line'><span class="c1">// C++ friendship rules, however, give access to all the private members of Foo.</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>提供选择性访问成员子集的功能, 是可取的. 这样的话, 剩余的私有成员如果需要的话, 可以更改接口. 它有助于减少两个类之间的耦合. Attorney-Client 可以精确控制它的友元能够访问的成员的数量.</p>
-
-
-		
-		<a href="/blog/2013/08/14/attorney-client/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-14T00:45:00+08:00" pubdate data-updated="true">Aug 14<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/idiom/'>idiom</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/08/14/attorney-client/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
