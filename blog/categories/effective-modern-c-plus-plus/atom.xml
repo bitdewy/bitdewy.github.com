@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Effective Modern C++ | Bitdewy]]></title>
   <link href="http://bitdewy.github.com/blog/categories/effective-modern-c-plus-plus/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-11-04T21:06:25+08:00</updated>
+  <updated>2014-11-18T01:20:24+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,189 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 5: Prefer auto to explicit type declarations.]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/11/12/emcpp-item-5/"/>
+    <updated>2014-11-12T15:55:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/11/12/emcpp-item-5</id>
+    <content type="html"><![CDATA[<p>看下面的声明，很和谐</p>
+
+<p><code>cpp
+int x;
+</code></p>
+
+<p>等等，擦. 忘记初始化了，所以它的值是不确定的。也许，它可能会被初始化成 0。但是很遗憾这是不确定的。</p>
+
+<p>再看看，解引用一个迭代器来初始化局部变量的例子：</p>
+
+<p>``` cpp
+template <typename It>  // algorithm to dwim (&ldquo;do what I mean&rdquo;)
+void dwim(It b, It e)   // for all elements in range from
+{                       // b to e</p>
+
+<pre><code>while (b != e) {
+    typename std::iterator_traits&lt;It&gt;::value_type currValue = *b;
+    // ...
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>呃，用 <code>typename std::iterator_traits&lt;It&gt;::value_type</code> 来表示迭代器所指向的值？这样真的没问题嚒？</p>
+
+<p>再来，如果我们想要一个闭包类型的局部变量。哦，好吧。只有编译器才知道这个闭包是什么类型，我们根本无法写出这个类型。</p>
+
+<p>擦，擦，擦。C++ 写起来还真是头疼。没错，不过那都是过去了。有了 C++11 之后，这些问题都不存在了，我们有了 <code>auto</code>。<code>auto</code> 类型会根据初始化自动推导，所以它们必须被初始化。这意味着在现代 C++ 中你可以和那些变量未初始化的问题挥手说拜拜了：</p>
+
+<p><code>cpp
+int x1;        // potentially uninitialized
+auto x2;       // error! initializer required
+auto x3 = 0;   // fine, x's valye is well-defined
+</code></p>
+
+<p>迭代器解引用初始化局部变量也可以这么来写了:</p>
+
+<p>``` cpp
+template <typename It>  // as before
+void dwim(It b, It e)
+{</p>
+
+<pre><code>while (b != e) {
+    auto currValue = *b;
+    // ...
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<!-- more -->
+
+
+<p>由于 <code>auto</code> 类型推导（Item 2），它也可以表示那些只有编译器才知道的类型了：</p>
+
+<p>``` cpp
+auto derefUPLess =                         // comparison func.
+  [](const std::unique_ptr<Widget>&amp; p1,    // for Widgets</p>
+
+<pre><code> const std::unique_ptr&lt;Widget&gt;&amp; p2)    // pointed to by
+</code></pre>
+
+<p>  { return <em>p1 &lt; </em>p2; };                   // std::unique_ptrs
+```</p>
+
+<p>很酷吧。C++14 更牛逼了，lambda 可以用 auto 类型的参数：</p>
+
+<p>``` cpp
+auto derefUPLess =          // C++14 comparison
+  [](const auto&amp; p1,        // function for</p>
+
+<pre><code> const auto&amp; p2)        // values pointed
+</code></pre>
+
+<p>  { return <em>p1 &lt; </em>p2; };    // to by anything pointer-like
+```</p>
+
+<p>尽管很酷，但你也许会想我们不需要使用 auto 来声明一个闭包，我们有 <code>std::function</code>。是的，可以，但是这也许会和你想的不太一样。现在你可能会想 <code>std::function</code> 对象到底是什么？接下来我们把这个问题讨论清楚。</p>
+
+<p><code>std::function</code> 是 C++11 标准库中的模板类，是函数指针的升级版。函数指针只能指向函数，而 <code>std::function</code> 对象可以表示任何可调用的对象，即任何可以像函数一样调用的对象。就像你必须给函数指针声明一个明确类型一样（类型签名必须与想要调用的函数类型一致），你必须明确 <code>std::function</code> 对象所涉及到的类型。也就是 <code>std::function</code> 的模板参数。举个例子，你想要声明一个 <code>std::function</code> 对象 <code>func</code> 它可以调用如下签名的函数：</p>
+
+<p>``` cpp
+bool(const std::unique_ptr<Widget>&amp;,    // C++11 signature for</p>
+
+<pre><code> const std::unique_ptr&lt;Widget&gt;&amp;)    // std::unique_ptr&lt;Widget&gt;
+                                    // comparison function
+</code></pre>
+
+<p>```</p>
+
+<p>你需要这么写：</p>
+
+<p><code>cpp
+std::function&lt;bool(const std::unique_ptr&lt;Widget&gt;&amp;, const std::unique_ptr&lt;Widget&gt;&amp;)&gt; func;
+</code></p>
+
+<p>由于 lambda 表达式生成可一个可调用的对象，那么闭包可以存在一个 <code>std::function</code> 对象中。也就是说在 C++11 中， 不使用 auto 我们可以像下面这样：</p>
+
+<p>``` cpp
+std::function&lt;bool(const std::unique_ptr<Widget>&amp;, const std::unique_ptr<Widget>&amp;)> derefUPLess</p>
+
+<pre><code>= [](const std::unique_ptr&lt;Widget&gt;&amp; p1, const std::unique_ptr&lt;Widget&gt;&amp; p2) {
+    return *p1 &lt; *p2;
+};
+</code></pre>
+
+<p>```</p>
+
+<p>但一定要明白，即使我们显示的给出了参数类型，但 <code>std::function</code> 与 <code>auto</code> 也不完全一样。用 <code>auto</code> 类型来接受一个闭包，它的类型与实际类型是一致的，内存的占用也是完全一样的。而用 <code>std::function</code> 来接受一个闭包，那么对于给定的签名，内存占用是固定的。而这个大小可能不足以存储该闭包，这个时候 <code>std::function</code> 的构造函数会在堆上分配足够的内存来存储这个闭包。也就是说，通常情况下 <code>std::function</code> 对象会比 <code>auto</code> 对象使用更多的内存。同时会阻止函数内连，让函数调用多一个间接层，通过 <code>std::function</code> 来调用一个闭包集合总是要比 auto 声明的闭包要慢。换句话说，<code>std::function</code> 通常都会比 <code>auto</code> 更大，更慢，而且还可能抛出 <code>out-of-memory</code> 异常。另外，像上面的例子，<code>auto</code> 会比完整类型更简洁。总之，当需要持有一个闭包时，<code>auto</code> 是比 <code>std::function</code> 更好的选择。（另外还有一个类似的东西是 <code>std::bind</code>，同样的也是选择使用 <code>auto</code> 而不是 <code>std::function</code>，不过，在 Item 34 中，我会尽力说服你用 lambda 表达式来代替 <code>std::bind</code>）。</p>
+
+<p><code>auto</code> 除了能避免未初始化变量，显式声明，直接保存闭包。另一个时可以避免 “短类型”，下面是你曾经可能见到过的代码：</p>
+
+<p><code>cpp
+std::vector&lt;int&gt; v;
+// ...
+usigned sz = v.size();
+</code></p>
+
+<p><code>v.size()</code> 的正确类型是 <code>std::vector&lt;int&gt;::size_type</code>，但是很少有程序员意识到它。<code>std::vector&lt;int&gt;::size_type</code> 内部实现的确是无符号类型，因此很多程序员使用 <code>unsigned</code> 写出了上面的代码。这会产生有趣的结果。在 32 位 Windows 上，<code>unsigned</code> 与 <code>std::vector&lt;int&gt;::size_type</code> 类型完全一致，但是在 64 位 Windows 上，<code>unsigned</code> 是 32 位，而 <code>std::vector&lt;int&gt;::size_type</code> 却是 64 位。这意味着那些在 32 位机器上运行正常的代码可能在 64 位机器上产生错误，另外当将你的程序从 32 位移植到 64 位机器上时，谁愿意花时间在这些问题上呢？</p>
+
+<p>如果使用 <code>auto</code> 就可以不必理会这个问题了：</p>
+
+<p><code>cpp
+auto sz = v.size() // sz's type is std::vector&lt;int&gt;::size_type
+</code></p>
+
+<p>还不确定 <code>auto</code> 够不够好嚒？考虑下面的代码：</p>
+
+<p>``` cpp
+std::unorderd_map&lt;std::string, int> m;
+// &hellip;
+for (const std::pair&lt;std::string, int>&amp; p : m) {</p>
+
+<pre><code>// ...    do something with p
+</code></pre>
+
+<p>}
+```</p>
+
+<p>看起来很完美？但是这是有问题的，你看发现了吗？</p>
+
+<p>要意识到 <code>std::unorderd_map</code> 的 key 类型是 const，因此散列表（<code>std::unordered_map</code>） 的元素类型 不是 <code>std::pair&lt;std::string, int&gt;</code> 而是 <code>std::pair&lt;const std::string, int&gt;</code>。但是这与上面代码中 <code>p</code> 的类型不符。因此，编译器会将 <code>std::pair&lt;const std::string, int&gt;</code> 对象转换为 <code>std::pair&lt;std::string, int&gt;</code> 对象。这会拷贝 m 的每个元素，然后将临时对象绑定到 p。在每次循环迭代的最后临时对象会释放。如果你写了上面的代码，你一定会被上面的行为惊到，因为你的意图仅仅是将 p 引用到 m 的每个元素上而已。</p>
+
+<p>像这样的误用，我们也可以用 <code>auto</code> 解决：</p>
+
+<p>``` cpp
+for (const auto&amp; p : m) {</p>
+
+<pre><code>// ...  as before
+</code></pre>
+
+<p>}
+```</p>
+
+<p>这不仅是高效的，而且写起来也更方便。还不仅如此，如果你想要取 p 的地址，你会取到 m 中的元素的指针。在没有使用 <code>auto</code> 的代码中，你取到的是临时对象的指针 —— 它会在当此循环结束时销毁。</p>
+
+<p>最后两个例子 —— 使用 <code>unsinged</code> 代替 <code>std::vector&lt;int&gt;::size_type</code> 以及 <code>std::pair&lt;std::string, int&gt;</code> 代替 <code>std::pair&lt;const std::string, int&gt;</code> —— 展示了明确类型会导致的那些你不想要的隐式转换。如果你使用 <code>auto</code> 就不用担心声明的类型与表达式实际类型不一致的问题了。</p>
+
+<p>还有很多使用 <code>auto</code> 类型的理由。虽然 <code>auto</code> 是不完美的。<code>auto</code> 类型是根据初始化的表达式类型自动推导的，而有时候自动退到出的类型不是我们期待的类型。这种情况我们在 Item 2 与 6 中讨论。在这里，我们把注意力转移到另外一个问题上，你可能会有用 <code>auto</code> 代替传统的类型声明的问题：源代码可读性问题。</p>
+
+<p>首先，做一次深呼吸，放松一下。<code>auto</code> 只是一种选择，而不是强制的任务。如果在你有专业的判断，使用显式类型的声会更清晰和更容易维护或以某种其他方式更好地通过，你可以自由地继续使用它们。C++ 没有采用什么新的东西，而只是运用早已被大家所熟知的类型推断而已。其他静态语言 (比如 C#, D, Scala, Visual Basic) 或多或少的都包含这种特性，更不用说静态类型的函数式语言(比如 ML, Haskell, OCaml, F# 等)了。这也归功于那些几乎从不明确类型的动态语言 Perl， Python，Ruby 的成功。软件开发社区在使用类型推断方面有着丰富的经验，它显示了这种技术与创建和维护大型、 工业强度的代码是有没有矛盾的。</p>
+
+<p>一些开发者可能会由于无法在阅读代码时第一时间知道对象类型而感到不安。不过，IDE 通常都有办法展示出对象的类型来缓解这个问题（Item 4 中我们有提到这个问题），并且在通常情况下一个抽象的类型就可以与一个明确类型一样提供给我们足够的信息。比如，知道一个对象是容器或者计数器或者一个智能指针，而不知道它们的具体类型。如果我们精心挑选了有意义的变量名，那么这些抽象类型的信息就很容易知道了。</p>
+
+<p>事实就是写明确类型往往会引入一些小错误，无论是类型的正确性，还是效率方面。此外，auto 类型在你更改了初始化表达式的时候会自动更改，这意味着你重构代码时一些代码的重构由 auto 代为处理了。举个例子，现在有一个函数的返回值是 <code>int</code> 类型，但不久之后，你发现 <code>long</code> 是个更好的选择，那么哪些用 <code>auto</code> 来接收函数返回值的地方在你下一次编译的时候会自动更新。如果那些代码是明确用 <code>int</code> 类型接收的话，你就需要找到所有那些调用的地方，一个个的更改它们。</p>
+
+<h2>需要记住的</h2>
+
+<ul>
+<li><code>auto</code> 变量必须被初始化，它可以有效避免类型不匹配造成的移植性问题与性能问题，可以方便重构，通常也会比明确类型打更少的字。</li>
+<li><code>auto</code> 类型的陷阱在 Item 2 与 Item 6 中。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] Item 4: Know how to view deduced types]]></title>

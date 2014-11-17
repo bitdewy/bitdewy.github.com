@@ -7,8 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="意图 定义一个操作中的算法骨架, 将一些步骤延迟到子类中定义. 模板方法模式, 可以让子类不改变算法的结构重新定义算法的某些步骤.
-基类声明算法的“占位符”, 子类来实现这个“占位符”. 讨论 组件设计者决定哪些算法的步骤是不变的? 哪些是会变化的? 不变的步骤在抽象类中直接实现, &hellip;">
+	<meta name="description" content="C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -99,6 +98,61 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/06/04/cpp14-optional/">
+		
+			C++14 std::optional<T></a>
+	</h2>
+	<div class="entry-content">
+		<p>C++11已经发布将近2年时间, 各编译器也陆续有了较好的支持. C++14 也已经有相当多的提案被接受, 包括 std::optional, 泛型 lambda, make_unique, 动态数组等, 肯定会出现在下一个标准中. 关于新标准中的提案, 以及已经被接受的提案，详细信息可以参考, wikipedia：<a href="http://en.wikipedia.org/wiki/C%2B%2B14">C++14</a>, 以及 open-std 中的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3672.html">C++ 标准草案</a>.</p>
+
+<h2>“无意义”的值</h2>
+
+<p>函数并不总能返回有效的返回值, 很多时候函数可能返回&#8221;无意义&#8221;的值, 这不意味着函数执行失败, 而是表明函数正确执行了, 但结果却不是有用的值.
+表示返回值无意义最常用的做法是增加一个&#8221;哨兵&#8221;的角色, 它位于解空间之外, 比如 <code>NULL, -1, EOF, std::string::npos, vector::end()</code>等. 但这些做法不够通用, 而且很多时候不存在解空间之外的&#8221;哨兵&#8221;.</p>
+
+<h2>std::optional<T></h2>
+
+<p>optional 库使用&#8221;容器&#8221;语义, 包装了&#8221;可能产生无效值&#8221;的对象, 实现了&#8221;未初始化&#8221;的概念. (在新标准未正式发布之前，可以参考 <a href="http://www.boost.org/doc/libs/1_54_0/libs/optional/doc/html/index.html">boost::optional</a> 的实现.)</p>
+
+<p>optional 使用&#8221;容器&#8221;语义, 为这种&#8221;无效值&#8221;的情形提供了一个较好的解决方案. 它很像一个仅能存放一个元素的容器, 它实现了&#8221;未初始化&#8221;的概念: 如果元素未初始化, 那么容器就是空的, 否则, 容器内就是有效的, 已经初始化的值.</p>
+
+
+		
+		<a href="/blog/2013/06/04/cpp14-optional/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-04T01:54:00+08:00" pubdate data-updated="true">Jun 4<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/c-plus-plus-14/'>C++14</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2013/06/04/cpp14-optional/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -752,70 +806,6 @@ Empty Member Optimization</p>
 </div>
 	
 	<div class="comments"><a href="/blog/2012/12/23/c-plus-plus-11-lambda-in-qt5/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/">
-		
-			[译] Why C++ Is Not Back</a>
-	</h2>
-	<div class="entry-content">
-		<p>前言：这个月初，<a href="http://herbsutter.com/">Herb Sutter</a> 发了一篇名为 <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Perspective: “Why C++ Is Not ‘Back’”</a>，的文章，虽然 <a href="http://herbsutter.com/">Sutter</a> 不同意原文中的全部细节，但也推荐读一读原文和评论。语言之争，由来已久，每次一有这种文章就会引发激烈的讨论，比如<a href="http://coolshell.cn/articles/7992.html">这里</a>。</p>
-
-<p>本译文中不会发表任何观点，尽量表达原作者的意图，如有翻译不当的地方欢迎大家积极指出，我会做出修改。</p>
-
-<p>原文在这里： <a href="http://simpleprogrammer.com/2012/12/01/why-c-is-not-back/">Why C++ Is Not “Back”</a></p>
-
-<p><strong>下面是译文：</strong></p>
-
-<p>我喜爱 C++。</p>
-
-<p>C++ 真正教会了我如何写代码。</p>
-
-<p>以前，我会学习语言本身的复杂性，<a href="http://www.cplusplus.com/reference/stl/">STL</a>，以及内存管理和指针运算中的所有细节。</p>
-
-<p>这些都是很美好的时光。我还记得一遍又一遍的读 <a href="http://www.aristeia.com/">Scott Meyers</a> 的 <a href="http://www.amazon.com/gp/product/B008E30L9A/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B008E30L9A&amp;linkCode=as2&amp;tag=makithecompsi-20">Effective C++</a> 系列。每一次都能从中学到一些新的东西，或者更理解如何使用 C++。</p>
-
-<p>我说上面这些只是想让你知道，<strong>我不讨厌 C++</strong>。我喜欢 C++。</p>
-
-<p>我知道，有很多优秀现在仍然在使用 C++ 并教别人如何使用，这一点也没有错。</p>
-
-<p>但问题是什么？</p>
-
-
-		
-		<a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-16T17:42:00+08:00" pubdate data-updated="true">Dec 16<span>th</span>, 2012</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2012/12/16/why-c-plus-plus-is-not-back/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

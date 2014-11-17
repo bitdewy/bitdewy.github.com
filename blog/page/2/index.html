@@ -7,7 +7,7 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="C++11 中引入了智能指针, 同时还有一个模板函数 std::make_shared 可以返回一个指定类型的 std::shared_ptr, 那与 std::shared_ptr 的构造函数相比它能给我们带来什么好处呢 ? 优点 效率更高 shared_ptr 需要维护引用计数的信息, &hellip;">
+	<meta name="description" content="原文地址: GotW #95 Solution: Thread Safety and Synchronization 这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言 问题 JG 问题 1) 竞态条件(race condition)指的是什么? &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +98,103 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/01/19/gotw-95/">
+		
+			[译]GotW #95 Solution: Thread Safety and Synchronization</a>
+	</h2>
+	<div class="entry-content">
+		<p><em>原文地址: <a href="http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/">GotW #95 Solution: Thread Safety and Synchronization</a></em></p>
+
+<p><em>这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言</em></p>
+
+<h1>问题</h1>
+
+<h2>JG 问题</h2>
+
+<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
+
+<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
+
+<h2>Guru 问题</h2>
+
+<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
+</span><span class='line'><span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
+
+<ul>
+<li>a) <code>int</code></li>
+<li>b) <code>string</code></li>
+<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
+<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
+<li>e) <code>mutex</code></li>
+<li>f) <code>condition_variable</code></li>
+<li>g) <code>atomic&lt;unsigned&gt;</code></li>
+</ul>
+
+
+<p><strong>提示: 虽然有 7 个类型, 但实际上答案只有两种.</strong></p>
+
+<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
+
+<ul>
+<li>a) 一般的外部同步的职责是什么?</li>
+<li>b) 什么是&#8221;基本的线程安全保障&#8221;?</li>
+<li>c) 哪些内部同步是在共享变量的实现中需要做的?</li>
+</ul>
+
+
+<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
+
+
+		
+		<a href="/blog/2014/01/19/gotw-95/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-19T23:54:00+08:00" pubdate data-updated="true">Jan 19<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/01/19/gotw-95/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -809,119 +906,6 @@
 </div>
 	
 	<div class="comments"><a href="/blog/2013/09/02/atomic-operation/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/20/async-and-await/">
-		
-			异步编程 Async & Await</a>
-	</h2>
-	<div class="entry-content">
-		<h2>使用异步编程</h2>
-
-<p>使用异步编程, 可以避免性能瓶颈和增强应用程序的总体响应能力. 但是编写异步程序在以前技术上比较复杂, 使得它们难以编写, 调试以及维护.</p>
-
-<p>在 .NET Framework 4.5 中, 引入了简化的异步编程方式, 编译器帮我们实现了之前需要实现的异步操作, 程序员只需要关注自己的代码逻辑即可. 程序员可以更专注到业务逻辑当中.</p>
-
-<h2>async &amp; await</h2>
-
-<p>在 C# 中, 关键字 async 和 await 是异步编程的核心, 当使用这两个关键字的时候, 我们可以直接创建一个异步函数, 就像创建一个同步函数一样简单. 看下面的例子, 所有的东西看起来都是那么的熟悉.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Three things to note in the signature: </span>
-</span><span class='line'><span class="c1">//  - The method has an async modifier.  </span>
-</span><span class='line'><span class="c1">//  - The return type is Task or Task&lt;T&gt;. (See &quot;Return Types&quot; section.)</span>
-</span><span class='line'><span class="c1">//    Here, it is Task&lt;int&gt; because the return statement returns an integer. </span>
-</span><span class='line'><span class="c1">//  - The method name ends in &quot;Async.&quot;</span>
-</span><span class='line'><span class="n">async</span> <span class="n">Task</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">AccessTheWebAsync</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="c1">// You need to add a reference to System.Net.Http to declare client.</span>
-</span><span class='line'>    <span class="n">HttpClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpClient</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// GetStringAsync returns a Task&lt;string&gt;. That means that when you await the </span>
-</span><span class='line'>    <span class="c1">// task you&#39;ll get a string (urlContents).</span>
-</span><span class='line'>    <span class="n">Task</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getStringTask</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">GetStringAsync</span><span class="p">(</span><span class="s">&quot;http://msdn.microsoft.com&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// You can do work here that doesn&#39;t rely on the string from GetStringAsync.</span>
-</span><span class='line'>    <span class="n">DoIndependentWork</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// The await operator suspends AccessTheWebAsync. </span>
-</span><span class='line'>    <span class="c1">//  - AccessTheWebAsync can&#39;t continue until getStringTask is complete. </span>
-</span><span class='line'>    <span class="c1">//  - Meanwhile, control returns to the caller of AccessTheWebAsync. </span>
-</span><span class='line'>    <span class="c1">//  - Control resumes here when getStringTask is complete.  </span>
-</span><span class='line'>    <span class="c1">//  - The await operator then retrieves the string result from getStringTask. </span>
-</span><span class='line'>    <span class="n">string</span> <span class="n">urlContents</span> <span class="o">=</span> <span class="n">await</span> <span class="n">getStringTask</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// The return statement specifies an integer result. </span>
-</span><span class='line'>    <span class="c1">// Any methods that are awaiting AccessTheWebAsync retrieve the length value. </span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">urlContents</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-
-		
-		<a href="/blog/2013/08/20/async-and-await/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-20T01:17:00+08:00" pubdate data-updated="true">Aug 20<span>th</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/async/'>async</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/08/20/async-and-await/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

@@ -7,10 +7,16 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="如何选择查看类型推导结果的工具依赖于你想在开发的那个阶段查看这个类型信息。下面来介绍三种可能的情况，编辑代码时，编译过程中，以及运行时。 IDE 编辑器 当你将鼠标移动到某处代码时，IDE 编辑器通常都会显示出类型（比如，变量，参数，函数的类型等），例如下面的代码： 1
+	<meta name="description" content="看下面的声明，很和谐 1
+int x; 等等，擦. 忘记初始化了，所以它的值是不确定的。也许，它可能会被初始化成 0。但是很遗憾这是不确定的。 再看看，解引用一个迭代器来初始化局部变量的例子： 1
 2
 3
-const &hellip;">
+4
+5
+6
+7
+8
+template &lt;typename It&gt; // &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -101,6 +107,114 @@ const &hellip;">
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/12/emcpp-item-5/">
+		
+			[译] Item 5: Prefer Auto to Explicit Type Declarations.</a>
+	</h2>
+	<div class="entry-content">
+		<p>看下面的声明，很和谐</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>等等，擦. 忘记初始化了，所以它的值是不确定的。也许，它可能会被初始化成 0。但是很遗憾这是不确定的。</p>
+
+<p>再看看，解引用一个迭代器来初始化局部变量的例子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">It</span><span class="o">&gt;</span>  <span class="c1">// algorithm to dwim (&quot;do what I mean&quot;)</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span>   <span class="c1">// for all elements in range from</span>
+</span><span class='line'><span class="p">{</span>                       <span class="c1">// b to e</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;::</span><span class="n">value_type</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>呃，用 <code>typename std::iterator_traits&lt;It&gt;::value_type</code> 来表示迭代器所指向的值？这样真的没问题嚒？</p>
+
+<p>再来，如果我们想要一个闭包类型的局部变量。哦，好吧。只有编译器才知道这个闭包是什么类型，我们根本无法写出这个类型。</p>
+
+<p>擦，擦，擦。C++ 写起来还真是头疼。没错，不过那都是过去了。有了 C++11 之后，这些问题都不存在了，我们有了 <code>auto</code>。<code>auto</code> 类型会根据初始化自动推导，所以它们必须被初始化。这意味着在现代 C++ 中你可以和那些变量未初始化的问题挥手说拜拜了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x1</span><span class="p">;</span>        <span class="c1">// potentially uninitialized</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">;</span>       <span class="c1">// error! initializer required</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>   <span class="c1">// fine, x&#39;s valye is well-defined</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>迭代器解引用初始化局部变量也可以这么来写了:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">It</span><span class="o">&gt;</span>  <span class="c1">// as before</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">auto</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+		
+		<a href="/blog/2014/11/12/emcpp-item-5/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-12T15:55:00+08:00" pubdate data-updated="true">Nov 12<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/effective-modern-c-plus-plus/'>Effective Modern C++</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/11/12/emcpp-item-5/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -847,103 +961,6 @@ const &hellip;">
 </div>
 	
 	<div class="comments"><a href="/blog/2014/01/28/passport/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/01/19/gotw-95/">
-		
-			[译]GotW #95 Solution: Thread Safety and Synchronization</a>
-	</h2>
-	<div class="entry-content">
-		<p><em>原文地址: <a href="http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/">GotW #95 Solution: Thread Safety and Synchronization</a></em></p>
-
-<p><em>这篇 GotW 是来回答一些关于线程安全与同步的问题的. 我们的讨论几乎适用于所有主流语言</em></p>
-
-<h1>问题</h1>
-
-<h2>JG 问题</h2>
-
-<p><strong>1) 竞态条件(race condition)指的是什么? 它有很严重吗?</strong></p>
-
-<p><strong>2) 什么是正确同步的程序? 你是如何实现的? 请具体说明.</strong></p>
-
-<h2>Guru 问题</h2>
-
-<p><strong>3) 考虑下面的代码, <code>some_obj</code> 是一个多个线程可见的共享变量.</strong></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// thread 1 (performs no additional synchronization)</span>
-</span><span class='line'><span class="n">code_that_reads_from</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>  <span class="c1">// passes some_obj by const &amp;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// thread 2 (performs no additional synchronization)</span>
-</span><span class='line'><span class="n">code_that_modifies</span><span class="p">(</span> <span class="n">some_obj</span> <span class="p">);</span>    <span class="c1">// passes some_obj by non-const &amp;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>如果线程 1 与线程 2 能够并行, 那么当 <code>some_ojb</code> 是如下类型时, 代码是否能够正确同步?</strong></p>
-
-<ul>
-<li>a) <code>int</code></li>
-<li>b) <code>string</code></li>
-<li>c) <code>vector&lt;map&lt;int,string&gt;&gt;</code></li>
-<li>d) <code>shared_ptr&lt;widget&gt;</code></li>
-<li>e) <code>mutex</code></li>
-<li>f) <code>condition_variable</code></li>
-<li>g) <code>atomic&lt;unsigned&gt;</code></li>
-</ul>
-
-
-<p><strong>提示: 虽然有 7 个类型, 但实际上答案只有两种.</strong></p>
-
-<p><strong>4) 外部同步, 意味着使用共享对象的代码需要自己来保证对象的同步. 回答下面有关外部同步的问题:</strong></p>
-
-<ul>
-<li>a) 一般的外部同步的职责是什么?</li>
-<li>b) 什么是&#8221;基本的线程安全保障&#8221;?</li>
-<li>c) 哪些内部同步是在共享变量的实现中需要做的?</li>
-</ul>
-
-
-<p><strong>5) 完全的内部同步类型(线程安全类型), 意味着所有的同步在对象内部完成, 外部不需要再进行同步. 哪些类型是内部同步的, 为什么?</strong></p>
-
-
-		
-		<a href="/blog/2014/01/19/gotw-95/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-19T23:54:00+08:00" pubdate data-updated="true">Jan 19<span>th</span>, 2014</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-plus-plus/'>C++</a>, <a class='category' href='/blog/categories/gotw/'>GotW</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2014/01/19/gotw-95/#disqus_thread">Comments</a></div>
 	
 </div>
 </article>

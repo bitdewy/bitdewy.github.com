@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-11-04T21:06:25+08:00</updated>
+  <updated>2014-11-18T01:20:24+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -12,6 +12,215 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[译] Item 5: Prefer auto to explicit type declarations.]]></title>
+    <link href="http://bitdewy.github.com/blog/2014/11/12/emcpp-item-5/"/>
+    <updated>2014-11-12T15:55:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2014/11/12/emcpp-item-5</id>
+    <content type="html"><![CDATA[<p>看下面的声明，很和谐</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>等等，擦. 忘记初始化了，所以它的值是不确定的。也许，它可能会被初始化成 0。但是很遗憾这是不确定的。</p>
+
+<p>再看看，解引用一个迭代器来初始化局部变量的例子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">It</span><span class="o">&gt;</span>  <span class="c1">// algorithm to dwim (&quot;do what I mean&quot;)</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span>   <span class="c1">// for all elements in range from</span>
+</span><span class='line'><span class="p">{</span>                       <span class="c1">// b to e</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;::</span><span class="n">value_type</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>呃，用 <code>typename std::iterator_traits&lt;It&gt;::value_type</code> 来表示迭代器所指向的值？这样真的没问题嚒？</p>
+
+<p>再来，如果我们想要一个闭包类型的局部变量。哦，好吧。只有编译器才知道这个闭包是什么类型，我们根本无法写出这个类型。</p>
+
+<p>擦，擦，擦。C++ 写起来还真是头疼。没错，不过那都是过去了。有了 C++11 之后，这些问题都不存在了，我们有了 <code>auto</code>。<code>auto</code> 类型会根据初始化自动推导，所以它们必须被初始化。这意味着在现代 C++ 中你可以和那些变量未初始化的问题挥手说拜拜了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">int</span> <span class="n">x1</span><span class="p">;</span>        <span class="c1">// potentially uninitialized</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x2</span><span class="p">;</span>       <span class="c1">// error! initializer required</span>
+</span><span class='line'><span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>   <span class="c1">// fine, x&#39;s valye is well-defined</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>迭代器解引用初始化局部变量也可以这么来写了:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">It</span><span class="o">&gt;</span>  <span class="c1">// as before</span>
+</span><span class='line'><span class="kt">void</span> <span class="n">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">auto</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>由于 <code>auto</code> 类型推导（Item 2），它也可以表示那些只有编译器才知道的类型了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">derefUPLess</span> <span class="o">=</span>                         <span class="c1">// comparison func.</span>
+</span><span class='line'>  <span class="p">[](</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p1</span><span class="p">,</span>    <span class="c1">// for Widgets</span>
+</span><span class='line'>     <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p2</span><span class="p">)</span>    <span class="c1">// pointed to by</span>
+</span><span class='line'>  <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span> <span class="p">};</span>                   <span class="c1">// std::unique_ptrs</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>很酷吧。C++14 更牛逼了，lambda 可以用 auto 类型的参数：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">derefUPLess</span> <span class="o">=</span>          <span class="c1">// C++14 comparison</span>
+</span><span class='line'>  <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p1</span><span class="p">,</span>        <span class="c1">// function for</span>
+</span><span class='line'>     <span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p2</span><span class="p">)</span>        <span class="c1">// values pointed</span>
+</span><span class='line'>  <span class="p">{</span> <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span> <span class="p">};</span>    <span class="c1">// to by anything pointer-like</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>尽管很酷，但你也许会想我们不需要使用 auto 来声明一个闭包，我们有 <code>std::function</code>。是的，可以，但是这也许会和你想的不太一样。现在你可能会想 <code>std::function</code> 对象到底是什么？接下来我们把这个问题讨论清楚。</p>
+
+<p><code>std::function</code> 是 C++11 标准库中的模板类，是函数指针的升级版。函数指针只能指向函数，而 <code>std::function</code> 对象可以表示任何可调用的对象，即任何可以像函数一样调用的对象。就像你必须给函数指针声明一个明确类型一样（类型签名必须与想要调用的函数类型一致），你必须明确 <code>std::function</code> 对象所涉及到的类型。也就是 <code>std::function</code> 的模板参数。举个例子，你想要声明一个 <code>std::function</code> 对象 <code>func</code> 它可以调用如下签名的函数：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">,</span>    <span class="c1">// C++11 signature for</span>
+</span><span class='line'>   <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">)</span>    <span class="c1">// std::unique_ptr&lt;Widget&gt;</span>
+</span><span class='line'>                                      <span class="c1">// comparison function</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你需要这么写：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">func</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于 lambda 表达式生成可一个可调用的对象，那么闭包可以存在一个 <code>std::function</code> 对象中。也就是说在 C++11 中， 不使用 auto 我们可以像下面这样：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">derefUPLess</span>
+</span><span class='line'>    <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p2</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但一定要明白，即使我们显示的给出了参数类型，但 <code>std::function</code> 与 <code>auto</code> 也不完全一样。用 <code>auto</code> 类型来接受一个闭包，它的类型与实际类型是一致的，内存的占用也是完全一样的。而用 <code>std::function</code> 来接受一个闭包，那么对于给定的签名，内存占用是固定的。而这个大小可能不足以存储该闭包，这个时候 <code>std::function</code> 的构造函数会在堆上分配足够的内存来存储这个闭包。也就是说，通常情况下 <code>std::function</code> 对象会比 <code>auto</code> 对象使用更多的内存。同时会阻止函数内连，让函数调用多一个间接层，通过 <code>std::function</code> 来调用一个闭包集合总是要比 auto 声明的闭包要慢。换句话说，<code>std::function</code> 通常都会比 <code>auto</code> 更大，更慢，而且还可能抛出 <code>out-of-memory</code> 异常。另外，像上面的例子，<code>auto</code> 会比完整类型更简洁。总之，当需要持有一个闭包时，<code>auto</code> 是比 <code>std::function</code> 更好的选择。（另外还有一个类似的东西是 <code>std::bind</code>，同样的也是选择使用 <code>auto</code> 而不是 <code>std::function</code>，不过，在 Item 34 中，我会尽力说服你用 lambda 表达式来代替 <code>std::bind</code>）。</p>
+
+<p><code>auto</code> 除了能避免未初始化变量，显式声明，直接保存闭包。另一个时可以避免 “短类型”，下面是你曾经可能见到过的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="n">usigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>v.size()</code> 的正确类型是 <code>std::vector&lt;int&gt;::size_type</code>，但是很少有程序员意识到它。<code>std::vector&lt;int&gt;::size_type</code> 内部实现的确是无符号类型，因此很多程序员使用 <code>unsigned</code> 写出了上面的代码。这会产生有趣的结果。在 32 位 Windows 上，<code>unsigned</code> 与 <code>std::vector&lt;int&gt;::size_type</code> 类型完全一致，但是在 64 位 Windows 上，<code>unsigned</code> 是 32 位，而 <code>std::vector&lt;int&gt;::size_type</code> 却是 64 位。这意味着那些在 32 位机器上运行正常的代码可能在 64 位机器上产生错误，另外当将你的程序从 32 位移植到 64 位机器上时，谁愿意花时间在这些问题上呢？</p>
+
+<p>如果使用 <code>auto</code> 就可以不必理会这个问题了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">auto</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="c1">// sz&#39;s type is std::vector&lt;int&gt;::size_type</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>还不确定 <code>auto</code> 够不够好嚒？考虑下面的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unorderd_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// ...    do something with p</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看起来很完美？但是这是有问题的，你看发现了吗？</p>
+
+<p>要意识到 <code>std::unorderd_map</code> 的 key 类型是 const，因此散列表（<code>std::unordered_map</code>） 的元素类型 不是 <code>std::pair&lt;std::string, int&gt;</code> 而是 <code>std::pair&lt;const std::string, int&gt;</code>。但是这与上面代码中 <code>p</code> 的类型不符。因此，编译器会将 <code>std::pair&lt;const std::string, int&gt;</code> 对象转换为 <code>std::pair&lt;std::string, int&gt;</code> 对象。这会拷贝 m 的每个元素，然后将临时对象绑定到 p。在每次循环迭代的最后临时对象会释放。如果你写了上面的代码，你一定会被上面的行为惊到，因为你的意图仅仅是将 p 引用到 m 的每个元素上而已。</p>
+
+<p>像这样的误用，我们也可以用 <code>auto</code> 解决：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// ...  as before</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>这不仅是高效的，而且写起来也更方便。还不仅如此，如果你想要取 p 的地址，你会取到 m 中的元素的指针。在没有使用 <code>auto</code> 的代码中，你取到的是临时对象的指针 —— 它会在当此循环结束时销毁。</p>
+
+<p>最后两个例子 —— 使用 <code>unsinged</code> 代替 <code>std::vector&lt;int&gt;::size_type</code> 以及 <code>std::pair&lt;std::string, int&gt;</code> 代替 <code>std::pair&lt;const std::string, int&gt;</code> —— 展示了明确类型会导致的那些你不想要的隐式转换。如果你使用 <code>auto</code> 就不用担心声明的类型与表达式实际类型不一致的问题了。</p>
+
+<p>还有很多使用 <code>auto</code> 类型的理由。虽然 <code>auto</code> 是不完美的。<code>auto</code> 类型是根据初始化的表达式类型自动推导的，而有时候自动退到出的类型不是我们期待的类型。这种情况我们在 Item 2 与 6 中讨论。在这里，我们把注意力转移到另外一个问题上，你可能会有用 <code>auto</code> 代替传统的类型声明的问题：源代码可读性问题。</p>
+
+<p>首先，做一次深呼吸，放松一下。<code>auto</code> 只是一种选择，而不是强制的任务。如果在你有专业的判断，使用显式类型的声会更清晰和更容易维护或以某种其他方式更好地通过，你可以自由地继续使用它们。C++ 没有采用什么新的东西，而只是运用早已被大家所熟知的类型推断而已。其他静态语言 (比如 C#, D, Scala, Visual Basic) 或多或少的都包含这种特性，更不用说静态类型的函数式语言(比如 ML, Haskell, OCaml, F# 等)了。这也归功于那些几乎从不明确类型的动态语言 Perl， Python，Ruby 的成功。软件开发社区在使用类型推断方面有着丰富的经验，它显示了这种技术与创建和维护大型、 工业强度的代码是有没有矛盾的。</p>
+
+<p>一些开发者可能会由于无法在阅读代码时第一时间知道对象类型而感到不安。不过，IDE 通常都有办法展示出对象的类型来缓解这个问题（Item 4 中我们有提到这个问题），并且在通常情况下一个抽象的类型就可以与一个明确类型一样提供给我们足够的信息。比如，知道一个对象是容器或者计数器或者一个智能指针，而不知道它们的具体类型。如果我们精心挑选了有意义的变量名，那么这些抽象类型的信息就很容易知道了。</p>
+
+<p>事实就是写明确类型往往会引入一些小错误，无论是类型的正确性，还是效率方面。此外，auto 类型在你更改了初始化表达式的时候会自动更改，这意味着你重构代码时一些代码的重构由 auto 代为处理了。举个例子，现在有一个函数的返回值是 <code>int</code> 类型，但不久之后，你发现 <code>long</code> 是个更好的选择，那么哪些用 <code>auto</code> 来接收函数返回值的地方在你下一次编译的时候会自动更新。如果那些代码是明确用 <code>int</code> 类型接收的话，你就需要找到所有那些调用的地方，一个个的更改它们。</p>
+
+<h2>需要记住的</h2>
+
+<ul>
+<li><code>auto</code> 变量必须被初始化，它可以有效避免类型不匹配造成的移植性问题与性能问题，可以方便重构，通常也会比明确类型打更少的字。</li>
+<li><code>auto</code> 类型的陷阱在 Item 2 与 Item 6 中。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[译] Item 4: Know how to view deduced types]]></title>
@@ -4490,186 +4699,6 @@
 <ul>
 <li><a href="http://en.cppreference.com/w/cpp/atomic/atomic">CppReference.com &ndash; atomic</a></li>
 <li><a href="http://channel9.msdn.com/Shows/Going+Deep/Cpp-and-Beyond-2012-Herb-Sutter-atomic-Weapons-1-of-2">C++ and Beyond 2012: Herb Sutter &ndash; atomic&lt;> Weapons</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[异步编程 async & await]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/08/20/async-and-await/"/>
-    <updated>2013-08-20T01:17:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/08/20/async-and-await</id>
-    <content type="html"><![CDATA[<h2>使用异步编程</h2>
-
-<p>使用异步编程, 可以避免性能瓶颈和增强应用程序的总体响应能力. 但是编写异步程序在以前技术上比较复杂, 使得它们难以编写, 调试以及维护.</p>
-
-<p>在 .NET Framework 4.5 中, 引入了简化的异步编程方式, 编译器帮我们实现了之前需要实现的异步操作, 程序员只需要关注自己的代码逻辑即可. 程序员可以更专注到业务逻辑当中.</p>
-
-<h2>async &amp; await</h2>
-
-<p>在 C# 中, 关键字 async 和 await 是异步编程的核心, 当使用这两个关键字的时候, 我们可以直接创建一个异步函数, 就像创建一个同步函数一样简单. 看下面的例子, 所有的东西看起来都是那么的熟悉.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="c1">// Three things to note in the signature: </span>
-</span><span class='line'><span class="c1">//  - The method has an async modifier.  </span>
-</span><span class='line'><span class="c1">//  - The return type is Task or Task&lt;T&gt;. (See &quot;Return Types&quot; section.)</span>
-</span><span class='line'><span class="c1">//    Here, it is Task&lt;int&gt; because the return statement returns an integer. </span>
-</span><span class='line'><span class="c1">//  - The method name ends in &quot;Async.&quot;</span>
-</span><span class='line'><span class="n">async</span> <span class="n">Task</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">AccessTheWebAsync</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="c1">// You need to add a reference to System.Net.Http to declare client.</span>
-</span><span class='line'>    <span class="n">HttpClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpClient</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// GetStringAsync returns a Task&lt;string&gt;. That means that when you await the </span>
-</span><span class='line'>    <span class="c1">// task you&#39;ll get a string (urlContents).</span>
-</span><span class='line'>    <span class="n">Task</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getStringTask</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">GetStringAsync</span><span class="p">(</span><span class="s">&quot;http://msdn.microsoft.com&quot;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// You can do work here that doesn&#39;t rely on the string from GetStringAsync.</span>
-</span><span class='line'>    <span class="n">DoIndependentWork</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// The await operator suspends AccessTheWebAsync. </span>
-</span><span class='line'>    <span class="c1">//  - AccessTheWebAsync can&#39;t continue until getStringTask is complete. </span>
-</span><span class='line'>    <span class="c1">//  - Meanwhile, control returns to the caller of AccessTheWebAsync. </span>
-</span><span class='line'>    <span class="c1">//  - Control resumes here when getStringTask is complete.  </span>
-</span><span class='line'>    <span class="c1">//  - The await operator then retrieves the string result from getStringTask. </span>
-</span><span class='line'>    <span class="n">string</span> <span class="n">urlContents</span> <span class="o">=</span> <span class="n">await</span> <span class="n">getStringTask</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// The return statement specifies an integer result. </span>
-</span><span class='line'>    <span class="c1">// Any methods that are awaiting AccessTheWebAsync retrieve the length value. </span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">urlContents</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!-- more -->
-
-
-<h2>async 方法中到底发生了什么？</h2>
-
-<p>在异步编程中, 最重要的需要了解的事情是, 方法与方法之间的执行流程是什么. 下面的图可以帮助我们理解执行流程.</p>
-
-<p><img src="https://qhphgq.bay.livefilestore.com/y2pPcdpEqnMPWdvKOr5yjswLE7F201mPiHRsjrk0PteSCWt9jdSWQxA3Tgkas4qOECf2vishbMkp4GnpFvE_ZQJcMwRppgT7hM0UrQxVevorwg/async.png" alt="" /></p>
-
-<p>图上的标记对应以下步骤</p>
-
-<ol>
-<li>事件处理程序调用并等待 AccessTheWebAsync 异步方法.</li>
-<li>AccessTheWebAsync 创建 HttpClient 实例并调用GetStringAsync 异步方法下载网页内容, 作为字符串.</li>
-<li>GetStringAsync 会造成挂起, 这时会发生一些事情. 可能它必须等待网页下载完成或者其他一些会阻塞的事情. 为了避免阻塞, GetStringAsync 会交出控制权给他的调用者, AccessTheWebAsync. AccessTheWebAsync 是返回一个模板参数是 string 的 Task 对象, 赋值给 getStringTask 变量. task 不会因为 GetStringAsync 的调用而阻塞当前进程, 而是当任务实际执行完成时, 再提交.</li>
-<li>由于 getStringTask 此时还没有 await, AccessTheWebAsync 可以继续执行一些不依赖 GetStringAsync 结果的一些操作. 这些工作在一个同步的叫做 DoIndependentWork 函数中执行.</li>
-<li>DoIndependentWork 是一个同步函数, 当它的工作做完之后会将结果返回给调用者.</li>
-<li><p>AccessTheWebAsync 做完了不依赖 getStringTask 的所有事情, AccessTheWekAsync 接下来需要计算 getStringTask 的结果, 但是此时函数还没有返回. 因此, AccessTheWebAsync 使用了 await 将当前的操作挂起, 然后将控制权移交到 AccessTheWebAsync 的调用者. AccessTheWebAsync 返回一个 task<int> 给调用者. 这个 task 给了外部一个承诺 (promise) 当计算完成时会返回给调用者一个整数, 这个整数就是下载的数据量的长度. <em>注意: 如果 GetStringAsync (以及 getStringTask) 在 AccessTheWebAsync await 之前就完成了, 那么控制权会仍然在 AccessTheWebAsync 中. 如果在不需要 await 时, 还继续进行代价很高的控制权转移的话, 是严重的浪费.</em> 在调用者中 (本例的 event handler), 这个过程会重复多次. 调用者可能会在 await 之前, 做一些其他的不依赖 AccessTheWebAsync 的操作, 或者直接 await. 当 event handler 执行到 await 语句时, 应用程序正在等待 AccessTheWebAsync, 同时 AccessTheWebAsync 正在等待 GetStringAsync.</p></li>
-<li><p>GetStringAsync 完成工作并返回了字符串结果. 这个字符串不是直接由 GetStringAsync 调用返回的. (在第 3 步的时候我们就已经返回了一个 task). 取而代之, 这个字符串是存储在已完成的 task 中的, getStringTask. await 会得到 getStringTask 的结果. 赋值语句会将得到的结果赋值给 urlContents.</p></li>
-<li>当 AccessTheWebSync 得到了结果之后, 他就可以计算字符串的长度了. 然后 AccessTheWebAsync 的任务就全部完成了. 正在等待的 event handler 就可以恢复工作了.</li>
-</ol>
-
-
-<h2>C++ 中的 async 以及 await</h2>
-
-<p>上面是一个 C# 的例子, C++11 中虽然对线程的支持作了相当多的工作, 但是异步编程方面还没有引入与 C# 中的 async 以及 await 类似的东西. 但标准委员会正在做这方面的工作, 提案名字叫做 Resumable Functions (n3650), 虽然 C++14 中不会引入这个特性 (这个特性应该是 C++1y 中的特性 (y应该等于7)), 但微软会很快的将该特性的实现引入到新版的 visual studio 中.</p>
-
-<p>一个例子感受一下没有 async 以及 await 时我们是如何做异步编程的</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">task</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">read</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">file</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">suffix</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-</span><span class='line'>   <span class="p">.</span><span class="n">then</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span> <span class="n">fi</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">auto</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
-</span><span class='line'>      <span class="k">auto</span> <span class="n">next</span> <span class="o">=</span>
-</span><span class='line'>         <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">task</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="p">(</span>
-</span><span class='line'>      <span class="p">[</span><span class="o">=</span><span class="p">]{</span>
-</span><span class='line'>         <span class="n">fi</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
-</span><span class='line'>         <span class="p">.</span><span class="n">then</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">chunk</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="k">if</span><span class="p">(</span> <span class="n">chunk</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>               <span class="o">*</span><span class="n">ret</span> <span class="o">+=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">;</span>
-</span><span class='line'>               <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>            <span class="k">return</span> <span class="o">*</span><span class="n">ret</span><span class="p">;</span>
-</span><span class='line'>         <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>      <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">next</span><span class="p">)();</span>
-</span><span class='line'>   <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>看看上面的一堆代码，WTF，谁能快速的搞明白？？？？？</p>
-
-<p>再看看下面清爽的代码吧…</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">task</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">read</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">file</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">suffix</span> <span class="p">)</span> <span class="n">__async</span> <span class="p">{</span>
-</span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">istream</span> <span class="n">fi</span> <span class="o">=</span> <span class="n">__await</span> <span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
-</span><span class='line'>   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">ret</span><span class="p">,</span> <span class="n">chunk</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">while</span><span class="p">((</span><span class="n">chunk</span> <span class="o">=</span> <span class="n">__await</span> <span class="n">fi</span><span class="p">.</span><span class="n">read</span><span class="p">()).</span><span class="n">size</span><span class="p">())</span>
-</span><span class='line'>      <span class="n">ret</span> <span class="o">+=</span> <span class="n">chunk</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>是不是迫不及待的想要尝试了呢？</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://msdn.microsoft.com/en-us/library/vstudio/hh191443.aspx">Asynchronous Programming with Async and Await (C# and Visual Basic)</a></li>
-<li><a href="http://channel9.msdn.com/Events/Build/2013/2-306">The future of C++</a></li>
-<li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3650.pdf">Resumable Functions</a></li>
 </ul>
 
 ]]></content>
