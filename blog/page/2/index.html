@@ -7,7 +7,11 @@
 	<meta name="author" content="bitdewy">
 
 	
-	<meta name="description" content="首先, 吐槽一下, 在自己国家的土地上都不能自由通行, 还需要办理各种证件. (╯‵□′)╯︵┻━┻ 以西安为例, 西安市出入境管理中心在科技路二号(西斜七路十字西南角), 工作时间为法定工作日 9:00-17:00. 据说中午有休息时间. 由于本人 14:50 才到, 中午休息时间未知. ( &hellip;">
+	<meta name="description" content="这是 @devqin 在 NADbb 上发的一个找虐的测试. (原作者有个提示: Warning: might hurt your feelings). 我来挨个找证据, 今天是 part 1, CSS 部分. 1) 1
+2
+3
+ul { MaRGin: 10px;
+} Are CSS &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -98,6 +102,89 @@
 
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/">
+		
+			Web 前端开发小测验, Part 1 之 CSS</a>
+	</h2>
+	<div class="entry-content">
+		<p>这是 <a href="http://www.devqin.com/">@devqin</a> 在 <a href="http://bb.ijser.cn/topic/46/%E7%9C%8B%E7%9C%8B%E4%BD%A0%E8%83%BD%E5%BE%97%E5%88%B0%E5%A4%9A%E5%B0%91%E5%88%86-%E8%87%AA%E6%88%91%E6%84%9F%E8%A7%89%E8%89%AF%E5%A5%BD%E8%80%85%E8%8E%AB%E5%85%A5-%E5%9B%A0%E4%B8%BA-%E5%AE%98%E6%96%B9%E8%AF%B4%E7%9A%84%E6%98%AF-maight-hurt-your-feelings">NADbb</a> 上发的一个找虐的测试. (原作者有个提示: Warning: might hurt your feelings).</p>
+
+<p>我来挨个找证据, 今天是 part 1, CSS 部分.</p>
+
+<h4>1)</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">ul</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">MaRGin</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Are CSS property names case-sensitive?</p>
+
+<p>CSS 属性名是大小写敏感的吗 ?</p>
+
+<p><strong>答</strong>: 不敏感. <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/">Cascading Style Sheets, level 1</a> 的 <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/#forward-compatible-parsing">7.1 Forward-compatible parsing</a> 最后有这么一段话,</p>
+
+<blockquote><p>All CSS style sheets are case-insensitive, except for parts that are not under the control of CSS. I.e., in CSS1, font family names and URLs can be case-sensitive. Also, the case-sensitivity of the CLASS and ID attributes is under the control of HTML.</p></blockquote>
+
+<p>因此, 只有不受 CSS 控制的, 如 <code>font family</code> 的名字, <code>url</code>, 以及受 <code>HTML</code> 控制的 <code>ID</code> 和 <code>class</code> 大小写敏感, 其他受 CSS 控制的内容都是大小写不敏感的.</p>
+
+<h4>2) Does setting <code>margin-top</code> and <code>margin-bottom</code> have an affect on an inline element ?</h4>
+
+<p><code>margin-top</code> 与 <code>margin-bottom</code> 对内联元素是否有效 ?</p>
+
+<p><strong>答</strong>: 没效果, <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/">Cascading Style Sheets, level 1</a> 的 <a href="http://www.w3.org/TR/2008/REC-CSS1-20080411/#inline-elements">4.2 Inline elements</a> 中有如下描述:</p>
+
+<blockquote><p>If the inline element has margins, borders, padding or text decorations attached, these will have no effect where the element is broken.</p></blockquote>
+
+<p>CSS2.1 中, <a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom">8.3 Margin properties: &lsquo;margin-top&rsquo;, &lsquo;margin-right&rsquo;, &lsquo;margin-bottom&rsquo;, &lsquo;margin-left&rsquo;, and &lsquo;margin&rsquo;</a> 节关于 <code>margin-top</code> 和 <code>margin-bottom</code> 有如下描述:</p>
+
+<blockquote><p>These properties have no effect on non-replaced inline elements.</p></blockquote>
+
+<p>关于 non-replaced 与 replaced element 的定义可以参考 CSS2.1 中的 <a href="http://www.w3.org/TR/CSS21/conform.html#replaced-element">Replaced element</a></p>
+
+<h4>3) Does setting <code>padding-top</code> and <code>padding-bottom</code> on an inline element add to its dimensions ?</h4>
+
+
+		
+		<a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-09T01:30:00+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/css/'>css</a>, <a class='category' href='/blog/categories/web/'>web</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/2014/03/09/front-end-web-development-quiz-part1-css/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -771,86 +858,6 @@
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/09/23/exception-and-multithread/">
-		
-			异常与多线程</a>
-	</h2>
-	<div class="entry-content">
-		<p>C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference).</p>
-
-<p>有些时候, 我们不得不使用多线程来提高工作的执行效率, 但由于异常都是基于线程的, 如何在线程间传递异常, 就成为了一个问题. C++11 之前异常是无法在线程之前传递的, C++11 在这方面提供了支持.</p>
-
-<h2>使用 C++11 中的异常相关内容实现在线程间传递异常</h2>
-
-<p>相关类如下:</p>
-
-<p><code>std::exception_ptr</code></p>
-
-<ul>
-<li>一个智能指针类型的异常对象, 支持 bool 操作符, 可以存储空异常 (null) 对象. 也支持比较 (operator==).</li>
-</ul>
-
-
-<p><code>std::current_exception</code></p>
-
-<ul>
-<li>当在异常处理块中 (catch块) 调用时, 会捕获当前异常对象并由被捕获的对象创建一个 <code>std::exception_ptr</code> 对象并返回.</li>
-</ul>
-
-
-<p><code>std::make_exception_ptr</code></p>
-
-<ul>
-<li>接受一个 Exception 对象参数, 并由这个异常对象创建一个 <code>std::exception_ptr</code> 对象</li>
-</ul>
-
-
-<p><code>std::rethrow_exception</code></p>
-
-<ul>
-<li>接受一个 <code>std::exception_ptr</code> 参数, 重新抛出这个异常</li>
-</ul>
-
-
-<p>(<em>以上的一切, 很大一部分都是因为 C++ 的值传递特性引起的一系列不适!!!</em>, !!(╯&#8217; &ndash; &lsquo;)╯︵ ┻━┻)</p>
-
-
-		
-		<a href="/blog/2013/09/23/exception-and-multithread/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-23T23:30:00+08:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2013</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/exception/'>exception</a>, <a class='category' href='/blog/categories/multithread/'>multithread</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/2013/09/23/exception-and-multithread/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
         <a href="/" class="prev">Prev</a>
@@ -860,7 +867,7 @@
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2014
+	<footer id="footer" class="inner">Copyright &copy; 2015
 
     bitdewy
 

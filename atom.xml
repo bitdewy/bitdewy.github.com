@@ -4,7 +4,7 @@
   <title><![CDATA[Bitdewy]]></title>
   <link href="http://bitdewy.github.com/atom.xml" rel="self"/>
   <link href="http://bitdewy.github.com/"/>
-  <updated>2014-12-17T00:54:08+08:00</updated>
+  <updated>2015-01-26T23:04:22+08:00</updated>
   <id>http://bitdewy.github.com/</id>
   <author>
     <name><![CDATA[bitdewy]]></name>
@@ -14,11 +14,21 @@
 
   
   <entry>
+    <title type="html"><![CDATA[git tutorial]]></title>
+    <link href="http://bitdewy.github.com/blog/2015/01/26/git-tutorial/"/>
+    <updated>2015-01-26T23:00:00+08:00</updated>
+    <id>http://bitdewy.github.com/blog/2015/01/26/git-tutorial</id>
+    <content type="html"><![CDATA[<iframe src="https://onedrive.live.com/embed?cid=DABFBDF91EE62075&resid=DABFBDF91EE62075%212829&authkey=APhlgwTfPvXcvCg&em=2" width="800" height="651" frameborder="0" scrolling="no"></iframe>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[lua tutorial]]></title>
     <link href="http://bitdewy.github.com/blog/2014/12/16/lua-tutorial/"/>
     <updated>2014-12-16T23:34:52+08:00</updated>
     <id>http://bitdewy.github.com/blog/2014/12/16/lua-tutorial</id>
-    <content type="html"><![CDATA[<iframe src="https://onedrive.live.com/embed?cid=DABFBDF91EE62075&resid=DABFBDF91EE62075%212133&authkey=ACSTWl1GIzIC9IE&em=2"frameborder="0" scrolling="no"></iframe>
+    <content type="html"><![CDATA[<iframe src="https://onedrive.live.com/embed?cid=DABFBDF91EE62075&resid=DABFBDF91EE62075%212133&authkey=ACSTWl1GIzIC9IE&em=2" width="800" height="651" frameborder="0" scrolling="no"></iframe>
 
 ]]></content>
   </entry>
@@ -4415,133 +4425,6 @@
 <li>Java: <a href="http://docs.spring.io/spring/docs/2.5.x/reference/aop.html">Spring AOP</a></li>
 <li><a href="http://www.lisha.ufsc.br/teaching/sce/aop_with_c++.pdf">Aspect-Oriented Programming with C++</a></li>
 <li><a href="http://www.aspectc.org/">AspectC++</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[异常与多线程]]></title>
-    <link href="http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread/"/>
-    <updated>2013-09-23T23:30:00+08:00</updated>
-    <id>http://bitdewy.github.com/blog/2013/09/23/exception-and-multithread</id>
-    <content type="html"><![CDATA[<p>C++ 的异常机制为程序员提供了一种处理错误的方式, 使程序员可以用更自然的方式处理错误.(但 C++ 的异常存在各种坑, 参考《More Effective C++》Item 13: Catch exceptions by reference).</p>
-
-<p>有些时候, 我们不得不使用多线程来提高工作的执行效率, 但由于异常都是基于线程的, 如何在线程间传递异常, 就成为了一个问题. C++11 之前异常是无法在线程之前传递的, C++11 在这方面提供了支持.</p>
-
-<h2>使用 C++11 中的异常相关内容实现在线程间传递异常</h2>
-
-<p>相关类如下:</p>
-
-<p><code>std::exception_ptr</code></p>
-
-<ul>
-<li>一个智能指针类型的异常对象, 支持 bool 操作符, 可以存储空异常 (null) 对象. 也支持比较 (operator==).</li>
-</ul>
-
-
-<p><code>std::current_exception</code></p>
-
-<ul>
-<li>当在异常处理块中 (catch块) 调用时, 会捕获当前异常对象并由被捕获的对象创建一个 <code>std::exception_ptr</code> 对象并返回.</li>
-</ul>
-
-
-<p><code>std::make_exception_ptr</code></p>
-
-<ul>
-<li>接受一个 Exception 对象参数, 并由这个异常对象创建一个 <code>std::exception_ptr</code> 对象</li>
-</ul>
-
-
-<p><code>std::rethrow_exception</code></p>
-
-<ul>
-<li>接受一个 <code>std::exception_ptr</code> 参数, 重新抛出这个异常</li>
-</ul>
-
-
-<p>(<em>以上的一切, 很大一部分都是因为 C++ 的值传递特性引起的一系列不适!!!</em>, !!(╯&#8217; &ndash; &lsquo;)╯︵ ┻━┻)</p>
-
-<!-- more -->
-
-
-<p>示例代码</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;future&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;exception&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">calc</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span><span class="o">&amp;</span> <span class="n">eptr</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">s</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="c1">// throw out of range exception</span>
-</span><span class='line'>    <span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_exception_ptr</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="p">());</span> <span class="c1">// if no exception use default</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(...)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">async</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">launch</span><span class="o">::</span><span class="n">async</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">ref</span><span class="p">(</span><span class="n">eptr</span><span class="p">)));</span>
-</span><span class='line'>  <span class="k">try</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">eptr</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">std</span><span class="o">::</span><span class="n">rethrow_exception</span><span class="p">(</span><span class="n">eptr</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">what</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如代码所示:</p>
-
-<p>函数 calc 在子线程中工作, 并有可能抛出异常. 主线程中, 等待子线程返回结果, 并在返回后检测是否有异常, 如果有异常, 则重新抛出异常. 主线程将上述工作都放到 try 块中, 如果有异常则打印. 这样, 子线程 calc 函数的异常就被成功的转移到了主线程中.</p>
-
-<h2>参考</h2>
-
-<ul>
-<li>《More Effective C++》Item 13: Catch exceptions by reference</li>
-<li>Cppreference.com <a href="http://en.cppreference.com/w/cpp/error">http://en.cppreference.com/w/cpp/error</a></li>
 </ul>
 
 ]]></content>
